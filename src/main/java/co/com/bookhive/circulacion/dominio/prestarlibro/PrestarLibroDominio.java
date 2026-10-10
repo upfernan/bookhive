@@ -14,6 +14,7 @@ public final class PrestarLibroDominio {
 	private UUID institucion;
 	private UUID bibliotecario;
 	private LocalDate fechaPrestamo;
+	private LocalDate fechaVencimiento;
 
 	public PrestarLibroDominio(
 			final UUID identificador,
@@ -21,7 +22,8 @@ public final class PrestarLibroDominio {
 			final UUID usuario,
 			final UUID institucion,
 			final UUID bibliotecario,
-			final LocalDate fechaPrestamo) {
+			final LocalDate fechaPrestamo,
+			final LocalDate fechaVencimiento) {
 
 		super();
 		setIdentificador(identificador);
@@ -30,6 +32,13 @@ public final class PrestarLibroDominio {
 		setInstitucion(institucion);
 		setBibliotecario(bibliotecario);
 		setFechaPrestamo(fechaPrestamo);
+		setFechaVencimiento(fechaVencimiento);
+	}
+
+	public PrestarLibroDominio conFechaVencimiento(final LocalDate nuevaFechaVencimiento) {
+		return new PrestarLibroDominio(
+				identificador, ejemplar, usuario, institucion,
+				bibliotecario, fechaPrestamo, nuevaFechaVencimiento);
 	}
 
 	public UUID getIdentificador() {
@@ -56,6 +65,10 @@ public final class PrestarLibroDominio {
 		return fechaPrestamo;
 	}
 
+	public LocalDate getFechaVencimiento() {
+		return fechaVencimiento;
+	}
+
 	private void setIdentificador(final UUID identificador) {
 		this.identificador = UUIDHelper.obtenerValorDefecto(identificador);
 	}
@@ -78,6 +91,10 @@ public final class PrestarLibroDominio {
 
 	private void setFechaPrestamo(final LocalDate fechaPrestamo) {
 		this.fechaPrestamo = FechaHelper.obtenerValorDefecto(fechaPrestamo);
+	}
+
+	private void setFechaVencimiento(final LocalDate fechaVencimiento) {
+		this.fechaVencimiento = FechaHelper.obtenerValorDefecto(fechaVencimiento);
 	}
 
 }
