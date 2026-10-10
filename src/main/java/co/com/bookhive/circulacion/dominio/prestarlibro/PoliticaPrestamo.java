@@ -17,7 +17,9 @@ public final class PoliticaPrestamo {
 			final LocalDate fechaPrestamo,
 			final int diasDePrestamo) {
 
-		if (FechaHelper.esValorDefecto(fechaPrestamo)) {
+		final LocalDate fecha = FechaHelper.obtenerValorDefecto(fechaPrestamo);
+
+		if (FechaHelper.esValorDefecto(fecha)) {
 			throw BookHiveException.crear(
 					"No fue posible calcular la fecha de entrega del ejemplar.",
 					"Se intentó calcular el vencimiento sin fecha de préstamo.");
@@ -29,7 +31,7 @@ public final class PoliticaPrestamo {
 					"El plazo recibido fue " + diasDePrestamo + " días; debe ser mayor que cero.");
 		}
 
-		return fechaPrestamo.plusDays(diasDePrestamo);
+		return fecha.plusDays(diasDePrestamo);
 	}
 
 }
