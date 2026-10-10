@@ -18,8 +18,10 @@ public final class FechaHelper {
 		return ObjectHelper.obtenerValorDefecto(valor, VALOR_DEFECTO);
 	}
 
+	// Un valor nulo cuenta como valor por defecto. Se dice de forma explícita
+	// para que el analizador sepa que, si esto da falso, el valor no es nulo.
 	public static boolean esValorDefecto(final LocalDate valor) {
-		return VALOR_DEFECTO.equals(obtenerValorDefecto(valor));
+		return ObjectHelper.esNulo(valor) || VALOR_DEFECTO.equals(valor);
 	}
 
 }

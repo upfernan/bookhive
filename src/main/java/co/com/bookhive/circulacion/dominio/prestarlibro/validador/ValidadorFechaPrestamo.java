@@ -21,7 +21,7 @@ public final class ValidadorFechaPrestamo implements Validador {
 	@Override
 	public void validar(final PrestarLibroDominio dominio) {
 
-		final LocalDate fechaPrestamo = dominio.getFechaPrestamo();
+		final LocalDate fechaPrestamo = FechaHelper.obtenerValorDefecto(dominio.getFechaPrestamo());
 
 		if (FechaHelper.esValorDefecto(fechaPrestamo)) {
 			throw BookHiveException.crear(
