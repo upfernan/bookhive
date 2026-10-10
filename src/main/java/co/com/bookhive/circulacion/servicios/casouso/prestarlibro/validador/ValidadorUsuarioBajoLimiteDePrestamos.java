@@ -8,24 +8,30 @@ import co.com.bookhive.transversal.excepcion.BookHiveException;
 
 public final class ValidadorUsuarioBajoLimiteDePrestamos {
 
-	private static final int LIMITE_DE_PRESTAMOS_SIMULTANEOS = 3;
-
 	private ValidadorUsuarioBajoLimiteDePrestamos() {
 		super();
 	}
 
 	public static void ejecutarValidacion(
 			final PrestarLibroDominio dominio,
-			final PrestamoRepositorioPort prestamoRepositorio) {
+			final PrestamoRepositorioPort prestamoRepositorio,
+			final int maximoPrestamosSimultaneos) {
+
+		if (maximoPrestamosSimultaneos <= 0) {
+			throw BookHiveException.crear(
+					"La institución no tiene configurado el máximo de préstamos por usuario.",
+					"El máximo recibido fue " + maximoPrestamosSimultaneos + "; debe ser mayor que cero.");
+		}
 
 		final UUID usuario = dominio.getUsuario();
 		final int activos = prestamoRepositorio.contarActivosPorUsuario(usuario);
 
-		if (activos >= LIMITE_DE_PRESTAMOS_SIMULTANEOS) {
+		if (activos >= maximoPrestamosSimultaneos) {
 			throw BookHiveException.crear(
 					"El usuario ya alcanzó el máximo de ejemplares que puede tener prestados al tiempo.",
 					"El usuario " + usuario + " tiene " + activos
-							+ " préstamos activos y el límite es " + LIMITE_DE_PRESTAMOS_SIMULTANEOS + ".");
+							+ " préstamos activos y el máximo de la institución es "
+							+ maximoPrestamosSimultaneos + ".");
 		}
 	}
 
