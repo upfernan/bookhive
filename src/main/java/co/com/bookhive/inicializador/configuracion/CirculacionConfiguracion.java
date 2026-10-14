@@ -14,28 +14,34 @@ import co.com.bookhive.circulacion.servicios.output.ports.ParametrosInstitucionP
 import co.com.bookhive.circulacion.servicios.output.ports.PrestamoRepositorioPort;
 import co.com.bookhive.circulacion.servicios.output.ports.UsuarioEnSesionPort;
 
-// Aquí se le presentan a Spring las piezas del corazón que no tienen
-// anotaciones: el caso de uso y el adaptador de entrada. Así Spring solo
-// vive en el inicializador y en la infraestructura, y el corazón queda limpio.
+// Aquí se arman las piezas del negocio. Existe para que el caso de uso y el
+// adaptador de entrada puedan quedarse sin una sola anotación de Spring: el
+// corazón no conoce el framework, y es el inicializador quien lo construye y le
+// entrega sus puertos.
 //
-// Spring entrega a cada método las implementaciones de los puertos que
-// encuentra en la infraestructura.
+// Si mañana se cambia de framework, se reescribe esta clase y el negocio no se
+// entera.
 @Configuration
 public class CirculacionConfiguracion {
 
 	@Bean
-	public PrestarLibroCasoUso prestarLibroCasoUso(
+	PrestarLibroCasoUso prestarLibroCasoUso(
 			final ParametrosInstitucionPort parametrosInstitucion,
 			final EjemplarRepositorioPort ejemplarRepositorio,
 			final MultaRepositorioPort multaRepositorio,
 			final PrestamoRepositorioPort prestamoRepositorio) {
 
 		return new PrestarLibroCasoUsoImpl(
-				parametrosInstitucion, ejemplarRepositorio, multaRepositorio, prestamoRepositorio);
+				parametrosInstitucion,
+				ejemplarRepositorio,
+				multaRepositorio,
+				prestamoRepositorio);
 	}
 
+	// El controlador pide el puerto de entrada; aquí se le entrega el
+	// adaptador (Interactor) que lo implementa, ya con el caso de uso adentro.
 	@Bean
-	public PrestarLibroInputPort prestarLibroInputPort(
+	PrestarLibroInputPort prestarLibroInputPort(
 			final PrestarLibroCasoUso prestarLibroCasoUso,
 			final UsuarioEnSesionPort usuarioEnSesion,
 			final FechaInstitucionPort fechaInstitucion) {
