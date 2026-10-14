@@ -14,6 +14,10 @@ public final class UUIDHelper {
 		return VALOR_DEFECTO;
 	}
 
+	public static UUID generarNuevo() {
+		return UUID.randomUUID();
+	}
+
 	public static UUID obtenerValorDefecto(final UUID valor) {
 		return ObjectHelper.obtenerValorDefecto(valor, VALOR_DEFECTO);
 	}
