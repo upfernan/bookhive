@@ -47,6 +47,19 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- Migraciones (ADR-015). NO corren al arrancar la aplicación: van como
+		     paso aparte del despliegue, recorriendo el esquema de cada
+		     institución. Ver spring.flyway.enabled=false. -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-database-postgresql</artifactId>
+		</dependency>
+
 		<!-- Instrumentación (ADR-056). Actuator expone salud y métricas; el
 		     starter de OpenTelemetry genera las trazas y mete traceId y spanId
 		     en el MDC, que es lo que permite correlacionar registro con traza.

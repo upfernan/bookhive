@@ -11,14 +11,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-/**
- * Pone la institución de la petición en el MDC, para que cada línea del
- * registro diga de qué universidad era. Sin esto, los registros de todas las
- * instituciones quedan revueltos y no se puede investigar nada.
- * <p>
- * El identificador de traza y el de tramo los pone micrometer solo; esta es la
- * parte propia de BookHive.
- */
+// Pone la institución de la petición en el MDC, para que cada línea del
+// registro diga de qué universidad era. Sin esto, los registros de todas las
+// instituciones quedan revueltos y no se puede investigar nada.
+// El identificador de traza y el de tramo los pone micrometer solo; esta es
+// la parte propia de BookHive.
 @Component
 public class InstitucionEnRegistroFiltro extends OncePerRequestFilter {
 
@@ -44,11 +41,8 @@ public class InstitucionEnRegistroFiltro extends OncePerRequestFilter {
 	}
 
 	private String resolverInstitucion() {
-		// Hoy no hay autenticación, así que no se puede resolver. Cuando entre
-		// el proveedor de identidad, la institución sale de la identidad del
-		// token (ADR-028) y nunca de una cabecera, que el cliente podría falsear.
-		// Mientras tanto, "sin-institucion" es información útil: marca en el
-		// registro las peticiones que entraron sin autenticar.
+		// Cuando entre el proveedor de identidad, la institución sale del token
+		// (ADR-028) y nunca de una cabecera, que el cliente podría falsear.
 		return SIN_RESOLVER;
 	}
 
