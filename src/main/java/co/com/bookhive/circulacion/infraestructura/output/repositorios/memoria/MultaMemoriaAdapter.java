@@ -2,12 +2,16 @@ package co.com.bookhive.circulacion.infraestructura.output.repositorios.memoria;
 
 import java.util.UUID;
 
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import co.com.bookhive.circulacion.infraestructura.output.repositorios.estructurados.entidad.MultaEntidad;
 import co.com.bookhive.circulacion.servicios.output.ports.MultaRepositorioPort;
 
 // TEMPORAL: adaptador de salida de multas sobre la base en memoria.
+@Primary
+@Profile("memoria")
 @Repository
 public class MultaMemoriaAdapter implements MultaRepositorioPort {
 

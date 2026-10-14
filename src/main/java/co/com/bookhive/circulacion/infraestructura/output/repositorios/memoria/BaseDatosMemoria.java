@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import co.com.bookhive.circulacion.infraestructura.output.repositorios.estructurados.entidad.EjemplarEntidad;
@@ -19,6 +20,7 @@ import co.com.bookhive.transversal.helper.ObjectHelper;
 //
 // Trae datos de prueba con identificadores fijos para poder probar el
 // endpoint POST /api/v1/prestamos desde Postman o desde las pruebas.
+@Profile("memoria")
 @Component
 public class BaseDatosMemoria {
 

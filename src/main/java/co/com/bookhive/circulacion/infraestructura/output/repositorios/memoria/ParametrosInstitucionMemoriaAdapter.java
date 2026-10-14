@@ -1,5 +1,7 @@
 package co.com.bookhive.circulacion.infraestructura.output.repositorios.memoria;
 
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
@@ -9,6 +11,8 @@ import co.com.bookhive.circulacion.servicios.output.ports.ParametrosInstitucionP
 // TEMPORAL: las reglas de la institución salen de application.properties.
 // Cuando exista la base de datos saldrán de la tabla parametros_institucion
 // (ADR-017), que es lo que representa ParametrosInstitucionEntidad.
+@Primary
+@Profile("memoria")
 @Repository
 public class ParametrosInstitucionMemoriaAdapter implements ParametrosInstitucionPort {
 

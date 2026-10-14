@@ -29,6 +29,7 @@
 	<properties>
 		<java.version>27</java.version>
 		<jacoco.version>0.8.15</jacoco.version>
+		<archunit.version>1.5.0</archunit.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -79,6 +80,14 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Pruebas de arquitectura: revisan que el código respete la arquitectura limpia -->
+		<dependency>
+			<groupId>com.tngtech.archunit</groupId>
+			<artifactId>archunit</artifactId>
+			<version>${archunit.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

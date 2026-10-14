@@ -2,6 +2,8 @@ package co.com.bookhive.circulacion.infraestructura.output.repositorios.memoria;
 
 import java.util.UUID;
 
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import co.com.bookhive.circulacion.infraestructura.output.repositorios.estructurados.entidad.EjemplarEntidad;
@@ -11,6 +13,8 @@ import co.com.bookhive.circulacion.servicios.output.ports.EjemplarRepositorioPor
 // TEMPORAL: adaptador de salida de ejemplares sobre la base en memoria.
 // Un ejemplar está disponible si su estado es DISPONIBLE y no tiene un
 // préstamo activo. Así no hay que cambiarle el estado al prestarlo.
+@Primary
+@Profile("memoria")
 @Repository
 public class EjemplarMemoriaAdapter implements EjemplarRepositorioPort {
 
