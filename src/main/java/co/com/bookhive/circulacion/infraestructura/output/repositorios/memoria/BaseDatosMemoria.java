@@ -34,9 +34,9 @@ public class BaseDatosMemoria {
 
 	public BaseDatosMemoria() {
 		super();
-		agregarEjemplar(EJEMPLAR_DISPONIBLE_A, true);
-		agregarEjemplar(EJEMPLAR_DISPONIBLE_B, true);
-		agregarEjemplar(EJEMPLAR_SOLO_SALA, false);
+		agregarEjemplar(EJEMPLAR_DISPONIBLE_A, "EJ-0001", true);
+		agregarEjemplar(EJEMPLAR_DISPONIBLE_B, "EJ-0002", true);
+		agregarEjemplar(EJEMPLAR_SOLO_SALA, "EJ-0003", false);
 		agregarMultaPendiente(USUARIO_CON_MULTA);
 	}
 
@@ -60,15 +60,15 @@ public class BaseDatosMemoria {
 		return multas.values();
 	}
 
-	private void agregarEjemplar(final UUID identificador, final boolean prestable) {
+	private void agregarEjemplar(final UUID identificador, final String codigoBarras, final boolean prestable) {
 		final EjemplarEntidad ejemplar = new EjemplarEntidad();
 		ejemplar.setIdentificador(identificador);
 		ejemplar.setLibro(UUID.randomUUID());
 		ejemplar.setSede(UUID.randomUUID());
-		ejemplar.setCodigoBarras("EJ-" + identificador.toString().substring(0, 4));
+		ejemplar.setCodigoBarras(codigoBarras);
 		ejemplar.setEstado(EjemplarEntidad.ESTADO_DISPONIBLE);
 		ejemplar.setPrestable(prestable);
-		ejemplares.put(identificador, ejemplar);
+		ejemplares.put(ejemplar.getIdentificador(), ejemplar);
 	}
 
 	private void agregarMultaPendiente(final UUID usuario) {
