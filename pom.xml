@@ -46,6 +46,22 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- Instrumentación (ADR-056). Actuator expone salud y métricas; el
+		     starter de OpenTelemetry genera las trazas y mete traceId y spanId
+		     en el MDC, que es lo que permite correlacionar registro con traza.
+		     Todavía SIN exportador: las trazas se generan pero no se envían a
+		     ningún lado. El destino es Cloud Trace, y eso se configura cuando
+		     se despliegue en GCP. -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-opentelemetry</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>

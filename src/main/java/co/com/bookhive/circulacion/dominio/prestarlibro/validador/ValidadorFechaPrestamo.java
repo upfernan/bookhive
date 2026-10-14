@@ -29,7 +29,7 @@ public final class ValidadorFechaPrestamo implements Validador {
 					"La fecha del préstamo llegó vacía en PrestarLibroDominio; la fija el servidor.");
 		}
 
-		if (fechaPrestamo.isAfter(LocalDate.now())) {
+		if (fechaPrestamo.isAfter(FechaHelper.hoyEnUtc())) {
 			throw BookHiveException.crear(
 					"No se puede registrar un préstamo con fecha futura.",
 					"La fecha del préstamo es posterior a la fecha actual.");
