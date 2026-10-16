@@ -6,7 +6,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>4.1.1</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/>
 	</parent>
 	<groupId>co.com.bookhive</groupId>
 	<artifactId>bookhive</artifactId>
@@ -28,6 +28,7 @@
 	</scm>
 	<properties>
 		<java.version>27</java.version>
+		<mapstruct.version>1.6.3</mapstruct.version>
 		<jacoco.version>0.8.15</jacoco.version>
 		<archunit.version>1.5.0</archunit.version>
 	</properties>
@@ -35,6 +36,12 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct</artifactId>
+			<version>${mapstruct.version}</version>
 		</dependency>
 
 		<dependency>
@@ -48,9 +55,6 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- Migraciones (ADR-015). NO corren al arrancar la aplicación: van como
-		     paso aparte del despliegue, recorriendo el esquema de cada
-		     institución. Ver spring.flyway.enabled=false. -->
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
@@ -61,15 +65,19 @@
 			<artifactId>flyway-database-postgresql</artifactId>
 		</dependency>
 
-		<!-- Instrumentación (ADR-056). Actuator expone salud y métricas; el
-		     starter de OpenTelemetry genera las trazas y mete traceId y spanId
-		     en el MDC, que es lo que permite correlacionar registro con traza.
-		     Todavía SIN exportador: las trazas se generan pero no se envían a
-		     ningún lado. El destino es Cloud Trace, y eso se configura cuando
-		     se despliegue en GCP. -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
 		</dependency>
 
 		<dependency>
@@ -94,6 +102,20 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.mapstruct</groupId>
+							<artifactId>mapstruct-processor</artifactId>
+							<version>${mapstruct.version}</version>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
