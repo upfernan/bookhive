@@ -1,0 +1,40 @@
+package co.com.bookhive.circulation.infrastructure.output.repositories.structured.adapter;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.stereotype.Component;
+
+import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.InstitutionParametersJpaRepository;
+import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.InstitutionParametersJpaEntity;
+import co.com.bookhive.circulation.infrastructure.output.repositories.structured.mapper.EntityMapper;
+import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionParametersRepository;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.InstitutionParametersEntity;
+
+@Component
+public class InstitutionParametersRepositoryAdapter implements InstitutionParametersRepository {
+
+	private final InstitutionParametersJpaRepository repository;
+	private final EntityMapper<InstitutionParametersEntity, InstitutionParametersJpaEntity> mapper;
+
+	public InstitutionParametersRepositoryAdapter(
+			final InstitutionParametersJpaRepository repository,
+			final EntityMapper<InstitutionParametersEntity, InstitutionParametersJpaEntity> mapper) {
+
+		super();
+		this.repository = repository;
+		this.mapper = mapper;
+	}
+
+	@Override
+	public Optional<InstitutionParametersEntity> findById(final UUID id) {
+		return repository.findById(id).map(mapper::toEntity);
+	}
+
+	@Override
+	public List<InstitutionParametersEntity> findAll() {
+		return repository.findAll().stream().map(mapper::toEntity).toList();
+	}
+
+}
