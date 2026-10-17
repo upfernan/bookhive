@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +14,9 @@ import co.com.bookhive.circulation.infrastructure.output.repositories.structured
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.mapper.EntityMapper;
 import co.com.bookhive.circulation.services.output.ports.repositories.LoanRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.LoanCriteria;
+import co.com.bookhive.circulation.services.output.ports.repositories.criteria.PageCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanEntity;
+import co.com.bookhive.crosscutting.helper.ObjectHelper;
 
 import jakarta.persistence.criteria.Predicate;
 
@@ -43,8 +46,10 @@ public class LoanRepositoryAdapter implements LoanRepository {
 	}
 
 	@Override
-	public List<LoanEntity> findAll() {
-		return repository.findAll().stream().map(mapper::toEntity).toList();
+	public List<LoanEntity> findAll(final PageCriteria page) {
+		final PageCriteria safePage = ObjectHelper.getDefaultValue(page, PageCriteria.defaultPage());
+		return repository.findAll(PageRequest.of(safePage.getPage(), safePage.getSize()))
+				.stream().map(mapper::toEntity).toList();
 	}
 
 	@Override

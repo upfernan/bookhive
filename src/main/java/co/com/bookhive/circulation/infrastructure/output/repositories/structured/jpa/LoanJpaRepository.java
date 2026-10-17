@@ -4,9 +4,11 @@ import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.stereotype.Repository;
 
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.LoanJpaEntity;
 
+@Repository
 public interface LoanJpaRepository
 		extends JpaRepository<LoanJpaEntity, UUID>,
 		JpaSpecificationExecutor<LoanJpaEntity> {

@@ -1,5 +1,7 @@
 package co.com.bookhive.circulation.infrastructure.input.controllers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,8 @@ import co.com.bookhive.circulation.services.input.ports.LendBookInputPort;
 @RequestMapping("/api/v1/prestamos")
 public class LoanController {
 
+	private static final Logger logger = LoggerFactory.getLogger(LoanController.class);
+
 	private final LendBookInputPort lendBookInputPort;
 
 	public LoanController(final LendBookInputPort lendBookInputPort) {
@@ -28,7 +32,12 @@ public class LoanController {
 	public ResponseEntity<LendBookResponseDTO> lend(
 			@RequestBody final LendBookRequestDTO request) {
 
+		logger.info("Inicia el préstamo del ejemplar {}.", request.getBookCopy());
+
 		final LendBookResponseDTO response = lendBookInputPort.execute(request);
+
+		logger.info("Préstamo {} registrado para el ejemplar {}; vence el {}.",
+				response.getLoan(), request.getBookCopy(), response.getDueDate());
 
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}

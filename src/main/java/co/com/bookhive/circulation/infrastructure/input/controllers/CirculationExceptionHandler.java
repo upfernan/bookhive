@@ -37,7 +37,11 @@ public class CirculationExceptionHandler {
 	@ExceptionHandler(BookHiveException.class)
 	public ResponseEntity<ErrorResponseDTO> handle(final BookHiveException exception) {
 
-		logger.error("Error controlado: {}", exception.getTechnicalMessage(), exception.getRootCause());
+		if (BookHiveException.Kind.UNEXPECTED.equals(exception.getKind())) {
+			logger.error("Error inesperado: {}", exception.getTechnicalMessage(), exception.getRootCause());
+		} else {
+			logger.warn("Solicitud rechazada: {}", exception.getTechnicalMessage());
+		}
 
 		return respond(statusOf(exception), exception.getUserMessageKey());
 	}
@@ -47,7 +51,7 @@ public class CirculationExceptionHandler {
 			MethodArgumentTypeMismatchException.class })
 	public ResponseEntity<ErrorResponseDTO> handleInvalidData(final Exception exception) {
 
-		logger.error(INVALID_DATA_TECHNICAL_MESSAGE, exception);
+		logger.warn("{} Tipo: {}", INVALID_DATA_TECHNICAL_MESSAGE, exception.getClass().getSimpleName());
 
 		return respond(HttpStatus.BAD_REQUEST, MessageKey.REQUEST_INVALID_DATA);
 	}

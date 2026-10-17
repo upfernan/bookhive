@@ -10,6 +10,7 @@ import co.com.bookhive.circulation.services.output.ports.repositories.Institutio
 import co.com.bookhive.circulation.services.output.ports.repositories.LoanRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.FineCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.LoanCriteria;
+import co.com.bookhive.circulation.services.output.ports.repositories.criteria.PageCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.FineEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.InstitutionParametersEntity;
@@ -258,7 +259,7 @@ public final class LendBookDomain {
 	}
 
 	private InstitutionParametersEntity findInstitutionParameters() {
-		return institutionParametersRepository.findAll().stream()
+		return institutionParametersRepository.findAll(PageCriteria.of(0, 1)).stream()
 				.findFirst()
 				.orElseGet(InstitutionParametersEntity::new);
 	}
