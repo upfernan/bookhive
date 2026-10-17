@@ -12,7 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "ejemplar")
+@Table(name = "book_copy")
 public class BookCopyJpaEntity {
 
 	public static final String STATUS_AVAILABLE = "DISPONIBLE";
@@ -20,25 +20,25 @@ public class BookCopyJpaEntity {
 	public static final String STATUS_RESERVED = "RESERVADO";
 
 	@Id
-	@Column(name = "id", nullable = false, updatable = false)
+	@Column(name = "id", updatable = false)
 	private UUID id;
 
-	@Column(name = "libro_id", nullable = false)
+	@Column(name = "book_id")
 	private UUID book;
 
-	@Column(name = "sede_id", nullable = false)
+	@Column(name = "branch_id")
 	private UUID branch;
 
-	@Column(name = "codigo_barras", nullable = false, unique = true, length = 50)
+	@Column(name = "barcode")
 	private String barcode;
 
-	@Column(name = "estado", nullable = false, length = 20)
+	@Column(name = "status")
 	private String status;
 
-	@Column(name = "prestable", nullable = false)
+	@Column(name = "lendable")
 	private boolean lendable;
 
-	@Column(name = "creado_en", nullable = false, insertable = false, updatable = false)
+	@Column(name = "created_at", insertable = false, updatable = false)
 	private Instant createdAt;
 
 	public BookCopyJpaEntity() {

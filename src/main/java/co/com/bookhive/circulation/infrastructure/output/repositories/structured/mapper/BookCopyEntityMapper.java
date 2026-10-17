@@ -14,6 +14,9 @@ import co.com.bookhive.circulation.services.output.ports.repositories.entities.B
 public interface BookCopyEntityMapper extends EntityMapper<BookCopyEntity, BookCopyJpaEntity> {
 
 	@Override
+	BookCopyEntity toEntity(BookCopyJpaEntity jpaEntity);
+
+	@Override
 	@Mapping(target = "createdAt", ignore = true)
 	BookCopyJpaEntity toJpaEntity(BookCopyEntity entity);
 

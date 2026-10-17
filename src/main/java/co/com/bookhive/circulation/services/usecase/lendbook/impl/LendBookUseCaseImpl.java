@@ -2,7 +2,7 @@ package co.com.bookhive.circulation.services.usecase.lendbook.impl;
 
 import java.time.LocalDate;
 
-import co.com.bookhive.circulation.domain.lendbook.LendBookDomain;
+import co.com.bookhive.circulation.domain.loan.lendbook.LendBookDomain;
 import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.FineRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionParametersRepository;
@@ -21,12 +21,14 @@ public final class LendBookUseCaseImpl implements LendBookUseCase {
 	private final BookCopyRepository bookCopyRepository;
 	private final FineRepository fineRepository;
 	private final LoanRepository loanRepository;
+	private final LoanDomainMapper loanDomainMapper;
 
 	public LendBookUseCaseImpl(
 			final InstitutionParametersRepository institutionParametersRepository,
 			final BookCopyRepository bookCopyRepository,
 			final FineRepository fineRepository,
-			final LoanRepository loanRepository) {
+			final LoanRepository loanRepository,
+			final LoanDomainMapper loanDomainMapper) {
 
 		super();
 		this.institutionParametersRepository = requireDependency(
@@ -34,6 +36,7 @@ public final class LendBookUseCaseImpl implements LendBookUseCase {
 		this.bookCopyRepository = requireDependency(bookCopyRepository, "el repositorio de ejemplares");
 		this.fineRepository = requireDependency(fineRepository, "el repositorio de multas");
 		this.loanRepository = requireDependency(loanRepository, "el repositorio de préstamos");
+		this.loanDomainMapper = requireDependency(loanDomainMapper, "el mapeador del préstamo");
 	}
 
 	@Override
@@ -58,7 +61,7 @@ public final class LendBookUseCaseImpl implements LendBookUseCase {
 				loan.getLoanDate(),
 				dueDate);
 
-		loanRepository.create(LoanDomainMapper.toEntity(registeredLoan));
+		loanRepository.create(loanDomainMapper.toEntity(registeredLoan));
 
 		markBookCopyAsLent(registeredLoan);
 

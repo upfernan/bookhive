@@ -9,10 +9,10 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import co.com.bookhive.circulation.services.output.ports.SessionContextPort;
+import co.com.bookhive.circulation.services.output.ports.repositories.PersonRepository;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;
-import co.com.bookhive.initializer.tenancy.PersonDirectory;
 
 @Service
 @ConditionalOnProperty(
@@ -21,21 +21,21 @@ import co.com.bookhive.initializer.tenancy.PersonDirectory;
 		matchIfMissing = true)
 public class AuthenticatedSessionContext implements SessionContextPort {
 
-	private final PersonDirectory personDirectory;
+	private final PersonRepository personRepository;
 
-	public AuthenticatedSessionContext(final PersonDirectory personDirectory) {
+	public AuthenticatedSessionContext(final PersonRepository personRepository) {
 		super();
-		this.personDirectory = personDirectory;
+		this.personRepository = personRepository;
 	}
 
 	@Override
 	public UUID getInstitution() {
-		return personDirectory.findActive(authenticatedIdentity()).institution();
+		return personRepository.findActive(authenticatedIdentity()).getInstitution();
 	}
 
 	@Override
 	public UUID getLibrarian() {
-		return personDirectory.findActive(authenticatedIdentity()).id();
+		return personRepository.findActive(authenticatedIdentity()).getId();
 	}
 
 	private static String authenticatedIdentity() {

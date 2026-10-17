@@ -11,48 +11,52 @@ import co.com.bookhive.crosscutting.helper.UUIDHelper;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "multa")
+@Table(name = "fine")
 public class FineJpaEntity {
 
 	public static final String STATUS_PENDING = "PENDIENTE";
 	public static final String STATUS_PAID = "PAGADA";
 
 	@Id
-	@Column(name = "id", nullable = false, updatable = false)
+	@Column(name = "id", updatable = false)
 	private UUID id;
 
-	@Column(name = "prestamo_id", nullable = false, updatable = false)
-	private UUID loan;
+	@ManyToOne
+	@JoinColumn(name = "loan_id", updatable = false)
+	private LoanJpaEntity loan;
 
-	@Column(name = "usuario_id", nullable = false, updatable = false)
-	private UUID user;
+	@ManyToOne
+	@JoinColumn(name = "user_id", updatable = false)
+	private UserJpaEntity user;
 
-	@Column(name = "fecha_generacion", nullable = false, updatable = false)
+	@Column(name = "issue_date", updatable = false)
 	private LocalDate issueDate;
 
-	@Column(name = "dias_retraso", nullable = false, updatable = false)
+	@Column(name = "overdue_days", updatable = false)
 	private int overdueDays;
 
-	@Column(name = "tarifa_diaria", nullable = false, updatable = false, precision = 12, scale = 2)
+	@Column(name = "daily_rate", updatable = false)
 	private BigDecimal dailyRate;
 
-	@Column(name = "valor_total", nullable = false, updatable = false, precision = 12, scale = 2)
+	@Column(name = "total_amount", updatable = false)
 	private BigDecimal totalAmount;
 
-	@Column(name = "estado", nullable = false, length = 20)
+	@Column(name = "status")
 	private String status;
 
-	@Column(name = "creado_en", nullable = false, insertable = false, updatable = false)
+	@Column(name = "created_at", insertable = false, updatable = false)
 	private Instant createdAt;
 
 	public FineJpaEntity() {
 		super();
 		setId(UUIDHelper.getDefaultValue());
-		setLoan(UUIDHelper.getDefaultValue());
-		setUser(UUIDHelper.getDefaultValue());
+		setLoan(new LoanJpaEntity());
+		setUser(new UserJpaEntity());
 		setIssueDate(DateHelper.getDefaultValue());
 		setOverdueDays(0);
 		setDailyRate(BigDecimal.ZERO);
@@ -69,20 +73,20 @@ public class FineJpaEntity {
 		this.id = UUIDHelper.getDefaultValue(id);
 	}
 
-	public UUID getLoan() {
+	public LoanJpaEntity getLoan() {
 		return loan;
 	}
 
-	public void setLoan(final UUID loan) {
-		this.loan = UUIDHelper.getDefaultValue(loan);
+	public void setLoan(final LoanJpaEntity loan) {
+		this.loan = ObjectHelper.getDefaultValue(loan, new LoanJpaEntity());
 	}
 
-	public UUID getUser() {
+	public UserJpaEntity getUser() {
 		return user;
 	}
 
-	public void setUser(final UUID user) {
-		this.user = UUIDHelper.getDefaultValue(user);
+	public void setUser(final UserJpaEntity user) {
+		this.user = ObjectHelper.getDefaultValue(user, new UserJpaEntity());
 	}
 
 	public LocalDate getIssueDate() {

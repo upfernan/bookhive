@@ -11,20 +11,20 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "parametros_institucion")
+@Table(name = "institution_parameters")
 public class InstitutionParametersJpaEntity {
 
 	@Id
-	@Column(name = "id", nullable = false, updatable = false)
+	@Column(name = "id", updatable = false)
 	private UUID id;
 
-	@Column(name = "dias_prestamo", nullable = false)
+	@Column(name = "loan_days")
 	private int loanDays;
 
-	@Column(name = "maximo_prestamos_simultaneos", nullable = false)
+	@Column(name = "max_concurrent_loans")
 	private int maxConcurrentLoans;
 
-	@Column(name = "creado_en", nullable = false, insertable = false, updatable = false)
+	@Column(name = "created_at", insertable = false, updatable = false)
 	private Instant createdAt;
 
 	public InstitutionParametersJpaEntity() {

@@ -10,10 +10,12 @@ import co.com.bookhive.crosscutting.helper.UUIDHelper;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "prestamo")
+@Table(name = "loan")
 public class LoanJpaEntity {
 
 	public static final String STATUS_ACTIVE = "ACTIVO";
@@ -21,35 +23,37 @@ public class LoanJpaEntity {
 	public static final String STATUS_RETURNED = "DEVUELTO";
 
 	@Id
-	@Column(name = "id", nullable = false, updatable = false)
+	@Column(name = "id", updatable = false)
 	private UUID id;
 
-	@Column(name = "ejemplar_id", nullable = false)
-	private UUID bookCopy;
+	@ManyToOne
+	@JoinColumn(name = "book_copy_id")
+	private BookCopyJpaEntity bookCopy;
 
-	@Column(name = "usuario_id", nullable = false)
-	private UUID user;
+	@ManyToOne
+	@JoinColumn(name = "user_id")
+	private UserJpaEntity user;
 
-	@Column(name = "bibliotecario_id", nullable = false)
+	@Column(name = "librarian_id")
 	private UUID librarian;
 
-	@Column(name = "fecha_prestamo", nullable = false)
+	@Column(name = "loan_date")
 	private LocalDate loanDate;
 
-	@Column(name = "fecha_vencimiento", nullable = false)
+	@Column(name = "due_date")
 	private LocalDate dueDate;
 
-	@Column(name = "estado", nullable = false, length = 20)
+	@Column(name = "status")
 	private String status;
 
-	@Column(name = "creado_en", nullable = false, insertable = false, updatable = false)
+	@Column(name = "created_at", insertable = false, updatable = false)
 	private Instant createdAt;
 
 	public LoanJpaEntity() {
 		super();
 		setId(UUIDHelper.getDefaultValue());
-		setBookCopy(UUIDHelper.getDefaultValue());
-		setUser(UUIDHelper.getDefaultValue());
+		setBookCopy(new BookCopyJpaEntity());
+		setUser(new UserJpaEntity());
 		setLibrarian(UUIDHelper.getDefaultValue());
 		setLoanDate(DateHelper.getDefaultValue());
 		setDueDate(DateHelper.getDefaultValue());
@@ -65,20 +69,20 @@ public class LoanJpaEntity {
 		this.id = UUIDHelper.getDefaultValue(id);
 	}
 
-	public UUID getBookCopy() {
+	public BookCopyJpaEntity getBookCopy() {
 		return bookCopy;
 	}
 
-	public void setBookCopy(final UUID bookCopy) {
-		this.bookCopy = UUIDHelper.getDefaultValue(bookCopy);
+	public void setBookCopy(final BookCopyJpaEntity bookCopy) {
+		this.bookCopy = ObjectHelper.getDefaultValue(bookCopy, new BookCopyJpaEntity());
 	}
 
-	public UUID getUser() {
+	public UserJpaEntity getUser() {
 		return user;
 	}
 
-	public void setUser(final UUID user) {
-		this.user = UUIDHelper.getDefaultValue(user);
+	public void setUser(final UserJpaEntity user) {
+		this.user = ObjectHelper.getDefaultValue(user, new UserJpaEntity());
 	}
 
 	public UUID getLibrarian() {
