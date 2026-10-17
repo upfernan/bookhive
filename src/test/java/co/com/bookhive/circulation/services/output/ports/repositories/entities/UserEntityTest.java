@@ -46,7 +46,7 @@ class UserEntityTest {
 	}
 
 	@Test
-	@DisplayName("convierte los nulos y el estado vacío en valores por defecto")
+	@DisplayName("convierte los nulos en valores por defecto")
 	void replacesNulls() {
 		final UserEntity user = new UserEntity();
 		user.setStatus(UserEntity.STATUS_RETIRED);
@@ -54,7 +54,7 @@ class UserEntityTest {
 		user.setId(null);
 		user.setName(null);
 		user.setEmail(null);
-		user.setStatus("   ");
+		user.setStatus(null);
 		user.setCreatedAt(null);
 
 		assertEquals(UUIDHelper.getDefaultValue(), user.getId());
@@ -62,6 +62,17 @@ class UserEntityTest {
 		assertEquals("", user.getEmail());
 		assertEquals(UserEntity.STATUS_ACTIVE, user.getStatus());
 		assertEquals(DateHelper.getDefaultTimestamp(), user.getCreatedAt());
+	}
+
+	@Test
+	@DisplayName("un estado en blanco deja al usuario activo")
+	void blankStatusIsActive() {
+		final UserEntity user = new UserEntity();
+		user.setStatus(UserEntity.STATUS_SUSPENDED);
+
+		user.setStatus("   ");
+
+		assertEquals(UserEntity.STATUS_ACTIVE, user.getStatus());
 	}
 
 }

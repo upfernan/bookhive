@@ -1,0 +1,89 @@
+package co.com.bookhive.circulation.infrastructure.output.repositories.structured.adapters;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.BookCopyJpaRepository;
+import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.BookCopyJpaEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.criteria.PageCriteria;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
+import co.com.bookhive.circulation.testdata.FakeEntityMapper;
+import co.com.bookhive.circulation.testdata.FakeJpaRepository;
+import co.com.bookhive.crosscutting.helper.UUIDHelper;
+
+class BookCopyRepositoryAdapterTest {
+
+	private static final UUID BOOK_COPY = UUIDHelper.generateNew();
+
+	@Test
+	@DisplayName("busca el ejemplar por su identificador")
+	void findsBookCopyById() {
+		final BookCopyRepositoryAdapter adapter = adapter(FakeJpaRepository.storing(jpaBookCopy()));
+
+		assertEquals(Optional.of(BOOK_COPY), adapter.findById(BOOK_COPY).map(BookCopyEntity::getId));
+	}
+
+	@Test
+	@DisplayName("devuelve vacío si el ejemplar no existe")
+	void returnsEmptyWhenBookCopyDoesNotExist() {
+		final BookCopyRepositoryAdapter adapter = adapter(FakeJpaRepository.storing());
+
+		assertTrue(adapter.findById(BOOK_COPY).isEmpty());
+	}
+
+	@Test
+	@DisplayName("consulta la página pedida")
+	void findsRequestedPage() {
+		final FakeJpaRepository<BookCopyJpaEntity> repository = FakeJpaRepository.storing(jpaBookCopy());
+
+		final List<BookCopyEntity> bookCopies = adapter(repository).findAll(PageCriteria.of(1, 5));
+
+		assertEquals(1, bookCopies.size());
+		assertEquals(1, repository.pages().get(0).getPageNumber());
+		assertEquals(5, repository.pages().get(0).getPageSize());
+	}
+
+	@Test
+	@DisplayName("guarda el ejemplar actualizado")
+	void updatesBookCopy() {
+		final FakeJpaRepository<BookCopyJpaEntity> repository = FakeJpaRepository.storing();
+		final BookCopyEntity bookCopy = new BookCopyEntity();
+		bookCopy.setId(BOOK_COPY);
+
+		adapter(repository).update(bookCopy);
+
+		assertEquals(BOOK_COPY, repository.saved().get(0).getId());
+	}
+
+	private static BookCopyRepositoryAdapter adapter(final FakeJpaRepository<BookCopyJpaEntity> repository) {
+		return new BookCopyRepositoryAdapter(repository.as(BookCopyJpaRepository.class),
+				new FakeEntityMapper<>(BookCopyRepositoryAdapterTest::toEntity,
+						BookCopyRepositoryAdapterTest::toJpaEntity));
+	}
+
+	private static BookCopyJpaEntity jpaBookCopy() {
+		final BookCopyJpaEntity jpaEntity = new BookCopyJpaEntity();
+		jpaEntity.setId(BOOK_COPY);
+		return jpaEntity;
+	}
+
+	private static BookCopyEntity toEntity(final BookCopyJpaEntity jpaEntity) {
+		final BookCopyEntity entity = new BookCopyEntity();
+		entity.setId(jpaEntity.getId());
+		return entity;
+	}
+
+	private static BookCopyJpaEntity toJpaEntity(final BookCopyEntity entity) {
+		final BookCopyJpaEntity jpaEntity = new BookCopyJpaEntity();
+		jpaEntity.setId(entity.getId());
+		return jpaEntity;
+	}
+
+}

@@ -7,6 +7,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -27,6 +29,24 @@ public final class FakeDataSource {
 
 	public static DataSource failing() {
 		return create(Map.of(), true);
+	}
+
+	public static DataSource recording(final List<String> events) {
+		final Statement statement = proxy(Statement.class, (instance, method, arguments) -> {
+			if ("execute".equals(method.getName())) {
+				events.add(String.valueOf(arguments[0]));
+			}
+			return defaultOf(method);
+		});
+		final Connection connection = proxy(Connection.class, (instance, method, arguments) -> {
+			if ("close".equals(method.getName())) {
+				events.add("close");
+			}
+			return "createStatement".equals(method.getName()) ? statement : defaultOf(method);
+		});
+
+		return proxy(DataSource.class,
+				(instance, method, arguments) -> "getConnection".equals(method.getName()) ? connection : defaultOf(method));
 	}
 
 	private static DataSource create(final Map<String, Object> row, final boolean fails) {

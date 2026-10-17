@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import co.com.bookhive.crosscutting.helper.DateHelper;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
-import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
 
 public class UserEntity {
@@ -59,7 +58,7 @@ public class UserEntity {
 	}
 
 	public void setStatus(final String status) {
-		this.status = TextHelper.isDefaultValue(status) ? STATUS_ACTIVE : status.trim();
+		this.status = ObjectHelper.isNull(status) || status.isBlank() ? STATUS_ACTIVE : status.trim();
 	}
 
 	public Instant getCreatedAt() {
