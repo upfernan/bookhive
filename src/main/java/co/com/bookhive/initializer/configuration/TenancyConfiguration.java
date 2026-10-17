@@ -1,4 +1,4 @@
-package co.com.bookhive.initializer.tenancy;
+package co.com.bookhive.initializer.configuration;
 
 import org.hibernate.cfg.MultiTenancySettings;
 import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
@@ -6,6 +6,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import co.com.bookhive.circulation.infrastructure.input.interceptors.TenantInterceptor;
+import co.com.bookhive.circulation.infrastructure.output.repositories.structured.tenancy.TenantConnectionProvider;
+import co.com.bookhive.circulation.infrastructure.output.repositories.structured.tenancy.TenantSchemaResolver;
 
 @Configuration
 public class TenancyConfiguration implements WebMvcConfigurer {

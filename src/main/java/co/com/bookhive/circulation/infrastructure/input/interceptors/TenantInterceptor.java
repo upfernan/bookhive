@@ -1,9 +1,11 @@
-package co.com.bookhive.initializer.tenancy;
+package co.com.bookhive.circulation.infrastructure.input.interceptors;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import co.com.bookhive.circulation.infrastructure.output.repositories.structured.tenancy.TenantContext;
 import co.com.bookhive.circulation.services.output.ports.SessionContextPort;
+import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,15 +14,15 @@ import jakarta.servlet.http.HttpServletResponse;
 public class TenantInterceptor implements HandlerInterceptor {
 
 	private final SessionContextPort sessionContext;
-	private final InstitutionDirectory institutionDirectory;
+	private final InstitutionRepository institutionRepository;
 
 	public TenantInterceptor(
 			final SessionContextPort sessionContext,
-			final InstitutionDirectory institutionDirectory) {
+			final InstitutionRepository institutionRepository) {
 
 		super();
 		this.sessionContext = sessionContext;
-		this.institutionDirectory = institutionDirectory;
+		this.institutionRepository = institutionRepository;
 	}
 
 	@Override
@@ -30,7 +32,7 @@ public class TenantInterceptor implements HandlerInterceptor {
 			final Object handler) {
 
 		TenantContext.set(
-				institutionDirectory.findActiveSchema(sessionContext.getInstitution()));
+				institutionRepository.findActiveSchema(sessionContext.getInstitution()));
 
 		return true;
 	}

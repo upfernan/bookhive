@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 import co.com.bookhive.crosscutting.helper.DateHelper;
+import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
 
@@ -15,8 +16,8 @@ public class LoanEntity {
 	public static final String STATUS_RETURNED = "DEVUELTO";
 
 	private UUID id;
-	private UUID bookCopy;
-	private UUID user;
+	private BookCopyEntity bookCopy;
+	private UserEntity user;
 	private UUID librarian;
 	private LocalDate loanDate;
 	private LocalDate dueDate;
@@ -27,8 +28,8 @@ public class LoanEntity {
 	public LoanEntity() {
 		super();
 		setId(UUIDHelper.getDefaultValue());
-		setBookCopy(UUIDHelper.getDefaultValue());
-		setUser(UUIDHelper.getDefaultValue());
+		setBookCopy(new BookCopyEntity());
+		setUser(new UserEntity());
 		setLibrarian(UUIDHelper.getDefaultValue());
 		setLoanDate(DateHelper.getDefaultValue());
 		setDueDate(DateHelper.getDefaultValue());
@@ -44,20 +45,20 @@ public class LoanEntity {
 		this.id = UUIDHelper.getDefaultValue(id);
 	}
 
-	public UUID getBookCopy() {
+	public BookCopyEntity getBookCopy() {
 		return bookCopy;
 	}
 
-	public void setBookCopy(final UUID bookCopy) {
-		this.bookCopy = UUIDHelper.getDefaultValue(bookCopy);
+	public void setBookCopy(final BookCopyEntity bookCopy) {
+		this.bookCopy = ObjectHelper.getDefaultValue(bookCopy, new BookCopyEntity());
 	}
 
-	public UUID getUser() {
+	public UserEntity getUser() {
 		return user;
 	}
 
-	public void setUser(final UUID user) {
-		this.user = UUIDHelper.getDefaultValue(user);
+	public void setUser(final UserEntity user) {
+		this.user = ObjectHelper.getDefaultValue(user, new UserEntity());
 	}
 
 	public UUID getLibrarian() {

@@ -1,4 +1,4 @@
-package co.com.bookhive.initializer.security;
+package co.com.bookhive.circulation.infrastructure.input.security;
 
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 import org.springframework.stereotype.Component;

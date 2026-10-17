@@ -1,4 +1,4 @@
-package co.com.bookhive.circulation.domain.lendbook;
+package co.com.bookhive.circulation.domain.loan.lendbook;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -188,7 +188,7 @@ public final class LendBookDomain {
 		if (days <= 0 || max <= 0) {
 			throw BookHiveException.createConflict(
 					MessageKey.INSTITUTION_WITHOUT_PARAMETERS,
-					"parametros_institucion entregó plazo de " + days + " días y máximo de "
+					"institution_parameters entregó plazo de " + days + " días y máximo de "
 							+ max + " préstamos; el cero indica que la fila no existe"
 							+ " o quedó sin configurar para el esquema en curso.");
 		}

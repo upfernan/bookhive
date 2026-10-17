@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import co.com.bookhive.circulation.services.input.dto.response.ErrorResponseDTO;
+import co.com.bookhive.circulation.infrastructure.input.controllers.dto.ErrorResponseDTO;
+import co.com.bookhive.circulation.services.output.ports.MessageCatalogPort;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.TextHelper;
-import co.com.bookhive.crosscutting.messages.MessageCatalog;
 import co.com.bookhive.crosscutting.messages.MessageKey;
 
 @RestControllerAdvice
@@ -27,9 +27,9 @@ public class CirculationExceptionHandler {
 	private static final String UNHANDLED_TECHNICAL_MESSAGE =
 			"Se generó una excepción no controlada en el sistema. Por favor revisar los registros de errores.";
 
-	private final MessageCatalog messageCatalog;
+	private final MessageCatalogPort messageCatalog;
 
-	public CirculationExceptionHandler(final MessageCatalog messageCatalog) {
+	public CirculationExceptionHandler(final MessageCatalogPort messageCatalog) {
 		super();
 		this.messageCatalog = messageCatalog;
 	}

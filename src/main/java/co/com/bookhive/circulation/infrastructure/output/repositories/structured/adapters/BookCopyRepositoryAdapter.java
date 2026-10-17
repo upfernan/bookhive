@@ -1,4 +1,4 @@
-package co.com.bookhive.circulation.infrastructure.output.repositories.structured.adapter;
+package co.com.bookhive.circulation.infrastructure.output.repositories.structured.adapters;
 
 import java.util.List;
 import java.util.Optional;

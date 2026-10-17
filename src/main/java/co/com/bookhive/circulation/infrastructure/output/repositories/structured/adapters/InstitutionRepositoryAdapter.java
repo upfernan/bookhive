@@ -1,4 +1,4 @@
-package co.com.bookhive.initializer.tenancy;
+package co.com.bookhive.circulation.infrastructure.output.repositories.structured.adapters;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,11 +10,13 @@ import javax.sql.DataSource;
 
 import org.springframework.stereotype.Component;
 
+import co.com.bookhive.circulation.infrastructure.output.repositories.structured.tenancy.SchemaName;
+import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionRepository;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.messages.MessageKey;
 
 @Component
-public class InstitutionDirectory {
+public class InstitutionRepositoryAdapter implements InstitutionRepository {
 
 	private static final String ACTIVE_STATUS = "ACTIVA";
 
@@ -23,11 +25,12 @@ public class InstitutionDirectory {
 
 	private final DataSource dataSource;
 
-	public InstitutionDirectory(final DataSource dataSource) {
+	public InstitutionRepositoryAdapter(final DataSource dataSource) {
 		super();
 		this.dataSource = dataSource;
 	}
 
+	@Override
 	public String findActiveSchema(final UUID institution) {
 
 		try (Connection connection = dataSource.getConnection();

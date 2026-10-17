@@ -2,6 +2,7 @@ package co.com.bookhive.circulation.infrastructure.input.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +23,7 @@ public class LoanController {
 		this.lendBookInputPort = lendBookInputPort;
 	}
 
+	@Transactional(rollbackFor = Exception.class)
 	@PostMapping
 	public ResponseEntity<LendBookResponseDTO> lend(
 			@RequestBody final LendBookRequestDTO request) {

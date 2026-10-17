@@ -1,4 +1,4 @@
-package co.com.bookhive.initializer.tenancy;
+package co.com.bookhive.circulation.infrastructure.output.repositories.structured.adapters;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,12 +10,14 @@ import javax.sql.DataSource;
 
 import org.springframework.stereotype.Component;
 
+import co.com.bookhive.circulation.services.output.ports.repositories.PersonRepository;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.PersonEntity;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;
 
 @Component
-public class PersonDirectory {
+public class PersonRepositoryAdapter implements PersonRepository {
 
 	private static final String ACTIVE_STATUS = "ACTIVA";
 
@@ -25,12 +27,13 @@ public class PersonDirectory {
 
 	private final DataSource dataSource;
 
-	public PersonDirectory(final DataSource dataSource) {
+	public PersonRepositoryAdapter(final DataSource dataSource) {
 		super();
 		this.dataSource = dataSource;
 	}
 
-	public Person findActive(final String identity) {
+	@Override
+	public PersonEntity findActive(final String identity) {
 
 		if (TextHelper.isDefaultValue(identity)) {
 			throw BookHiveException.createUnexpected(
@@ -55,7 +58,7 @@ public class PersonDirectory {
 		}
 	}
 
-	private static Person readPerson(final PreparedStatement statement, final String identity)
+	private static PersonEntity readPerson(final PreparedStatement statement, final String identity)
 			throws SQLException {
 
 		try (ResultSet result = statement.executeQuery()) {
@@ -68,14 +71,11 @@ public class PersonDirectory {
 								+ " institución de BookHive.");
 			}
 
-			return new Person(
-					result.getObject("id", UUID.class),
-					result.getObject("institucion_id", UUID.class));
+			final PersonEntity person = new PersonEntity();
+			person.setId(result.getObject("id", UUID.class));
+			person.setInstitution(result.getObject("institucion_id", UUID.class));
+			return person;
 		}
-	}
-
-	public record Person(UUID id, UUID institution) {
-
 	}
 
 }

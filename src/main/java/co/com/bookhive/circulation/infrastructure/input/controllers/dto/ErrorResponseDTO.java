@@ -1,4 +1,4 @@
-package co.com.bookhive.circulation.services.input.dto.response;
+package co.com.bookhive.circulation.infrastructure.input.controllers.dto;
 
 import co.com.bookhive.crosscutting.helper.TextHelper;
 

@@ -1,4 +1,4 @@
-package co.com.bookhive.initializer.tenancy;
+package co.com.bookhive.circulation.infrastructure.output.repositories.structured.tenancy;
 
 import co.com.bookhive.crosscutting.helper.TextHelper;
 

@@ -1,4 +1,4 @@
-package co.com.bookhive.initializer.messages;
+package co.com.bookhive.circulation.infrastructure.output.externalservices.messagecatalog;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -17,11 +17,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
+import co.com.bookhive.circulation.services.output.ports.MessageCatalogPort;
 import co.com.bookhive.crosscutting.helper.TextHelper;
-import co.com.bookhive.crosscutting.messages.MessageCatalog;
 
 @Component
-public class DatabaseMessageCatalog implements MessageCatalog {
+public class DatabaseMessageCatalog implements MessageCatalogPort {
 
 	private static final Logger logger = LoggerFactory.getLogger(DatabaseMessageCatalog.class);
 

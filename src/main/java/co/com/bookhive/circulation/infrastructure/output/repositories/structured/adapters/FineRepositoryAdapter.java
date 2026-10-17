@@ -1,4 +1,4 @@
-package co.com.bookhive.circulation.infrastructure.output.repositories.structured.adapter;
+package co.com.bookhive.circulation.infrastructure.output.repositories.structured.adapters;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +43,7 @@ public class FineRepositoryAdapter implements FineRepository {
 			final List<Predicate> predicates = new ArrayList<>();
 
 			if (criteria.filtersByUser()) {
-				predicates.add(builder.equal(root.get("user"), criteria.getUser()));
+				predicates.add(builder.equal(root.get("user").get("id"), criteria.getUser()));
 			}
 
 			if (criteria.filtersByStatus()) {
