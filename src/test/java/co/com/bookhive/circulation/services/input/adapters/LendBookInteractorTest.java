@@ -1,8 +1,8 @@
 package co.com.bookhive.circulation.services.input.adapters;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -69,7 +69,7 @@ class LendBookInteractorTest {
 		final BookHiveException exception = assertThrows(BookHiveException.class, () -> interactor.execute(null));
 
 		assertEquals(MessageKey.LOAN_DATA_REQUIRED, exception.getUserMessageKey());
-		assertTrue(useCase.received == null);
+		assertNull(useCase.received);
 	}
 
 	private static final class FakeUseCase implements LendBookUseCase {

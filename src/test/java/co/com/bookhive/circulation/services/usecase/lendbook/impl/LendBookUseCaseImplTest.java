@@ -73,8 +73,10 @@ class LendBookUseCaseImplTest {
 	@DisplayName("no guarda nada si el préstamo se rechaza")
 	void doesNotSaveRejectedLoan() {
 		fines = new FakeRepositories.Fines().withPendingFine();
+		final LendBookUseCaseImpl useCase = useCase();
+		final LendBookDomain request = request();
 
-		final BookHiveException exception = assertThrows(BookHiveException.class, () -> useCase().execute(request()));
+		final BookHiveException exception = assertThrows(BookHiveException.class, () -> useCase.execute(request));
 
 		assertEquals(MessageKey.USER_WITH_PENDING_FINES, exception.getUserMessageKey());
 		assertTrue(loans.created().isEmpty());
@@ -84,7 +86,9 @@ class LendBookUseCaseImplTest {
 	@Test
 	@DisplayName("rechaza el préstamo si no llegan datos")
 	void rejectsNullDomain() {
-		final BookHiveException exception = assertThrows(BookHiveException.class, () -> useCase().execute(null));
+		final LendBookUseCaseImpl useCase = useCase();
+
+		final BookHiveException exception = assertThrows(BookHiveException.class, () -> useCase.execute(null));
 
 		assertEquals(MessageKey.LOAN_DATA_REQUIRED, exception.getUserMessageKey());
 	}

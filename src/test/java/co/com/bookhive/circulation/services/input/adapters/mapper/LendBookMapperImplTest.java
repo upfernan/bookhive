@@ -42,8 +42,11 @@ class LendBookMapperImplTest {
 	@Test
 	@DisplayName("rechaza una petición vacía")
 	void rejectsNullRequest() {
+		final UUID institution = UUIDHelper.generateNew();
+		final UUID librarian = UUIDHelper.generateNew();
+
 		final BookHiveException exception = assertThrows(BookHiveException.class,
-				() -> mapper.toDomain(null, UUIDHelper.generateNew(), UUIDHelper.generateNew()));
+				() -> mapper.toDomain(null, institution, librarian));
 
 		assertEquals(MessageKey.LOAN_DATA_REQUIRED, exception.getUserMessageKey());
 	}

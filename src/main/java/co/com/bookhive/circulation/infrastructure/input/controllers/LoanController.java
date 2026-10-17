@@ -32,12 +32,11 @@ public class LoanController {
 	public ResponseEntity<LendBookResponseDTO> lend(
 			@RequestBody final LendBookRequestDTO request) {
 
-		logger.info("Inicia el préstamo del ejemplar {}.", request.getBookCopy());
+		logger.info("Inicia el registro de un préstamo.");
 
 		final LendBookResponseDTO response = lendBookInputPort.execute(request);
 
-		logger.info("Préstamo {} registrado para el ejemplar {}; vence el {}.",
-				response.getLoan(), request.getBookCopy(), response.getDueDate());
+		logger.info("Préstamo registrado.");
 
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
