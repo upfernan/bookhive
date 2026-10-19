@@ -16,6 +16,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
+import co.com.bookhive.circulation.infrastructure.input.security.SessionCookieTokenResolver;
 import co.com.bookhive.crosscutting.helper.TextHelper;
 
 @Configuration

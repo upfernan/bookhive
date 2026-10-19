@@ -17,8 +17,8 @@ public class FineEntity {
 	public static final String STATUS_WAIVED = "CONDONADA";
 
 	private UUID id;
-	private UUID loan;
-	private UUID user;
+	private LoanEntity loan;
+	private UserEntity user;
 	private LocalDate issueDate;
 	private int overdueDays;
 	private BigDecimal dailyRate;
@@ -30,8 +30,8 @@ public class FineEntity {
 	public FineEntity() {
 		super();
 		setId(UUIDHelper.getDefaultValue());
-		setLoan(UUIDHelper.getDefaultValue());
-		setUser(UUIDHelper.getDefaultValue());
+		setLoan(new LoanEntity());
+		setUser(new UserEntity());
 		setIssueDate(DateHelper.getDefaultValue());
 		setOverdueDays(0);
 		setDailyRate(BigDecimal.ZERO);
@@ -48,20 +48,20 @@ public class FineEntity {
 		this.id = UUIDHelper.getDefaultValue(id);
 	}
 
-	public UUID getLoan() {
+	public LoanEntity getLoan() {
 		return loan;
 	}
 
-	public void setLoan(final UUID loan) {
-		this.loan = UUIDHelper.getDefaultValue(loan);
+	public void setLoan(final LoanEntity loan) {
+		this.loan = ObjectHelper.getDefaultValue(loan, new LoanEntity());
 	}
 
-	public UUID getUser() {
+	public UserEntity getUser() {
 		return user;
 	}
 
-	public void setUser(final UUID user) {
-		this.user = UUIDHelper.getDefaultValue(user);
+	public void setUser(final UserEntity user) {
+		this.user = ObjectHelper.getDefaultValue(user, new UserEntity());
 	}
 
 	public LocalDate getIssueDate() {

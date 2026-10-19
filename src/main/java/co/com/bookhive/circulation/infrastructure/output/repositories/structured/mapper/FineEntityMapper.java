@@ -10,8 +10,12 @@ import co.com.bookhive.circulation.services.output.ports.repositories.entities.F
 @Mapper(
 		componentModel = "spring",
 		implementationPackage = "<PACKAGE_NAME>.impl",
-		nullValueMappingStrategy = NullValueMappingStrategy.RETURN_DEFAULT)
+		nullValueMappingStrategy = NullValueMappingStrategy.RETURN_DEFAULT,
+		uses = { LoanEntityMapper.class, UserEntityMapper.class })
 public interface FineEntityMapper extends EntityMapper<FineEntity, FineJpaEntity> {
+
+	@Override
+	FineEntity toEntity(FineJpaEntity jpaEntity);
 
 	@Override
 	@Mapping(target = "createdAt", ignore = true)

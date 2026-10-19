@@ -1,0 +1,143 @@
+package co.com.bookhive.circulation.testdata;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRepository;
+import co.com.bookhive.circulation.services.output.ports.repositories.FineRepository;
+import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionParametersRepository;
+import co.com.bookhive.circulation.services.output.ports.repositories.LoanRepository;
+import co.com.bookhive.circulation.services.output.ports.repositories.criteria.FineCriteria;
+import co.com.bookhive.circulation.services.output.ports.repositories.criteria.LoanCriteria;
+import co.com.bookhive.circulation.services.output.ports.repositories.criteria.PageCriteria;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.FineEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.InstitutionParametersEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanEntity;
+
+public final class FakeRepositories {
+
+	private FakeRepositories() {
+		super();
+	}
+
+	public static BookCopyEntity bookCopy(final UUID id, final String status, final boolean lendable) {
+		final BookCopyEntity bookCopy = new BookCopyEntity();
+		bookCopy.setId(id);
+		bookCopy.setStatus(status);
+		bookCopy.setLendable(lendable);
+		return bookCopy;
+	}
+
+	public static final class BookCopies implements BookCopyRepository {
+
+		private final List<BookCopyEntity> stored = new ArrayList<>();
+		private final List<BookCopyEntity> updated = new ArrayList<>();
+
+		public BookCopies with(final BookCopyEntity bookCopy) {
+			stored.add(bookCopy);
+			return this;
+		}
+
+		public List<BookCopyEntity> updated() {
+			return updated;
+		}
+
+		@Override
+		public Optional<BookCopyEntity> findById(final UUID id) {
+			return stored.stream().filter(bookCopy -> bookCopy.getId().equals(id)).findFirst();
+		}
+
+		@Override
+		public List<BookCopyEntity> findAll(final PageCriteria page) {
+			return List.copyOf(stored);
+		}
+
+		@Override
+		public void update(final BookCopyEntity entity) {
+			updated.add(entity);
+		}
+
+	}
+
+	public static final class Fines implements FineRepository {
+
+		private final List<FineEntity> pending = new ArrayList<>();
+
+		public Fines withPendingFine() {
+			pending.add(new FineEntity());
+			return this;
+		}
+
+		@Override
+		public List<FineEntity> findByCriteria(final FineCriteria criteria) {
+			return List.copyOf(pending);
+		}
+
+	}
+
+	public static final class Loans implements LoanRepository {
+
+		private final List<LoanEntity> active = new ArrayList<>();
+		private final List<LoanEntity> created = new ArrayList<>();
+
+		public Loans withActiveLoans(final int amount) {
+			for (int i = 0; i < amount; i++) {
+				active.add(new LoanEntity());
+			}
+			return this;
+		}
+
+		public List<LoanEntity> created() {
+			return created;
+		}
+
+		@Override
+		public void create(final LoanEntity entity) {
+			created.add(entity);
+		}
+
+		@Override
+		public Optional<LoanEntity> findById(final UUID id) {
+			return created.stream().filter(loan -> loan.getId().equals(id)).findFirst();
+		}
+
+		@Override
+		public List<LoanEntity> findAll(final PageCriteria page) {
+			return List.copyOf(created);
+		}
+
+		@Override
+		public List<LoanEntity> findByCriteria(final LoanCriteria criteria) {
+			return List.copyOf(active);
+		}
+
+	}
+
+	public static final class Parameters implements InstitutionParametersRepository {
+
+		private final List<InstitutionParametersEntity> stored = new ArrayList<>();
+
+		public Parameters with(final int loanDays, final int maxConcurrentLoans) {
+			final InstitutionParametersEntity parameters = new InstitutionParametersEntity();
+			parameters.setLoanDays(loanDays);
+			parameters.setMaxConcurrentLoans(maxConcurrentLoans);
+			stored.add(parameters);
+			return this;
+		}
+
+		@Override
+		public Optional<InstitutionParametersEntity> findById(final UUID id) {
+			return stored.stream().findFirst();
+		}
+
+		@Override
+		public List<InstitutionParametersEntity> findAll(final PageCriteria page) {
+			return List.copyOf(stored);
+		}
+
+	}
+
+}
