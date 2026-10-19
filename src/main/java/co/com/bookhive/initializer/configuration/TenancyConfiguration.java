@@ -8,6 +8,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import co.com.bookhive.circulation.infrastructure.input.controllers.SessionController;
+import co.com.bookhive.circulation.infrastructure.input.interceptors.PermissionInterceptor;
 import co.com.bookhive.circulation.infrastructure.input.interceptors.TenantInterceptor;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.tenancy.TenantConnectionProvider;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.tenancy.TenantSchemaResolver;
@@ -18,16 +19,19 @@ public class TenancyConfiguration implements WebMvcConfigurer {
 	private static final String TENANTED_PATHS = "/api/**";
 
 	private final TenantInterceptor tenantInterceptor;
+	private final PermissionInterceptor permissionInterceptor;
 	private final TenantConnectionProvider tenantConnectionProvider;
 	private final TenantSchemaResolver tenantSchemaResolver;
 
 	public TenancyConfiguration(
 			final TenantInterceptor tenantInterceptor,
+			final PermissionInterceptor permissionInterceptor,
 			final TenantConnectionProvider tenantConnectionProvider,
 			final TenantSchemaResolver tenantSchemaResolver) {
 
 		super();
 		this.tenantInterceptor = tenantInterceptor;
+		this.permissionInterceptor = permissionInterceptor;
 		this.tenantConnectionProvider = tenantConnectionProvider;
 		this.tenantSchemaResolver = tenantSchemaResolver;
 	}
@@ -35,6 +39,9 @@ public class TenancyConfiguration implements WebMvcConfigurer {
 	@Override
 	public void addInterceptors(final InterceptorRegistry registry) {
 		registry.addInterceptor(tenantInterceptor)
+				.addPathPatterns(TENANTED_PATHS)
+				.excludePathPatterns(SessionController.PATH);
+		registry.addInterceptor(permissionInterceptor)
 				.addPathPatterns(TENANTED_PATHS)
 				.excludePathPatterns(SessionController.PATH);
 	}
