@@ -9,6 +9,7 @@ public class BookHiveException extends RuntimeException {
 	public enum Kind {
 		MISSING_DATA,
 		STATE_DOES_NOT_ALLOW_IT,
+		NOT_ALLOWED,
 		UNEXPECTED
 	}
 
@@ -43,6 +44,12 @@ public class BookHiveException extends RuntimeException {
 
 		return new BookHiveException(
 				new Exception(), userMessageKey, technicalMessage, Kind.STATE_DOES_NOT_ALLOW_IT);
+	}
+
+	public static BookHiveException createNotAllowed(
+			final String userMessageKey, final String technicalMessage) {
+
+		return new BookHiveException(new Exception(), userMessageKey, technicalMessage, Kind.NOT_ALLOWED);
 	}
 
 	public static BookHiveException createUnexpected(

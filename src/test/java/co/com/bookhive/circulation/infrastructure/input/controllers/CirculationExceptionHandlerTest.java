@@ -38,6 +38,16 @@ class CirculationExceptionHandlerTest {
 	}
 
 	@Test
+	@DisplayName("una acción sin permiso responde 403 con el mensaje del catálogo")
+	void missingPermissionIsForbidden() {
+		final ResponseEntity<ErrorResponseDTO> response =
+				handler.handle(BookHiveException.createNotAllowed(MessageKey.PERMISSION_DENIED, "Sin permiso."));
+
+		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+		assertEquals("Texto de " + MessageKey.PERMISSION_DENIED, messageOf(response));
+	}
+
+	@Test
 	@DisplayName("un error inesperado propio responde 500")
 	void unexpectedErrorIsServerError() {
 		final ResponseEntity<ErrorResponseDTO> response =

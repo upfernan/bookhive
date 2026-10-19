@@ -27,6 +27,8 @@ public final class MessageKey {
 	public static final String SESSION_NOT_OPENED = "session.not-opened";
 	public static final String SESSION_PROVIDER_UNAVAILABLE = "session.provider-unavailable";
 
+	public static final String PERMISSION_DENIED = "permission.denied";
+
 	public static final String REQUEST_UNEXPECTED = "request.unexpected";
 	public static final String REQUEST_INVALID_DATA = "request.invalid-data";
 	public static final String REQUEST_UNHANDLED = "request.unhandled";

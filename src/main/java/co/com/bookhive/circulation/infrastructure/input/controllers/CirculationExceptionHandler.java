@@ -69,6 +69,7 @@ public class CirculationExceptionHandler {
 		return switch (exception.getKind()) {
 			case MISSING_DATA -> HttpStatus.BAD_REQUEST;
 			case STATE_DOES_NOT_ALLOW_IT -> HttpStatus.CONFLICT;
+			case NOT_ALLOWED -> HttpStatus.FORBIDDEN;
 			case UNEXPECTED -> HttpStatus.INTERNAL_SERVER_ERROR;
 		};
 	}

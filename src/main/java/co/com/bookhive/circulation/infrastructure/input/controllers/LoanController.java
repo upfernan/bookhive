@@ -10,9 +10,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import co.com.bookhive.circulation.infrastructure.input.security.RequiredPermission;
 import co.com.bookhive.circulation.services.input.dto.request.LendBookRequestDTO;
 import co.com.bookhive.circulation.services.input.dto.response.LendBookResponseDTO;
 import co.com.bookhive.circulation.services.input.ports.LendBookInputPort;
+import co.com.bookhive.crosscutting.security.PermissionCode;
 
 @RestController
 @RequestMapping("/api/v1/prestamos")
@@ -27,6 +29,7 @@ public class LoanController {
 		this.lendBookInputPort = lendBookInputPort;
 	}
 
+	@RequiredPermission(PermissionCode.LEND_BOOK)
 	@Transactional(rollbackFor = Exception.class)
 	@PostMapping
 	public ResponseEntity<LendBookResponseDTO> lend(
