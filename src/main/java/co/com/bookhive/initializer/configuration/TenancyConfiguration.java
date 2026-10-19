@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import co.com.bookhive.circulation.infrastructure.input.controllers.SessionController;
 import co.com.bookhive.circulation.infrastructure.input.interceptors.TenantInterceptor;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.tenancy.TenantConnectionProvider;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.tenancy.TenantSchemaResolver;
@@ -33,7 +34,9 @@ public class TenancyConfiguration implements WebMvcConfigurer {
 
 	@Override
 	public void addInterceptors(final InterceptorRegistry registry) {
-		registry.addInterceptor(tenantInterceptor).addPathPatterns(TENANTED_PATHS);
+		registry.addInterceptor(tenantInterceptor)
+				.addPathPatterns(TENANTED_PATHS)
+				.excludePathPatterns(SessionController.PATH);
 	}
 
 	@Bean

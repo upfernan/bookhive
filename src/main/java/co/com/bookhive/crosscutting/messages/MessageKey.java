@@ -23,6 +23,9 @@ public final class MessageKey {
 	public static final String INSTITUTION_WITHOUT_PARAMETERS = "institution.without-parameters";
 
 	public static final String SESSION_NOT_RESOLVED = "session.not-resolved";
+	public static final String SESSION_ID_TOKEN_REQUIRED = "session.id-token.required";
+	public static final String SESSION_NOT_OPENED = "session.not-opened";
+	public static final String SESSION_PROVIDER_UNAVAILABLE = "session.provider-unavailable";
 
 	public static final String REQUEST_UNEXPECTED = "request.unexpected";
 	public static final String REQUEST_INVALID_DATA = "request.invalid-data";
