@@ -55,7 +55,7 @@ public class SessionController {
 		logger.info("Sesión abierta.");
 
 		return ResponseEntity.noContent()
-				.header(HttpHeaders.SET_COOKIE, cookie(session.getSessionToken(), sessionLength))
+				.header(HttpHeaders.SET_COOKIE, cookie(session.sessionToken(), sessionLength))
 				.build();
 	}
 

@@ -58,7 +58,7 @@ public class IdentityPlatformAdapter implements IdentityProviderPort {
 
 		try {
 			identity = sessionDecoder.decode(sessionToken).getSubject();
-		} catch (final JwtException exception) {
+		} catch (final JwtException _) {
 			logger.info("Se pidió cerrar una sesión que ya no estaba vigente.");
 			return;
 		}
