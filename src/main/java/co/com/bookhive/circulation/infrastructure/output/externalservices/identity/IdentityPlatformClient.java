@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,7 +33,8 @@ public class IdentityPlatformClient {
 	private final RestClient restClient;
 	private final String projectId;
 
-	private volatile AccessToken accessToken = new AccessToken("", Instant.EPOCH);
+	private final AtomicReference<AccessToken> accessToken =
+			new AtomicReference<>(new AccessToken("", Instant.EPOCH));
 
 	@Autowired
 	public IdentityPlatformClient(@Value("${bookhive.identity.project-id:}") final String projectId) {
@@ -118,7 +120,8 @@ public class IdentityPlatformClient {
 		} catch (final HttpClientErrorException.BadRequest exception) {
 			throw BookHiveException.create(
 					MessageKey.SESSION_NOT_OPENED,
-					"Identity Platform rechazó " + operation + " por datos inválidos.");
+					"Identity Platform rechazó " + operation + " por datos inválidos: "
+							+ exception.getResponseBodyAsString());
 
 		} catch (final RestClientException exception) {
 			throw BookHiveException.createUnexpected(
@@ -130,7 +133,7 @@ public class IdentityPlatformClient {
 
 	private String currentAccessToken() {
 
-		final AccessToken current = accessToken;
+		final AccessToken current = accessToken.get();
 
 		if (current.isValidAt(Instant.now().plus(TOKEN_MARGIN))) {
 			return current.value();
@@ -150,7 +153,7 @@ public class IdentityPlatformClient {
 					"El servidor de metadatos no entregó un token de acceso.");
 		}
 
-		accessToken = new AccessToken(value, Instant.now().plusSeconds(numberOf(response, "expires_in")));
+		accessToken.set(new AccessToken(value, Instant.now().plusSeconds(numberOf(response, "expires_in"))));
 
 		return value;
 	}
@@ -167,7 +170,7 @@ public class IdentityPlatformClient {
 
 		try {
 			return TextHelper.isDefaultValue(text) ? 0L : Long.parseLong(text);
-		} catch (final NumberFormatException exception) {
+		} catch (final NumberFormatException _) {
 			return 0L;
 		}
 	}

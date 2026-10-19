@@ -7,9 +7,9 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,7 +36,8 @@ public class GoogleSessionKeys implements JWKSource<SecurityContext> {
 
 	private final RestClient restClient;
 
-	private volatile CachedKeys cached = new CachedKeys(new JWKSet(), Instant.EPOCH);
+	private final AtomicReference<CachedKeys> cached =
+			new AtomicReference<>(new CachedKeys(new JWKSet(), Instant.EPOCH));
 
 	@Autowired
 	public GoogleSessionKeys() {
@@ -62,7 +63,7 @@ public class GoogleSessionKeys implements JWKSource<SecurityContext> {
 
 	private JWKSet currentKeys() throws KeySourceException {
 
-		final CachedKeys current = cached;
+		final CachedKeys current = cached.get();
 
 		if (Instant.now().isBefore(current.loadedAt().plus(KEEP_FOR))) {
 			return current.keys();
@@ -82,27 +83,30 @@ public class GoogleSessionKeys implements JWKSource<SecurityContext> {
 		}
 
 		final JWKSet keys = toKeySet(certificates);
-		cached = new CachedKeys(keys, Instant.now());
+		cached.set(new CachedKeys(keys, Instant.now()));
 
 		return keys;
 	}
 
 	static JWKSet toKeySet(final Map<?, ?> certificates) throws KeySourceException {
 
-		final List<JWK> keys = new ArrayList<>();
-
 		if (ObjectHelper.isNull(certificates)) {
+			return new JWKSet();
+		}
+
+		try {
+			final List<JWK> keys = certificates.entrySet().stream()
+					.<JWK>map(entry -> toKey(String.valueOf(entry.getKey()), String.valueOf(entry.getValue())))
+					.toList();
+
 			return new JWKSet(keys);
-		}
 
-		for (final Map.Entry<?, ?> entry : certificates.entrySet()) {
-			keys.add(toKey(String.valueOf(entry.getKey()), String.valueOf(entry.getValue())));
+		} catch (final IllegalArgumentException exception) {
+			throw new KeySourceException(exception.getMessage(), exception);
 		}
-
-		return new JWKSet(keys);
 	}
 
-	private static JWK toKey(final String keyId, final String pem) throws KeySourceException {
+	private static JWK toKey(final String keyId, final String pem) {
 
 		try {
 			final X509Certificate certificate = (X509Certificate) CertificateFactory.getInstance("X.509")
@@ -111,7 +115,7 @@ public class GoogleSessionKeys implements JWKSource<SecurityContext> {
 			return new RSAKey.Builder(RSAKey.parse(certificate)).keyID(keyId).build();
 
 		} catch (final CertificateException | JOSEException | ClassCastException exception) {
-			throw new KeySourceException("El certificado " + keyId + " de Google no se pudo leer.", exception);
+			throw new IllegalArgumentException("El certificado " + keyId + " de Google no se pudo leer.", exception);
 		}
 	}
 

@@ -40,7 +40,7 @@ class OpenSessionInteractorTest {
 
 		final OpenSessionResponseDTO response = interactor.execute(new OpenSessionRequestDTO("  " + ID_TOKEN + "  "));
 
-		assertEquals(SESSION, response.getSessionToken());
+		assertEquals(SESSION, response.sessionToken());
 		assertEquals(ID_TOKEN, identityProvider.receivedIdToken);
 		assertEquals(List.of(IDENTITY), searchedPeople);
 	}
