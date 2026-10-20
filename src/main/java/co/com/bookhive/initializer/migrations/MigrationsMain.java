@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.flywaydb.core.Flyway;
@@ -31,14 +32,16 @@ public final class MigrationsMain {
 		final String url = requiredVariable("DB_URL");
 		final String user = requiredVariable("DB_ADMIN_USERNAME");
 		final String password = requiredVariable("DB_ADMIN_PASSWORD");
+		final Map<String, String> placeholders =
+				MigrationPlaceholders.forApplicationUser(System.getenv("DB_APP_USERNAME"));
 
 		try {
-			migrateSharedSchema(url, user, password);
+			migrateSharedSchema(url, user, password, placeholders);
 
 			final List<String> schemas = readInstitutionSchemas(url, user, password);
 			logger.info("Instituciones activas: {}", schemas.size());
 
-			migrateInstitutions(url, user, password, schemas);
+			migrateInstitutions(url, user, password, placeholders, schemas);
 
 		} catch (final Exception exception) {
 			logger.error("Las migraciones fallaron.", exception);
@@ -47,10 +50,12 @@ public final class MigrationsMain {
 	}
 
 	private static void migrateSharedSchema(
-			final String url, final String user, final String password) {
+			final String url, final String user, final String password,
+			final Map<String, String> placeholders) {
 
 		Flyway.configure()
 				.dataSource(url, user, password)
+				.placeholders(placeholders)
 				.schemas(SHARED_SCHEMA)
 				.locations(SHARED_PATH)
 				.createSchemas(true)
@@ -83,7 +88,7 @@ public final class MigrationsMain {
 
 	private static void migrateInstitutions(
 			final String url, final String user, final String password,
-			final List<String> schemas) {
+			final Map<String, String> placeholders, final List<String> schemas) {
 
 		final List<String> failed = new ArrayList<>();
 
@@ -97,6 +102,7 @@ public final class MigrationsMain {
 			try {
 				Flyway.configure()
 						.dataSource(url, user, password)
+						.placeholders(placeholders)
 						.schemas(schema)
 						.locations(INSTITUTION_PATH)
 						.createSchemas(true)

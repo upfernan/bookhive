@@ -1,5 +1,9 @@
 package co.com.bookhive.circulation.infrastructure.input.controllers;
 
+import java.sql.SQLException;
+import java.util.Locale;
+
+import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -13,6 +17,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import co.com.bookhive.circulation.infrastructure.input.controllers.dto.ErrorResponseDTO;
 import co.com.bookhive.circulation.services.output.ports.MessageCatalogPort;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
+import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;
 
@@ -26,6 +31,9 @@ public class CirculationExceptionHandler {
 
 	private static final String UNHANDLED_TECHNICAL_MESSAGE =
 			"Se generó una excepción no controlada en el sistema. Por favor revisar los registros de errores.";
+
+	private static final String ACTIVE_LOAN_INDEX = "uq_loan_book_copy_active";
+	private static final String UNIQUE_VIOLATION = "23505";
 
 	private final MessageCatalogPort messageCatalog;
 
@@ -59,9 +67,41 @@ public class CirculationExceptionHandler {
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ErrorResponseDTO> handle(final Exception exception) {
 
+		if (isActiveLoanCollision(exception)) {
+			logger.warn("Dos préstamos simultáneos del mismo ejemplar: la base de datos rechazó el segundo (RT-01).");
+			return respond(HttpStatus.CONFLICT, MessageKey.BOOK_COPY_NOT_AVAILABLE);
+		}
+
 		logger.error(UNHANDLED_TECHNICAL_MESSAGE, exception);
 
 		return respond(HttpStatus.INTERNAL_SERVER_ERROR, MessageKey.REQUEST_UNHANDLED);
+	}
+
+	private static boolean isActiveLoanCollision(final Throwable exception) {
+
+		Throwable current = exception;
+
+		while (!ObjectHelper.isNull(current)) {
+
+			if (current instanceof ConstraintViolationException violation
+					&& mentionsActiveLoanIndex(violation.getConstraintName())) {
+				return true;
+			}
+
+			if (current instanceof SQLException sql
+					&& UNIQUE_VIOLATION.equals(sql.getSQLState())
+					&& mentionsActiveLoanIndex(sql.getMessage())) {
+				return true;
+			}
+
+			current = current.getCause();
+		}
+
+		return false;
+	}
+
+	private static boolean mentionsActiveLoanIndex(final String text) {
+		return TextHelper.getDefaultValue(text).toLowerCase(Locale.ROOT).contains(ACTIVE_LOAN_INDEX);
 	}
 
 	private static HttpStatus statusOf(final BookHiveException exception) {
