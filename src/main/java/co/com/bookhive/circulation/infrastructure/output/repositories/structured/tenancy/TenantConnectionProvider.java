@@ -2,7 +2,6 @@ package co.com.bookhive.circulation.infrastructure.output.repositories.structure
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import javax.sql.DataSource;
 
@@ -34,8 +33,16 @@ public class TenantConnectionProvider implements MultiTenantConnectionProvider<S
 	@Override
 	public Connection getConnection(final String schema) throws SQLException {
 
+		SchemaName.requireValid(schema);
+
 		final Connection connection = dataSource.getConnection();
-		useSchema(connection, schema);
+
+		try {
+			TenantSession.enter(connection, schema);
+		} catch (final SQLException | RuntimeException exception) {
+			connection.close();
+			throw exception;
+		}
 
 		return connection;
 	}
@@ -45,7 +52,7 @@ public class TenantConnectionProvider implements MultiTenantConnectionProvider<S
 			throws SQLException {
 
 		try {
-			useSchema(connection, TenantContext.SCHEMA_WITHOUT_TENANT);
+			TenantSession.leave(connection);
 		} finally {
 			connection.close();
 		}
@@ -69,14 +76,6 @@ public class TenantConnectionProvider implements MultiTenantConnectionProvider<S
 	@Override
 	public <T> T unwrap(final Class<T> type) {
 		return null;
-	}
-
-	private static void useSchema(final Connection connection, final String schema)
-			throws SQLException {
-
-		try (Statement statement = connection.createStatement()) {
-			statement.execute("SET search_path TO " + SchemaName.requireValid(schema));
-		}
 	}
 
 }
