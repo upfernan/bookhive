@@ -5,8 +5,9 @@ import java.text.ParseException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpCookie;
@@ -32,6 +33,8 @@ public class SessionCookieVerifier {
 	static final Duration CLOCK_SKEW = Duration.ofMinutes(1);
 
 	private static final int MAX_ACCOUNT_LENGTH = 128;
+	private static final String EXPIRES_AT = "exp";
+	private static final String ISSUED_AT = "iat";
 
 	private final String projectId;
 	private final SessionKeys keys;
@@ -67,7 +70,7 @@ public class SessionCookieVerifier {
 
 		try {
 			session = SignedJWT.parse(cleanToken);
-		} catch (final ParseException exception) {
+		} catch (final ParseException _) {
 			return Mono.just(TextHelper.getDefaultValue());
 		}
 
@@ -94,7 +97,7 @@ public class SessionCookieVerifier {
 					? TextHelper.getDefaultValue(claims.getSubject())
 					: TextHelper.getDefaultValue();
 
-		} catch (final JOSEException | ParseException exception) {
+		} catch (final JOSEException | ParseException _) {
 			return TextHelper.getDefaultValue();
 		}
 	}
@@ -103,20 +106,27 @@ public class SessionCookieVerifier {
 
 		final List<String> audience = claims.getAudience();
 		final String subject = TextHelper.getDefaultValue(claims.getSubject());
+		final Map<String, Object> values = claims.toJSONObject();
 
 		return (ISSUER_PREFIX + projectId).equals(claims.getIssuer())
 				&& audience != null && audience.contains(projectId)
 				&& !TextHelper.isDefaultValue(subject) && subject.length() <= MAX_ACCOUNT_LENGTH
-				&& notExpired(claims.getExpirationTime(), now)
-				&& notIssuedInFuture(claims.getIssueTime(), now);
+				&& notExpired(values.get(EXPIRES_AT), now)
+				&& notIssuedInFuture(values.get(ISSUED_AT), now);
 	}
 
-	private static boolean notExpired(final Date expiresAt, final Instant now) {
-		return expiresAt != null && expiresAt.toInstant().plus(CLOCK_SKEW).isAfter(now);
+	private static boolean notExpired(final Object expiresAt, final Instant now) {
+		return instantOf(expiresAt).map(moment -> moment.plus(CLOCK_SKEW).isAfter(now)).orElse(false);
 	}
 
-	private static boolean notIssuedInFuture(final Date issuedAt, final Instant now) {
-		return issuedAt == null || !issuedAt.toInstant().minus(CLOCK_SKEW).isAfter(now);
+	private static boolean notIssuedInFuture(final Object issuedAt, final Instant now) {
+		return instantOf(issuedAt).map(moment -> !moment.minus(CLOCK_SKEW).isAfter(now)).orElse(true);
+	}
+
+	static Optional<Instant> instantOf(final Object secondsSinceEpoch) {
+		return secondsSinceEpoch instanceof Number seconds
+				? Optional.of(Instant.ofEpochSecond(seconds.longValue()))
+				: Optional.empty();
 	}
 
 }
