@@ -38,22 +38,35 @@ class TenantConnectionProviderTest {
 	}
 
 	@Test
-	@DisplayName("apunta la conexión al esquema de la institución")
-	void usesInstitutionSchema() throws SQLException {
+	@DisplayName("entra con el rol de la institución y apunta la conexión a su esquema")
+	void usesInstitutionRoleAndSchema() throws SQLException {
 		provider.getConnection(SCHEMA);
 
-		assertEquals(List.of("SET search_path TO " + SCHEMA), events);
+		assertEquals(List.of("set role=inst_" + SCHEMA, "set search_path=" + SCHEMA), events);
 	}
 
 	@Test
-	@DisplayName("al soltar la conexión vuelve al esquema público y la cierra")
+	@DisplayName("al soltar la conexión deja el rol de la institución, vuelve al esquema público y la cierra")
 	void resetsSchemaOnRelease() throws SQLException {
 		final Connection connection = provider.getConnection(SCHEMA);
 		events.clear();
 
 		provider.releaseConnection(SCHEMA, connection);
 
-		assertEquals(List.of("SET search_path TO " + TenantContext.SCHEMA_WITHOUT_TENANT, "close"), events);
+		assertEquals(List.of("set role=none", "set search_path=" + TenantContext.SCHEMA_WITHOUT_TENANT, "close"), events);
+	}
+
+	@Test
+	@DisplayName("si la conexión quedó con una transacción abierta la descarta antes de quitar el rol")
+	void discardsPendingTransactionOnRelease() throws SQLException {
+		final Connection connection = provider.getConnection(SCHEMA);
+		events.clear();
+		events.add("inTransaction");
+
+		provider.releaseConnection(SCHEMA, connection);
+
+		assertEquals(List.of("inTransaction", "rollback", "set role=none",
+				"set search_path=" + TenantContext.SCHEMA_WITHOUT_TENANT, "close"), events);
 	}
 
 	@Test

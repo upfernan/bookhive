@@ -39,14 +39,33 @@ public final class FakeDataSource {
 			return defaultOf(method);
 		});
 		final Connection connection = proxy(Connection.class, (instance, method, arguments) -> {
-			if ("close".equals(method.getName())) {
-				events.add("close");
+			if ("close".equals(method.getName()) || "rollback".equals(method.getName())) {
+				events.add(method.getName());
+			}
+			if ("getAutoCommit".equals(method.getName())) {
+				return !events.contains("inTransaction");
+			}
+			if ("prepareStatement".equals(method.getName())) {
+				return recordingSetting(events);
 			}
 			return "createStatement".equals(method.getName()) ? statement : defaultOf(method);
 		});
 
 		return proxy(DataSource.class,
 				(instance, method, arguments) -> "getConnection".equals(method.getName()) ? connection : defaultOf(method));
+	}
+
+	private static PreparedStatement recordingSetting(final List<String> events) {
+		final Object[] values = new Object[3];
+		return proxy(PreparedStatement.class, (instance, method, arguments) -> {
+			if ("setString".equals(method.getName())) {
+				values[(int) arguments[0]] = arguments[1];
+			}
+			if ("execute".equals(method.getName())) {
+				events.add("set " + values[1] + "=" + values[2]);
+			}
+			return defaultOf(method);
+		});
 	}
 
 	private static DataSource create(final Map<String, Object> row, final boolean fails) {
