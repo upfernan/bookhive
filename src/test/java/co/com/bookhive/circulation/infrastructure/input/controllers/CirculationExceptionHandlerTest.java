@@ -3,10 +3,15 @@ package co.com.bookhive.circulation.infrastructure.input.controllers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.sql.SQLException;
+
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.TransactionSystemException;
 
 import co.com.bookhive.circulation.infrastructure.input.controllers.dto.ErrorResponseDTO;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
@@ -52,6 +57,48 @@ class CirculationExceptionHandlerTest {
 	void unexpectedErrorIsServerError() {
 		final ResponseEntity<ErrorResponseDTO> response =
 				handler.handle(BookHiveException.createUnexpected(MessageKey.LOAN_UNEXPECTED, "Falló algo."));
+
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+	}
+
+	@Test
+	@DisplayName("si dos préstamos del mismo ejemplar llegan al tiempo el segundo responde 409")
+	void simultaneousLoanIsConflict() {
+		final ResponseEntity<ErrorResponseDTO> response = handler.handle(new DataIntegrityViolationException(
+				"No se pudo guardar.",
+				new ConstraintViolationException("Duplicado.", new SQLException("Duplicado.", "23505"),
+						"uq_loan_book_copy_active")));
+
+		assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+		assertEquals("Texto de " + MessageKey.BOOK_COPY_NOT_AVAILABLE, messageOf(response));
+	}
+
+	@Test
+	@DisplayName("el choque también se reconoce cuando solo llega el error del driver")
+	void simultaneousLoanFromDriverIsConflict() {
+		final ResponseEntity<ErrorResponseDTO> response = handler.handle(new TransactionSystemException(
+				"No se pudo confirmar.",
+				new SQLException("duplicate key value violates unique constraint \"uq_loan_book_copy_active\"",
+						"23505")));
+
+		assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+	}
+
+	@Test
+	@DisplayName("otra restricción de la base de datos sigue siendo un error inesperado")
+	void otherConstraintIsServerError() {
+		final ResponseEntity<ErrorResponseDTO> response = handler.handle(new DataIntegrityViolationException(
+				"No se pudo guardar.",
+				new ConstraintViolationException("Otra.", new SQLException("Otra.", "23505"), "uq_book_copy_barcode")));
+
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+	}
+
+	@Test
+	@DisplayName("un error del driver que no es de duplicado sigue siendo inesperado")
+	void otherDriverErrorIsServerError() {
+		final ResponseEntity<ErrorResponseDTO> response = handler.handle(new IllegalStateException(
+				"Falló.", new SQLException("uq_loan_book_copy_active", "08006")));
 
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
 	}
