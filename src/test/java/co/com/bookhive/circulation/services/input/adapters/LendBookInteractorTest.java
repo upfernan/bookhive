@@ -3,8 +3,11 @@ package co.com.bookhive.circulation.services.input.adapters;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +18,7 @@ import co.com.bookhive.circulation.domain.loan.lendbook.LendBookDomain;
 import co.com.bookhive.circulation.services.input.adapters.mapper.LendBookMapperImpl;
 import co.com.bookhive.circulation.services.input.dto.request.LendBookRequestDTO;
 import co.com.bookhive.circulation.services.input.dto.response.LendBookResponseDTO;
+import co.com.bookhive.circulation.services.output.ports.AuditPort;
 import co.com.bookhive.circulation.services.output.ports.SessionContextPort;
 import co.com.bookhive.circulation.services.usecase.lendbook.LendBookUseCase;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
@@ -30,12 +34,15 @@ class LendBookInteractorTest {
 	private static final LocalDate DUE_DATE = LocalDate.of(2026, 11, 1);
 
 	private FakeUseCase useCase;
+	private List<String> audited;
 	private LendBookInteractor interactor;
 
 	@BeforeEach
 	void prepare() {
 		useCase = new FakeUseCase();
-		interactor = new LendBookInteractor(useCase, new FakeSession(), new LendBookMapperImpl());
+		audited = new ArrayList<>();
+		interactor = new LendBookInteractor(useCase, new FakeSession(), new LendBookMapperImpl(),
+				(action, institution, person, detail) -> audited.add(action + " " + institution + " " + person + " " + detail));
 	}
 
 	@Test
@@ -64,12 +71,21 @@ class LendBookInteractorTest {
 	}
 
 	@Test
+	@DisplayName("deja constancia del préstamo registrado con la institución y quien lo atendió")
+	void auditsRegisteredLoan() {
+		interactor.execute(new LendBookRequestDTO(UUIDHelper.generateNew(), UUIDHelper.generateNew()));
+
+		assertEquals(List.of(AuditPort.LOAN_REGISTERED + " " + INSTITUTION + " " + LIBRARIAN + " " + LOAN), audited);
+	}
+
+	@Test
 	@DisplayName("si la petición llega vacía no llama al caso de uso")
 	void rejectsNullRequest() {
 		final BookHiveException exception = assertThrows(BookHiveException.class, () -> interactor.execute(null));
 
 		assertEquals(MessageKey.LOAN_DATA_REQUIRED, exception.getUserMessageKey());
 		assertNull(useCase.received);
+		assertTrue(audited.isEmpty());
 	}
 
 	private static final class FakeUseCase implements LendBookUseCase {

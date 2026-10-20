@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.web.method.HandlerMethod;
 
 import co.com.bookhive.circulation.infrastructure.input.security.RequiredPermission;
+import co.com.bookhive.circulation.services.output.ports.AuditPort;
 import co.com.bookhive.circulation.services.output.ports.SessionContextPort;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
@@ -26,10 +27,12 @@ class PermissionInterceptorTest {
 	private static final UUID LIBRARIAN = UUIDHelper.generateNew();
 
 	private List<String> checks;
+	private List<String> audited;
 
 	@BeforeEach
 	void prepare() {
 		checks = new ArrayList<>();
+		audited = new ArrayList<>();
 	}
 
 	@Test
@@ -39,6 +42,7 @@ class PermissionInterceptorTest {
 
 		assertTrue(interceptor.preHandle(null, null, operation("lend")));
 		assertEquals(List.of(LIBRARIAN + " " + PermissionCode.LEND_BOOK), checks);
+		assertTrue(audited.isEmpty());
 	}
 
 	@Test
@@ -52,6 +56,8 @@ class PermissionInterceptorTest {
 
 		assertEquals(BookHiveException.Kind.NOT_ALLOWED, exception.getKind());
 		assertEquals(MessageKey.PERMISSION_DENIED, exception.getUserMessageKey());
+		assertEquals(List.of(AuditPort.PERMISSION_DENIED + " " + INSTITUTION + " " + LIBRARIAN + " "
+				+ PermissionCode.LEND_BOOK), audited);
 	}
 
 	@Test
@@ -78,7 +84,7 @@ class PermissionInterceptorTest {
 		return new PermissionInterceptor(new FixedSession(), (person, permission) -> {
 			checks.add(person + " " + permission);
 			return granted;
-		});
+		}, (action, institution, person, detail) -> audited.add(action + " " + institution + " " + person + " " + detail));
 	}
 
 	private static HandlerMethod operation(final String name) throws NoSuchMethodException {
