@@ -16,8 +16,10 @@ public class LoggingAuditAdapter implements AuditPort {
 	private static final Logger logger = LoggerFactory.getLogger(AUDIT_LOGGER);
 
 	@Override
-	public void record(final String action, final String account, final String origin, final String detail) {
-		logger.info(describe(action, account, origin, detail));
+	public void register(final String action, final String account, final String origin, final String detail) {
+		if (logger.isInfoEnabled()) {
+			logger.info(describe(action, account, origin, detail));
+		}
 	}
 
 	static String describe(final String action, final String account, final String origin, final String detail) {

@@ -10,7 +10,7 @@ public final class RecordingAudit implements AuditPort {
 	private final List<String> events = new ArrayList<>();
 
 	@Override
-	public void record(final String action, final String account, final String origin, final String detail) {
+	public void register(final String action, final String account, final String origin, final String detail) {
 		events.add(action + "|" + account + "|" + origin + "|" + detail);
 	}
 

@@ -11,6 +11,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
@@ -83,27 +84,24 @@ public class GoogleSessionKeys implements SessionKeys {
 			return keys;
 		}
 
-		certificates.forEach((keyId, pem) -> {
-			final PublicKey key = publicKeyOf(TextHelper.getDefaultValue(pem));
-
-			if (key instanceof RSAPublicKey rsaKey) {
-				keys.put(TextHelper.getDefaultValue(keyId), rsaKey);
-			}
-		});
+		certificates.forEach((keyId, pem) -> publicKeyOf(TextHelper.getDefaultValue(pem))
+				.filter(RSAPublicKey.class::isInstance)
+				.map(RSAPublicKey.class::cast)
+				.ifPresent(rsaKey -> keys.put(TextHelper.getDefaultValue(keyId), rsaKey)));
 
 		return Map.copyOf(keys);
 	}
 
-	private static PublicKey publicKeyOf(final String pem) {
+	private static Optional<PublicKey> publicKeyOf(final String pem) {
 
 		try {
-			return CertificateFactory.getInstance("X.509")
+			return Optional.of(CertificateFactory.getInstance("X.509")
 					.generateCertificate(new ByteArrayInputStream(pem.getBytes(StandardCharsets.US_ASCII)))
-					.getPublicKey();
+					.getPublicKey());
 
 		} catch (final CertificateException exception) {
 			logger.warn("Google entregó un certificado de sesión que no se pudo leer: {}", exception.getMessage());
-			return null;
+			return Optional.empty();
 		}
 	}
 

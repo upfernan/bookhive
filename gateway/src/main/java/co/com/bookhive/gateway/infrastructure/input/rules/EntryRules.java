@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.springframework.http.HttpMethod;
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
@@ -72,9 +71,7 @@ public class EntryRules {
 	record Route(String method, PathPattern path) {
 
 		boolean matches(final ServerHttpRequest request) {
-			final HttpMethod requestMethod = request.getMethod();
-			final boolean methodMatches = ANY_METHOD.equals(method)
-					|| (requestMethod != null && method.equals(requestMethod.name()));
+			final boolean methodMatches = ANY_METHOD.equals(method) || method.equals(request.getMethod().name());
 
 			return methodMatches && path.matches(request.getPath().pathWithinApplication());
 		}

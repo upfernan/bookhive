@@ -85,14 +85,14 @@ public class EntryGuardFilter implements GlobalFilter, Ordered {
 
 		if (!publicRoute && TextHelper.isDefaultValue(attempt.account())) {
 			return responses.withoutSession(exchange)
-					.then(Mono.defer(() -> record(attempt, HttpStatus.UNAUTHORIZED.value())));
+					.then(Mono.defer(() -> saveOutcome(attempt, HttpStatus.UNAUTHORIZED.value())));
 		}
 
 		return chain.filter(exchange)
-				.then(Mono.defer(() -> record(attempt, statusOf(exchange))));
+				.then(Mono.defer(() -> saveOutcome(attempt, statusOf(exchange))));
 	}
 
-	private Mono<Void> record(final AttemptDTO attempt, final int status) {
+	private Mono<Void> saveOutcome(final AttemptDTO attempt, final int status) {
 		return Mono.fromCompletionStage(() -> guard.recordOutcome(attempt, status))
 				.onErrorResume(failure -> Mono.empty());
 	}

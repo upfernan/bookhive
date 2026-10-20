@@ -15,6 +15,7 @@ import co.com.bookhive.gateway.services.usecase.guardattempts.GuardAttemptsUseCa
 public final class GuardAttemptsUseCaseImpl implements GuardAttemptsUseCase {
 
 	private static final CompletionStage<Void> DONE = CompletableFuture.completedFuture(null);
+	private static final String ACTION = "accion ";
 
 	private final AttemptPolicy policy;
 	private final AttemptStore store;
@@ -40,8 +41,8 @@ public final class GuardAttemptsUseCaseImpl implements GuardAttemptsUseCase {
 			}
 
 			if (seconds != null && seconds > 0) {
-				audit.record(AuditPort.REQUEST_HELD, request.account(), request.origin(),
-						"accion " + request.action() + " espera " + seconds + "s");
+				audit.register(AuditPort.REQUEST_HELD, request.account(), request.origin(),
+						ACTION + request.action() + " espera " + seconds + "s");
 				return GuardVerdict.block(seconds);
 			}
 
@@ -56,8 +57,8 @@ public final class GuardAttemptsUseCaseImpl implements GuardAttemptsUseCase {
 			return DONE;
 		}
 
-		audit.record(AuditPort.FAILED_ATTEMPT, request.account(), request.origin(),
-				"accion " + request.action() + " estado " + status);
+		audit.register(AuditPort.FAILED_ATTEMPT, request.account(), request.origin(),
+				ACTION + request.action() + " estado " + status);
 
 		final CompletionStage<Void> byAccount = request.hasAccount()
 				? countAndHold(AttemptKeys.accountCounter(request), AttemptKeys.accountBlock(request),
@@ -91,8 +92,8 @@ public final class GuardAttemptsUseCaseImpl implements GuardAttemptsUseCase {
 				return DONE;
 			}
 
-			audit.record(auditAction, request.account(), request.origin(),
-					"accion " + request.action() + " intentos " + failures + " bloqueo " + policy.blockFor().toMinutes() + "min");
+			audit.register(auditAction, request.account(), request.origin(),
+					ACTION + request.action() + " intentos " + failures + " bloqueo " + policy.blockFor().toMinutes() + "min");
 
 			return store.block(blockKey, policy.blockFor()).thenCompose(blocked -> store.forget(counterKey));
 		});

@@ -4,7 +4,6 @@ import java.text.ParseException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Date;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.stereotype.Component;
@@ -24,6 +23,8 @@ public class MetadataIdentityTokens {
 	static final String GOOGLE = "Google";
 	static final Duration RENEW_BEFORE = Duration.ofMinutes(5);
 	static final Duration FALLBACK_LIFETIME = Duration.ofMinutes(10);
+
+	private static final String EXPIRES_AT = "exp";
 
 	private final WebClient client;
 	private final Clock clock;
@@ -58,17 +59,15 @@ public class MetadataIdentityTokens {
 	static Instant renewAt(final String token, final Instant now) {
 
 		try {
-			final Date expiresAt = JWTParser.parse(token).getJWTClaimsSet().getExpirationTime();
+			final Object expiresAt = JWTParser.parse(token).getJWTClaimsSet().toJSONObject().get(EXPIRES_AT);
 
-			if (expiresAt != null) {
-				return expiresAt.toInstant().minus(RENEW_BEFORE);
-			}
+			return expiresAt instanceof Number seconds
+					? Instant.ofEpochSecond(seconds.longValue()).minus(RENEW_BEFORE)
+					: now.plus(FALLBACK_LIFETIME);
 
-		} catch (final ParseException exception) {
+		} catch (final ParseException _) {
 			return now.plus(FALLBACK_LIFETIME);
 		}
-
-		return now.plus(FALLBACK_LIFETIME);
 	}
 
 	private record CachedToken(String audience, String value, Instant renewAt) {

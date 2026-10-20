@@ -7,6 +7,6 @@ public interface AuditPort {
 	String ORIGIN_HELD = "ORIGEN_FRENADO";
 	String REQUEST_HELD = "SOLICITUD_FRENADA";
 
-	void record(String action, String account, String origin, String detail);
+	void register(String action, String account, String origin, String detail);
 
 }

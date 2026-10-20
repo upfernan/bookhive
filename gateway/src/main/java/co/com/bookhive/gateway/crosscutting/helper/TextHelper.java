@@ -17,7 +17,7 @@ public final class TextHelper {
 	}
 
 	public static String getDefaultValue(final String value, final String defaultValue) {
-		return isDefaultValue(value) ? getDefaultValue(defaultValue) : getDefaultValue(value);
+		return getDefaultValue(isDefaultValue(value) ? defaultValue : value);
 	}
 
 	public static boolean isDefaultValue(final String value) {

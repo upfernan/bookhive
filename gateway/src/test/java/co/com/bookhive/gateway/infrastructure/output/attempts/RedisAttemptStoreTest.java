@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 import org.junit.jupiter.api.DisplayName;
@@ -32,7 +33,7 @@ class RedisAttemptStoreTest {
 	@Test
 	@DisplayName("cuenta y fija el vencimiento en un solo paso, con la ventana en milisegundos")
 	void countsWithScript() {
-		when(redis.execute(eq(RedisAttemptStore.COUNT_FAILURE), eq(List.of(COUNTER)), eq(List.of("600000"))))
+		when(redis.execute(RedisAttemptStore.COUNT_FAILURE, List.of(COUNTER), List.of("600000")))
 				.thenReturn(Flux.just(3L));
 
 		assertEquals(3L, store.countFailure(COUNTER, Duration.ofMinutes(10)).toCompletableFuture().join());
@@ -79,8 +80,9 @@ class RedisAttemptStoreTest {
 		when(redis.execute(eq(RedisAttemptStore.COUNT_FAILURE), anyList(), anyList()))
 				.thenReturn(Flux.error(new IllegalStateException("Redis caído")));
 
-		assertThrows(CompletionException.class,
-				() -> store.countFailure(COUNTER, Duration.ofMinutes(10)).toCompletableFuture().join());
+		final CompletableFuture<Long> counting = store.countFailure(COUNTER, Duration.ofMinutes(10)).toCompletableFuture();
+
+		assertThrows(CompletionException.class, counting::join);
 	}
 
 }

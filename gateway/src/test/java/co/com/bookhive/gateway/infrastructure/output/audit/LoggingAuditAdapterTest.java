@@ -24,7 +24,7 @@ class LoggingAuditAdapterTest {
 	@Test
 	@DisplayName("registrar no falla")
 	void recordDoesNotFail() {
-		new LoggingAuditAdapter().record("SOLICITUD_FRENADA", "uid-1", "10.0.0.1", "espera 60s");
+		new LoggingAuditAdapter().register("SOLICITUD_FRENADA", "uid-1", "10.0.0.1", "espera 60s");
 		assertEquals("bookhive.auditoria", LoggingAuditAdapter.AUDIT_LOGGER);
 	}
 
