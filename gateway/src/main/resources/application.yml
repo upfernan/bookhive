@@ -1,0 +1,76 @@
+spring:
+  application:
+    name: bookhive-gateway
+  main:
+    banner-mode: off
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 500ms
+      connect-timeout: 1s
+  cloud:
+    gateway:
+      server:
+        webflux:
+          httpclient:
+            connect-timeout: 2000
+            response-timeout: 30s
+          routes:
+            - id: backend
+              uri: ${BACKEND_URL:http://localhost:8080}
+              predicates:
+                - Path=/**
+
+server:
+  port: ${PORT:8081}
+
+management:
+  endpoints:
+    web:
+      base-path: /puerta
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+      show-components: never
+      probes:
+        enabled: true
+  health:
+    redis:
+      enabled: false
+
+bookhive:
+  identity:
+    project-id: ${IDENTITY_PROJECT_ID:}
+  gateway:
+    backend-url: ${BACKEND_URL:http://localhost:8080}
+    backend-authentication: ${BACKEND_AUTHENTICATION:false}
+    trusted-hops: ${TRUSTED_HOPS:1}
+    attempts:
+      max-per-account: ${MAX_PER_ACCOUNT:5}
+      max-per-origin: ${MAX_PER_ORIGIN:100}
+      window: 10m
+      block-for: 10m
+    rules:
+      public-routes:
+        - GET /actuator/health
+        - GET /actuator/health/**
+        - POST /api/v1/sesiones
+        - DELETE /api/v1/sesiones
+      sensitive-actions:
+        abrir-sesion: POST /api/v1/sesiones
+        prestar: POST /api/v1/prestamos
+      administrative-paths:
+        - /api/v1/admin/**
+    messages:
+      without-session: Tu sesión no es válida o ya se cerró. Vuelve a iniciar sesión.
+      blocked: Hiciste demasiados intentos seguidos. Espera unos minutos y vuelve a intentarlo.
+      unavailable: Esta operación no está disponible en este momento. Inténtalo más tarde.
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name},%X{traceId:-},%X{spanId:-}]"
+    dateformat: "yyyy-MM-dd'T'HH:mm:ss.SSSXXX, UTC"

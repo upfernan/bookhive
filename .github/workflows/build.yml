@@ -35,3 +35,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=upfernan_bookhive -Dsonar.organization=upfernan -Dsonar.host.url=https://sonarcloud.io
+      - name: Build and analyze gateway
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn -B -f gateway/pom.xml verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=upfernan_bookhive-gateway -Dsonar.organization=upfernan -Dsonar.host.url=https://sonarcloud.io -Dsonar.qualitygate.wait=true
