@@ -11,9 +11,9 @@ import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRe
 import co.com.bookhive.circulation.services.output.ports.repositories.FineRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionParametersRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.LoanRepository;
-import co.com.bookhive.circulation.services.usecase.lendbook.LendBookUseCase;
-import co.com.bookhive.circulation.services.usecase.lendbook.impl.LendBookUseCaseImpl;
-import co.com.bookhive.circulation.services.usecase.lendbook.impl.mapper.LoanDomainMapperImpl;
+import co.com.bookhive.circulation.services.usecase.loan.lendbook.LendBookUseCase;
+import co.com.bookhive.circulation.services.usecase.loan.lendbook.impl.LendBookUseCaseImpl;
+import co.com.bookhive.circulation.services.usecase.loan.lendbook.impl.mapper.LoanDomainMapperImpl;
 import co.com.bookhive.shared.services.output.ports.AuditPort;
 
 @Configuration

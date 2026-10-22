@@ -7,11 +7,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import co.com.bookhive.circulation.infrastructure.input.controllers.SessionController;
-import co.com.bookhive.circulation.infrastructure.input.interceptors.PermissionInterceptor;
-import co.com.bookhive.circulation.infrastructure.input.interceptors.TenantInterceptor;
-import co.com.bookhive.circulation.infrastructure.output.repositories.structured.tenancy.TenantConnectionProvider;
-import co.com.bookhive.circulation.infrastructure.output.repositories.structured.tenancy.TenantSchemaResolver;
+import co.com.bookhive.access.infrastructure.input.controllers.SessionController;
+import co.com.bookhive.access.infrastructure.input.interceptors.PermissionInterceptor;
+import co.com.bookhive.access.infrastructure.input.interceptors.TenantInterceptor;
+import co.com.bookhive.access.infrastructure.output.repositories.structured.tenancy.TenantConnectionProvider;
+import co.com.bookhive.access.infrastructure.output.repositories.structured.tenancy.TenantSchemaResolver;
 
 @Configuration
 public class TenancyConfiguration implements WebMvcConfigurer {

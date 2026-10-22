@@ -19,7 +19,7 @@ import co.com.bookhive.circulation.services.input.adapters.mapper.LendBookMapper
 import co.com.bookhive.circulation.services.input.dto.request.LendBookRequestDTO;
 import co.com.bookhive.circulation.services.input.dto.response.LendBookResponseDTO;
 import co.com.bookhive.circulation.services.output.ports.SessionContextPort;
-import co.com.bookhive.circulation.services.usecase.lendbook.LendBookUseCase;
+import co.com.bookhive.circulation.services.usecase.loan.lendbook.LendBookUseCase;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.DateHelper;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
