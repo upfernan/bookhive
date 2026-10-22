@@ -3,42 +3,16 @@ package co.com.bookhive.access.infrastructure.input.interceptors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import co.com.bookhive.access.infrastructure.output.repositories.structured.tenancy.TenantContext;
-import co.com.bookhive.access.services.output.ports.SessionContextPort;
-import co.com.bookhive.crosscutting.helper.UUIDHelper;
+import co.com.bookhive.access.services.input.dto.response.ResolveSchemaResponseDTO;
+import co.com.bookhive.crosscutting.tenancy.TenantContext;
 
 class TenantInterceptorTest {
 
-	private static final UUID INSTITUTION = UUIDHelper.generateNew();
-
-	private final List<UUID> askedInstitutions = new ArrayList<>();
-
-	private final TenantInterceptor interceptor = new TenantInterceptor(
-			new SessionContextPort() {
-
-				@Override
-				public UUID getInstitution() {
-					return INSTITUTION;
-				}
-
-				@Override
-				public UUID getLibrarian() {
-					return UUIDHelper.generateNew();
-				}
-
-			},
-			institution -> {
-				askedInstitutions.add(institution);
-				return "uco";
-			});
+	private final TenantInterceptor interceptor = new TenantInterceptor(() -> new ResolveSchemaResponseDTO("uco"));
 
 	@AfterEach
 	void clean() {
@@ -51,7 +25,6 @@ class TenantInterceptorTest {
 		assertTrue(interceptor.preHandle(null, null, new Object()));
 
 		assertEquals("uco", TenantContext.get());
-		assertEquals(List.of(INSTITUTION), askedInstitutions);
 	}
 
 	@Test

@@ -27,7 +27,7 @@ class SessionControllerTest {
 		closedSessions = new ArrayList<>();
 		controller = new SessionController(
 				request -> new OpenSessionResponseDTO("cookie-de-" + request.getIdToken()),
-				closedSessions::add,
+				request -> closedSessions.add(request.sessionToken()),
 				20);
 	}
 

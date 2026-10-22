@@ -1,5 +1,7 @@
 package co.com.bookhive.access.infrastructure.output.repositories.structured.tenancy;
 
+import co.com.bookhive.crosscutting.tenancy.TenantContext;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;

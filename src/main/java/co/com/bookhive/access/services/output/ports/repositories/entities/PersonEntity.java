@@ -6,6 +6,8 @@ import co.com.bookhive.crosscutting.helper.UUIDHelper;
 
 public class PersonEntity {
 
+	public static final String STATUS_ACTIVE = "ACTIVA";
+
 	private UUID id;
 	private UUID institution;
 

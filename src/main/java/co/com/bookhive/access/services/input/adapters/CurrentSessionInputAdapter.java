@@ -1,21 +1,23 @@
 package co.com.bookhive.access.services.input.adapters;
 
+import co.com.bookhive.access.domain.session.resolvesession.ResolveSessionDomain;
 import co.com.bookhive.access.services.input.dto.response.CurrentSessionResponseDTO;
 import co.com.bookhive.access.services.input.ports.CurrentSessionInputPort;
-import co.com.bookhive.access.services.output.ports.SessionContextPort;
+import co.com.bookhive.access.services.usecase.session.resolvesession.ResolveSessionUseCase;
 
 public final class CurrentSessionInputAdapter implements CurrentSessionInputPort {
 
-	private final SessionContextPort sessionContext;
+	private final ResolveSessionUseCase useCase;
 
-	public CurrentSessionInputAdapter(final SessionContextPort sessionContext) {
+	public CurrentSessionInputAdapter(final ResolveSessionUseCase useCase) {
 		super();
-		this.sessionContext = sessionContext;
+		this.useCase = useCase;
 	}
 
 	@Override
 	public CurrentSessionResponseDTO execute() {
-		return new CurrentSessionResponseDTO(sessionContext.getInstitution(), sessionContext.getLibrarian());
+		final ResolveSessionDomain session = useCase.execute();
+		return new CurrentSessionResponseDTO(session.institution(), session.person());
 	}
 
 }

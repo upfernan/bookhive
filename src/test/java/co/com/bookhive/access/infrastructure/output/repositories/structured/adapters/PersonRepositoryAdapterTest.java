@@ -2,14 +2,16 @@ package co.com.bookhive.access.infrastructure.output.repositories.structured.ada
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 
+import co.com.bookhive.access.services.output.ports.repositories.criteria.PersonCriteria;
 import co.com.bookhive.access.services.output.ports.repositories.entities.PersonEntity;
 import co.com.bookhive.access.testdata.FakeDataSource;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
@@ -18,53 +20,48 @@ import co.com.bookhive.crosscutting.messages.MessageKey;
 
 class PersonRepositoryAdapterTest {
 
-	private static final String IDENTITY = "persona-del-pase";
-
 	@Test
-	@DisplayName("devuelve la persona activa con su institución")
-	void findsActivePerson() {
+	@DisplayName("devuelve las personas que cumplen el criterio, con su institución")
+	void findsPeopleByCriteria() {
 		final UUID id = UUIDHelper.generateNew();
 		final UUID institution = UUIDHelper.generateNew();
 		final PersonRepositoryAdapter adapter = new PersonRepositoryAdapter(
 				FakeDataSource.withRow(Map.of("id", id, "institucion_id", institution)));
 
-		final PersonEntity person = adapter.findActive(IDENTITY);
+		final List<PersonEntity> people = adapter.findByCriteria(PersonCriteria.activeByIdentity("uid"));
 
-		assertEquals(id, person.getId());
-		assertEquals(institution, person.getInstitution());
+		assertEquals(1, people.size());
+		assertEquals(id, people.get(0).getId());
+		assertEquals(institution, people.get(0).getInstitution());
 	}
 
 	@Test
-	@DisplayName("rechaza un pase sin identificador de persona")
-	void rejectsBlankIdentity() {
+	@DisplayName("si nadie cumple el criterio devuelve una lista vacía")
+	void returnsEmptyWhenNobodyMatches() {
 		final PersonRepositoryAdapter adapter = new PersonRepositoryAdapter(FakeDataSource.withoutRows());
 
-		assertRejected(BookHiveException.Kind.UNEXPECTED, MessageKey.SESSION_NOT_RESOLVED, () -> adapter.findActive("  "));
+		assertTrue(adapter.findByCriteria(PersonCriteria.activeByIdentity("uid")).isEmpty());
 	}
 
 	@Test
-	@DisplayName("rechaza a una persona que no está activa en BookHive")
-	void rejectsUnknownPerson() {
-		final PersonRepositoryAdapter adapter = new PersonRepositoryAdapter(FakeDataSource.withoutRows());
+	@DisplayName("sin criterio no consulta nada")
+	void withoutCriteriaReturnsNothing() {
+		final PersonRepositoryAdapter adapter = new PersonRepositoryAdapter(FakeDataSource.failing());
 
-		assertRejected(BookHiveException.Kind.STATE_DOES_NOT_ALLOW_IT, MessageKey.SESSION_NOT_RESOLVED,
-				() -> adapter.findActive(IDENTITY));
+		assertTrue(adapter.findByCriteria(null).isEmpty());
 	}
 
 	@Test
 	@DisplayName("si la base de datos falla responde con un error inesperado")
 	void reportsDatabaseFailure() {
 		final PersonRepositoryAdapter adapter = new PersonRepositoryAdapter(FakeDataSource.failing());
+		final PersonCriteria criteria = PersonCriteria.activeByIdentity("uid");
 
-		assertRejected(BookHiveException.Kind.UNEXPECTED, MessageKey.REQUEST_UNEXPECTED,
-				() -> adapter.findActive(IDENTITY));
-	}
+		final BookHiveException exception =
+				assertThrows(BookHiveException.class, () -> adapter.findByCriteria(criteria));
 
-	private static void assertRejected(final BookHiveException.Kind kind, final String messageKey,
-			final Executable action) {
-		final BookHiveException exception = assertThrows(BookHiveException.class, action);
-		assertEquals(kind, exception.getKind());
-		assertEquals(messageKey, exception.getUserMessageKey());
+		assertEquals(BookHiveException.Kind.UNEXPECTED, exception.getKind());
+		assertEquals(MessageKey.REQUEST_UNEXPECTED, exception.getUserMessageKey());
 	}
 
 }

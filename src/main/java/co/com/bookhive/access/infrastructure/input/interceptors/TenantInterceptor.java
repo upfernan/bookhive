@@ -3,9 +3,8 @@ package co.com.bookhive.access.infrastructure.input.interceptors;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import co.com.bookhive.access.infrastructure.output.repositories.structured.tenancy.TenantContext;
-import co.com.bookhive.access.services.output.ports.SessionContextPort;
-import co.com.bookhive.access.services.output.ports.repositories.InstitutionRepository;
+import co.com.bookhive.access.services.input.ports.ResolveSchemaInputPort;
+import co.com.bookhive.crosscutting.tenancy.TenantContext;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,16 +12,11 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class TenantInterceptor implements HandlerInterceptor {
 
-	private final SessionContextPort sessionContext;
-	private final InstitutionRepository institutionRepository;
+	private final ResolveSchemaInputPort resolveSchema;
 
-	public TenantInterceptor(
-			final SessionContextPort sessionContext,
-			final InstitutionRepository institutionRepository) {
-
+	public TenantInterceptor(final ResolveSchemaInputPort resolveSchema) {
 		super();
-		this.sessionContext = sessionContext;
-		this.institutionRepository = institutionRepository;
+		this.resolveSchema = resolveSchema;
 	}
 
 	@Override
@@ -31,8 +25,7 @@ public class TenantInterceptor implements HandlerInterceptor {
 			final HttpServletResponse response,
 			final Object handler) {
 
-		TenantContext.set(
-				institutionRepository.findActiveSchema(sessionContext.getInstitution()));
+		TenantContext.set(resolveSchema.execute().schema());
 
 		return true;
 	}

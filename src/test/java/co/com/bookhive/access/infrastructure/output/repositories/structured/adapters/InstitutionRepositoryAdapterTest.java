@@ -2,14 +2,17 @@ package co.com.bookhive.access.infrastructure.output.repositories.structured.ada
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 
+import co.com.bookhive.access.services.output.ports.repositories.criteria.InstitutionCriteria;
+import co.com.bookhive.access.services.output.ports.repositories.entities.InstitutionEntity;
 import co.com.bookhive.access.testdata.FakeDataSource;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
@@ -20,47 +23,54 @@ class InstitutionRepositoryAdapterTest {
 	private static final UUID INSTITUTION = UUIDHelper.generateNew();
 
 	@Test
-	@DisplayName("devuelve el esquema de la institución activa")
-	void findsActiveSchema() {
+	@DisplayName("devuelve las instituciones que cumplen el criterio, con su esquema")
+	void findsInstitutionsByCriteria() {
 		final InstitutionRepositoryAdapter adapter = new InstitutionRepositoryAdapter(
-				FakeDataSource.withRow(Map.of("esquema", "institucion_uco")));
+				FakeDataSource.withRow(Map.of("id", INSTITUTION, "esquema", "institucion_uco")));
 
-		assertEquals("institucion_uco", adapter.findActiveSchema(INSTITUTION));
+		final List<InstitutionEntity> institutions =
+				adapter.findByCriteria(InstitutionCriteria.activeById(INSTITUTION));
+
+		assertEquals(INSTITUTION, institutions.get(0).getId());
+		assertEquals("institucion_uco", institutions.get(0).getSchema());
 	}
 
 	@Test
-	@DisplayName("rechaza una institución que no está activa")
-	void rejectsInactiveInstitution() {
+	@DisplayName("si ninguna institución cumple el criterio devuelve una lista vacía")
+	void returnsEmptyWhenNoneMatches() {
 		final InstitutionRepositoryAdapter adapter = new InstitutionRepositoryAdapter(FakeDataSource.withoutRows());
 
-		assertRejected(BookHiveException.Kind.STATE_DOES_NOT_ALLOW_IT, MessageKey.INSTITUTION_NOT_ACTIVE,
-				() -> adapter.findActiveSchema(INSTITUTION));
+		assertTrue(adapter.findByCriteria(InstitutionCriteria.activeById(INSTITUTION)).isEmpty());
+	}
+
+	@Test
+	@DisplayName("sin criterio no consulta nada")
+	void withoutCriteriaReturnsNothing() {
+		final InstitutionRepositoryAdapter adapter = new InstitutionRepositoryAdapter(FakeDataSource.failing());
+
+		assertTrue(adapter.findByCriteria(null).isEmpty());
 	}
 
 	@Test
 	@DisplayName("no acepta un nombre de esquema que pueda dañar la consulta")
 	void rejectsUnsafeSchemaName() {
 		final InstitutionRepositoryAdapter adapter = new InstitutionRepositoryAdapter(
-				FakeDataSource.withRow(Map.of("esquema", "uco; DROP SCHEMA compartido")));
+				FakeDataSource.withRow(Map.of("id", INSTITUTION, "esquema", "uco; DROP SCHEMA compartido")));
+		final InstitutionCriteria criteria = InstitutionCriteria.activeById(INSTITUTION);
 
-		assertRejected(BookHiveException.Kind.UNEXPECTED, MessageKey.REQUEST_UNEXPECTED,
-				() -> adapter.findActiveSchema(INSTITUTION));
+		assertThrows(BookHiveException.class, () -> adapter.findByCriteria(criteria));
 	}
 
 	@Test
 	@DisplayName("si la base de datos falla responde con un error inesperado")
 	void reportsDatabaseFailure() {
 		final InstitutionRepositoryAdapter adapter = new InstitutionRepositoryAdapter(FakeDataSource.failing());
+		final InstitutionCriteria criteria = InstitutionCriteria.activeById(INSTITUTION);
 
-		assertRejected(BookHiveException.Kind.UNEXPECTED, MessageKey.REQUEST_UNEXPECTED,
-				() -> adapter.findActiveSchema(INSTITUTION));
-	}
+		final BookHiveException exception =
+				assertThrows(BookHiveException.class, () -> adapter.findByCriteria(criteria));
 
-	private static void assertRejected(final BookHiveException.Kind kind, final String messageKey,
-			final Executable action) {
-		final BookHiveException exception = assertThrows(BookHiveException.class, action);
-		assertEquals(kind, exception.getKind());
-		assertEquals(messageKey, exception.getUserMessageKey());
+		assertEquals(MessageKey.REQUEST_UNEXPECTED, exception.getUserMessageKey());
 	}
 
 }

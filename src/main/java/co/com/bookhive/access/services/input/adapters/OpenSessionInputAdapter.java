@@ -1,43 +1,26 @@
 package co.com.bookhive.access.services.input.adapters;
 
+import co.com.bookhive.access.domain.session.opensession.OpenSessionDomain;
 import co.com.bookhive.access.services.input.dto.request.OpenSessionRequestDTO;
 import co.com.bookhive.access.services.input.dto.response.OpenSessionResponseDTO;
 import co.com.bookhive.access.services.input.ports.OpenSessionInputPort;
-import co.com.bookhive.access.services.output.ports.IdentityProviderPort;
-import co.com.bookhive.access.services.output.ports.repositories.PersonRepository;
-import co.com.bookhive.crosscutting.exception.BookHiveException;
+import co.com.bookhive.access.services.usecase.session.opensession.OpenSessionUseCase;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
-import co.com.bookhive.crosscutting.helper.TextHelper;
-import co.com.bookhive.crosscutting.messages.MessageKey;
 
-public class OpenSessionInputAdapter implements OpenSessionInputPort {
+public final class OpenSessionInputAdapter implements OpenSessionInputPort {
 
-	private final IdentityProviderPort identityProvider;
-	private final PersonRepository personRepository;
+	private final OpenSessionUseCase useCase;
 
-	public OpenSessionInputAdapter(
-			final IdentityProviderPort identityProvider,
-			final PersonRepository personRepository) {
-
+	public OpenSessionInputAdapter(final OpenSessionUseCase useCase) {
 		super();
-		this.identityProvider = identityProvider;
-		this.personRepository = personRepository;
+		this.useCase = useCase;
 	}
 
 	@Override
-	public OpenSessionResponseDTO execute(final OpenSessionRequestDTO request) {
-
-		if (ObjectHelper.isNull(request) || TextHelper.isDefaultValue(request.getIdToken())) {
-			throw BookHiveException.create(
-					MessageKey.SESSION_ID_TOKEN_REQUIRED,
-					"Se pidió abrir una sesión sin el pase que entrega el proveedor de identidad.");
-		}
-
-		final String sessionToken = identityProvider.openSession(request.getIdToken());
-
-		personRepository.findActive(identityProvider.identityOf(sessionToken));
-
-		return new OpenSessionResponseDTO(sessionToken);
+	public OpenSessionResponseDTO execute(final OpenSessionRequestDTO input) {
+		final OpenSessionRequestDTO request = ObjectHelper.getDefaultValue(input, new OpenSessionRequestDTO());
+		final OpenSessionDomain session = useCase.execute(new OpenSessionDomain(request.getIdToken(), ""));
+		return new OpenSessionResponseDTO(session.sessionToken());
 	}
 
 }

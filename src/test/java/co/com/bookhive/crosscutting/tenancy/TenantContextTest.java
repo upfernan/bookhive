@@ -1,4 +1,4 @@
-package co.com.bookhive.access.infrastructure.output.repositories.structured.tenancy;
+package co.com.bookhive.crosscutting.tenancy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

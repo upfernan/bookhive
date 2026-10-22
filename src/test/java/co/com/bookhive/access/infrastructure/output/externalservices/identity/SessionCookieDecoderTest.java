@@ -1,4 +1,4 @@
-package co.com.bookhive.access.infrastructure.input.security;
+package co.com.bookhive.access.infrastructure.output.externalservices.identity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -31,7 +31,6 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
-import co.com.bookhive.access.infrastructure.output.externalservices.identity.IdentityPlatformClientFactory;
 
 class SessionCookieDecoderTest {
 

@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import javax.sql.DataSource;
@@ -12,16 +14,16 @@ import org.springframework.stereotype.Component;
 
 import co.com.bookhive.access.infrastructure.output.repositories.structured.tenancy.SchemaName;
 import co.com.bookhive.access.services.output.ports.repositories.InstitutionRepository;
+import co.com.bookhive.access.services.output.ports.repositories.criteria.InstitutionCriteria;
+import co.com.bookhive.access.services.output.ports.repositories.entities.InstitutionEntity;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
+import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;
 
 @Component
 public class InstitutionRepositoryAdapter implements InstitutionRepository {
 
-	private static final String ACTIVE_STATUS = "ACTIVA";
-
-	private static final String FIND_ACTIVE_SCHEMA =
-			"SELECT esquema FROM compartido.institucion WHERE id = ? AND estado = ?";
+	private static final String FIND_INSTITUTIONS = "SELECT id, esquema FROM compartido.institucion";
 
 	private final DataSource dataSource;
 
@@ -31,38 +33,49 @@ public class InstitutionRepositoryAdapter implements InstitutionRepository {
 	}
 
 	@Override
-	public String findActiveSchema(final UUID institution) {
+	public List<InstitutionEntity> findByCriteria(final InstitutionCriteria criteria) {
+
+		final SqlFilter filter = new SqlFilter(FIND_INSTITUTIONS);
+
+		if (ObjectHelper.isNull(criteria)) {
+			return List.of();
+		}
+		if (criteria.filtersById()) {
+			filter.add("id = ?", criteria.getId());
+		}
+		if (criteria.filtersByStatus()) {
+			filter.add("estado = ?", criteria.getStatus());
+		}
 
 		try (Connection connection = dataSource.getConnection();
-			 PreparedStatement statement = connection.prepareStatement(FIND_ACTIVE_SCHEMA)) {
+			 PreparedStatement statement = connection.prepareStatement(filter.query())) {
 
-			statement.setObject(1, institution);
-			statement.setString(2, ACTIVE_STATUS);
-
-			return readSchema(statement, institution);
+			filter.bind(statement);
+			return readInstitutions(statement);
 
 		} catch (final SQLException exception) {
 			throw BookHiveException.createUnexpected(
 					exception,
 					MessageKey.REQUEST_UNEXPECTED,
-					"Falló la consulta del directorio de instituciones para " + institution + ".");
+					"Falló la consulta del directorio de instituciones para " + criteria.getId() + ".");
 		}
 	}
 
-	private static String readSchema(final PreparedStatement statement, final UUID institution)
+	private static List<InstitutionEntity> readInstitutions(final PreparedStatement statement)
 			throws SQLException {
 
+		final List<InstitutionEntity> institutions = new ArrayList<>();
+
 		try (ResultSet result = statement.executeQuery()) {
-
-			if (!result.next()) {
-				throw BookHiveException.createConflict(
-						MessageKey.INSTITUTION_NOT_ACTIVE,
-						"No hay fila con estado " + ACTIVE_STATUS + " en compartido.institucion"
-								+ " para la institución " + institution + ".");
+			while (result.next()) {
+				final InstitutionEntity institution = new InstitutionEntity();
+				institution.setId(result.getObject("id", UUID.class));
+				institution.setSchema(SchemaName.requireValid(result.getString("esquema")));
+				institutions.add(institution);
 			}
-
-			return SchemaName.requireValid(result.getString("esquema"));
 		}
+
+		return institutions;
 	}
 
 }

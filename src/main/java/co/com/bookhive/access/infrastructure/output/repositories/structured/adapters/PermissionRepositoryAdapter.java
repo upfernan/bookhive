@@ -4,28 +4,29 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.sql.DataSource;
 
 import org.springframework.stereotype.Component;
 
 import co.com.bookhive.access.infrastructure.output.repositories.structured.tenancy.SchemaName;
-import co.com.bookhive.access.infrastructure.output.repositories.structured.tenancy.TenantContext;
 import co.com.bookhive.access.infrastructure.output.repositories.structured.tenancy.TenantSession;
 import co.com.bookhive.access.services.output.ports.repositories.PermissionRepository;
+import co.com.bookhive.access.services.output.ports.repositories.criteria.PermissionCriteria;
+import co.com.bookhive.access.services.output.ports.repositories.entities.PermissionEntity;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
-import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;
+import co.com.bookhive.crosscutting.tenancy.TenantContext;
 
 @Component
 public class PermissionRepositoryAdapter implements PermissionRepository {
 
-	private static final String GRANT_QUERY =
-			"SELECT 1 AS granted FROM person_role pr"
-					+ " JOIN role_permission rp ON rp.role_id = pr.role_id"
-					+ " WHERE pr.person_id = ? AND rp.permission_code = ? LIMIT 1";
+	private static final String FIND_GRANTED_PERMISSIONS =
+			"SELECT DISTINCT rp.permission_code FROM person_role pr"
+					+ " JOIN role_permission rp ON rp.role_id = pr.role_id";
 
 	private final DataSource dataSource;
 
@@ -35,10 +36,19 @@ public class PermissionRepositoryAdapter implements PermissionRepository {
 	}
 
 	@Override
-	public boolean isGranted(final UUID person, final String permission) {
+	public List<PermissionEntity> findByCriteria(final PermissionCriteria criteria) {
 
-		if (ObjectHelper.isNull(person) || TextHelper.isDefaultValue(permission)) {
-			return false;
+		if (ObjectHelper.isNull(criteria)) {
+			return List.of();
+		}
+
+		final SqlFilter filter = new SqlFilter(FIND_GRANTED_PERMISSIONS);
+
+		if (criteria.filtersByPerson()) {
+			filter.add("pr.person_id = ?", criteria.getPerson());
+		}
+		if (criteria.filtersByCode()) {
+			filter.add("rp.permission_code = ?", criteria.getCode());
 		}
 
 		final String schema = SchemaName.requireValid(TenantContext.get());
@@ -47,8 +57,9 @@ public class PermissionRepositoryAdapter implements PermissionRepository {
 
 			TenantSession.enter(connection, schema);
 
-			try {
-				return hasGrant(connection, person, permission.trim());
+			try (PreparedStatement statement = connection.prepareStatement(filter.query())) {
+				filter.bind(statement);
+				return readPermissions(statement);
 			} finally {
 				TenantSession.leave(connection);
 			}
@@ -57,22 +68,24 @@ public class PermissionRepositoryAdapter implements PermissionRepository {
 			throw BookHiveException.createUnexpected(
 					exception,
 					MessageKey.REQUEST_UNEXPECTED,
-					"Falló la consulta de permisos de " + person + " en el esquema " + schema + ".");
+					"Falló la consulta de permisos de " + criteria.getPerson() + " en el esquema " + schema + ".");
 		}
 	}
 
-	private static boolean hasGrant(final Connection connection, final UUID person, final String permission)
+	private static List<PermissionEntity> readPermissions(final PreparedStatement statement)
 			throws SQLException {
 
-		try (PreparedStatement statement = connection.prepareStatement(GRANT_QUERY)) {
+		final List<PermissionEntity> permissions = new ArrayList<>();
 
-			statement.setObject(1, person);
-			statement.setString(2, permission);
-
-			try (ResultSet result = statement.executeQuery()) {
-				return result.next();
+		try (ResultSet result = statement.executeQuery()) {
+			while (result.next()) {
+				final PermissionEntity permission = new PermissionEntity();
+				permission.setCode(result.getString("permission_code"));
+				permissions.add(permission);
 			}
 		}
+
+		return permissions;
 	}
 
 }

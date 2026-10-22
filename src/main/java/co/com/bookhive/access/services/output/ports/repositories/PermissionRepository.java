@@ -1,9 +1,9 @@
 package co.com.bookhive.access.services.output.ports.repositories;
 
-import java.util.UUID;
+import co.com.bookhive.access.services.output.ports.repositories.criteria.PermissionCriteria;
+import co.com.bookhive.access.services.output.ports.repositories.entities.PermissionEntity;
+import co.com.bookhive.shared.services.output.ports.repositories.FindByCriteriaRepository;
 
-public interface PermissionRepository {
-
-	boolean isGranted(UUID person, String permission);
+public interface PermissionRepository extends FindByCriteriaRepository<PermissionEntity, PermissionCriteria> {
 
 }

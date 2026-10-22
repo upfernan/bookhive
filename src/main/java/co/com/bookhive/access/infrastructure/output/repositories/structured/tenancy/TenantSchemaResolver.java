@@ -1,5 +1,7 @@
 package co.com.bookhive.access.infrastructure.output.repositories.structured.tenancy;
 
+import co.com.bookhive.crosscutting.tenancy.TenantContext;
+
 import org.hibernate.context.spi.CurrentTenantIdentifierResolver;
 import org.springframework.stereotype.Component;
 
