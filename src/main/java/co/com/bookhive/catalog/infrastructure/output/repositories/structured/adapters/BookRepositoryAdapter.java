@@ -2,6 +2,7 @@ package co.com.bookhive.catalog.infrastructure.output.repositories.structured.ad
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.stereotype.Component;
 
@@ -50,7 +51,7 @@ public class BookRepositoryAdapter implements BookRepository {
 				row.getId(),
 				row.getTitle(),
 				row.getIsbn(),
-				ObjectHelper.getDefaultValue(row.getYear(), 0),
+				Objects.requireNonNullElse(row.getYear(), 0),
 				row.getFormat(),
 				row.getStatus(),
 				row.getCategory(),
@@ -59,10 +60,11 @@ public class BookRepositoryAdapter implements BookRepository {
 	}
 
 	private static List<String> authorsOf(final String authors) {
-		if (TextHelper.isDefaultValue(authors)) {
+		final String safeAuthors = TextHelper.getDefaultValue(authors);
+		if (safeAuthors.isEmpty()) {
 			return List.of();
 		}
-		return Arrays.stream(authors.split(BookJpaRepository.AUTHOR_SEPARATOR))
+		return Arrays.stream(safeAuthors.split(BookJpaRepository.AUTHOR_SEPARATOR))
 				.map(String::trim)
 				.filter(author -> !author.isEmpty())
 				.toList();

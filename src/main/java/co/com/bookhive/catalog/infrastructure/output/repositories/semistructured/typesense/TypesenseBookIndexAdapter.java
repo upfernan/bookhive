@@ -50,7 +50,18 @@ public class TypesenseBookIndexAdapter implements BookIndexRepository {
 	private static final int MAX_DETAIL_LENGTH = 200;
 	private static final Pattern INSTITUTION = Pattern.compile("^[a-z][a-z0-9_]{0,62}$");
 	private static final MediaType JSON_LINES = new MediaType(MediaType.TEXT_PLAIN, StandardCharsets.UTF_8);
-	private static final MediaType JSON = new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8);
+	private static final MediaType JSON_BODY = new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8);
+	private static final String FIELD_INSTITUTION = "institution";
+	private static final String FIELD_BOOK = "book";
+	private static final String FIELD_TITLE = "title";
+	private static final String FIELD_AUTHORS = "authors";
+	private static final String FIELD_CATEGORY = "category";
+	private static final String FIELD_PUBLISHER = "publisher";
+	private static final String FIELD_FORMAT = "format";
+	private static final String FIELD_YEAR = "year";
+	private static final String FIELD_ISBN = "isbn";
+	private static final String TYPE_STRING = "string";
+	private static final String FACET = "facet";
 
 	private final TypesenseClient client;
 	private final JsonMapper json = JsonMapper.shared();
@@ -152,19 +163,19 @@ public class TypesenseBookIndexAdapter implements BookIndexRepository {
 	private String toDocument(final String institution, final BookEntity book) {
 		final ObjectNode document = json.createObjectNode();
 		document.put("id", institution + "_" + book.id());
-		document.put("institution", institution);
-		document.put("book", book.id().toString());
-		document.put("title", book.title());
-		final ArrayNode authors = document.putArray("authors");
+		document.put(FIELD_INSTITUTION, institution);
+		document.put(FIELD_BOOK, book.id().toString());
+		document.put(FIELD_TITLE, book.title());
+		final ArrayNode authors = document.putArray(FIELD_AUTHORS);
 		book.authors().forEach(authors::add);
-		document.put("category", book.category());
-		document.put("publisher", book.publisher());
-		document.put("format", book.format());
+		document.put(FIELD_CATEGORY, book.category());
+		document.put(FIELD_PUBLISHER, book.publisher());
+		document.put(FIELD_FORMAT, book.format());
 		if (book.year() > 0) {
-			document.put("year", book.year());
+			document.put(FIELD_YEAR, book.year());
 		}
 		if (!TextHelper.isDefaultValue(book.isbn())) {
-			document.put("isbn", book.isbn());
+			document.put(FIELD_ISBN, book.isbn());
 		}
 		return json.writeValueAsString(document);
 	}
@@ -181,27 +192,27 @@ public class TypesenseBookIndexAdapter implements BookIndexRepository {
 		return new BookSearchPageEntity(
 				result.path("found").asLong(0),
 				books,
-				facets.getOrDefault("authors", List.of()),
-				facets.getOrDefault("category", List.of()),
-				facets.getOrDefault("publisher", List.of()));
+				facets.getOrDefault(FIELD_AUTHORS, List.of()),
+				facets.getOrDefault(FIELD_CATEGORY, List.of()),
+				facets.getOrDefault(FIELD_PUBLISHER, List.of()));
 	}
 
 	private static Optional<BookEntity> toBook(final JsonNode document) {
-		final Optional<UUID> id = uuidOf(document.path("book").asString(""));
+		final Optional<UUID> id = uuidOf(document.path(FIELD_BOOK).asString(""));
 		if (id.isEmpty()) {
 			return Optional.empty();
 		}
 		final List<String> authors = new ArrayList<>();
-		document.path("authors").forEach(author -> authors.add(author.asString("")));
+		document.path(FIELD_AUTHORS).forEach(author -> authors.add(author.asString("")));
 		return Optional.of(new BookEntity(
 				id.get(),
-				document.path("title").asString(""),
-				document.path("isbn").asString(""),
-				document.path("year").asInt(0),
-				document.path("format").asString(""),
+				document.path(FIELD_TITLE).asString(""),
+				document.path(FIELD_ISBN).asString(""),
+				document.path(FIELD_YEAR).asInt(0),
+				document.path(FIELD_FORMAT).asString(""),
 				BookEntity.STATUS_ACTIVE,
-				document.path("category").asString(""),
-				document.path("publisher").asString(""),
+				document.path(FIELD_CATEGORY).asString(""),
+				document.path(FIELD_PUBLISHER).asString(""),
 				authors));
 	}
 
@@ -216,7 +227,7 @@ public class TypesenseBookIndexAdapter implements BookIndexRepository {
 	private static Optional<UUID> uuidOf(final String value) {
 		try {
 			return Optional.of(UUID.fromString(value));
-		} catch (final IllegalArgumentException exception) {
+		} catch (final IllegalArgumentException _) {
 			return Optional.empty();
 		}
 	}
@@ -267,7 +278,7 @@ public class TypesenseBookIndexAdapter implements BookIndexRepository {
 			requireSuccess(existing, "consultar la colección " + COLLECTION);
 		}
 		final TypesenseResponse created = client.post(
-				COLLECTIONS, Map.of(), client.adminKey(), collectionSchema(), JSON);
+				COLLECTIONS, Map.of(), client.adminKey(), collectionSchema(), JSON_BODY);
 		if (created.status() != CONFLICT) {
 			requireSuccess(created, "crear la colección " + COLLECTION);
 		}
@@ -280,7 +291,7 @@ public class TypesenseBookIndexAdapter implements BookIndexRepository {
 		key.putArray("collections").add(COLLECTION);
 		key.put("value", searchKey());
 		final TypesenseResponse created = client.post(
-				KEYS, Map.of(), client.adminKey(), json.writeValueAsString(key), JSON);
+				KEYS, Map.of(), client.adminKey(), json.writeValueAsString(key), JSON_BODY);
 		if (created.status() != CONFLICT) {
 			requireSuccess(created, "crear la clave de búsqueda");
 		}
@@ -290,15 +301,15 @@ public class TypesenseBookIndexAdapter implements BookIndexRepository {
 		final ObjectNode schema = json.createObjectNode();
 		schema.put("name", COLLECTION);
 		final ArrayNode fields = schema.putArray("fields");
-		fields.add(field("institution", "string"));
-		fields.add(field("book", "string"));
-		fields.add(field("title", "string").put("sort", true));
-		fields.add(field("authors", "string[]").put("facet", true));
-		fields.add(field("category", "string").put("facet", true));
-		fields.add(field("publisher", "string").put("facet", true));
-		fields.add(field("format", "string").put("facet", true));
-		fields.add(field("year", "int32").put("optional", true));
-		fields.add(field("isbn", "string").put("optional", true));
+		fields.add(field(FIELD_INSTITUTION, TYPE_STRING));
+		fields.add(field(FIELD_BOOK, TYPE_STRING));
+		fields.add(field(FIELD_TITLE, TYPE_STRING).put("sort", true));
+		fields.add(field(FIELD_AUTHORS, TYPE_STRING + "[]").put(FACET, true));
+		fields.add(field(FIELD_CATEGORY, TYPE_STRING).put(FACET, true));
+		fields.add(field(FIELD_PUBLISHER, TYPE_STRING).put(FACET, true));
+		fields.add(field(FIELD_FORMAT, TYPE_STRING).put(FACET, true));
+		fields.add(field(FIELD_YEAR, "int32").put("optional", true));
+		fields.add(field(FIELD_ISBN, TYPE_STRING).put("optional", true));
 		return json.writeValueAsString(schema);
 	}
 
