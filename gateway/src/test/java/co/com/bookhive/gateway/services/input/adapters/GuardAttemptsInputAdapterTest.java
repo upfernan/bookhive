@@ -18,15 +18,15 @@ import co.com.bookhive.gateway.services.input.dto.AttemptDTO;
 import co.com.bookhive.gateway.services.input.dto.VerdictDTO;
 import co.com.bookhive.gateway.services.usecase.guardattempts.GuardAttemptsUseCase;
 
-class GuardAttemptsInteractorTest {
+class GuardAttemptsInputAdapterTest {
 
 	@Test
 	@DisplayName("convierte el DTO en dominio y el veredicto en DTO")
 	void mapsBothWays() {
 		final List<AttemptRequest> received = new ArrayList<>();
-		final GuardAttemptsInteractor interactor = new GuardAttemptsInteractor(useCase(received, GuardVerdict.block(90)));
+		final GuardAttemptsInputAdapter inputAdapter = new GuardAttemptsInputAdapter(useCase(received, GuardVerdict.block(90)));
 
-		final VerdictDTO verdict = interactor
+		final VerdictDTO verdict = inputAdapter
 				.admit(new AttemptDTO(" prestar ", "uid-1", "10.0.0.1", false))
 				.toCompletableFuture().join();
 
@@ -40,10 +40,10 @@ class GuardAttemptsInteractorTest {
 	@DisplayName("un DTO vacío llega como solicitud vacía y un veredicto de no disponible se conserva")
 	void emptyDtoAndUnavailableVerdict() {
 		final List<AttemptRequest> received = new ArrayList<>();
-		final GuardAttemptsInteractor interactor = new GuardAttemptsInteractor(useCase(received, GuardVerdict.unavailable()));
+		final GuardAttemptsInputAdapter inputAdapter = new GuardAttemptsInputAdapter(useCase(received, GuardVerdict.unavailable()));
 
-		final VerdictDTO verdict = interactor.admit(null).toCompletableFuture().join();
-		interactor.recordOutcome(null, 401).toCompletableFuture().join();
+		final VerdictDTO verdict = inputAdapter.admit(null).toCompletableFuture().join();
+		inputAdapter.recordOutcome(null, 401).toCompletableFuture().join();
 
 		assertTrue(verdict.unavailable());
 		assertFalse(verdict.blocked());

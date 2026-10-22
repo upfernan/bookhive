@@ -26,7 +26,7 @@ import co.com.bookhive.crosscutting.helper.DateHelper;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;
 
-class LendBookInteractorTest {
+class LendBookInputAdapterTest {
 
 	private static final UUID INSTITUTION = UUIDHelper.generateNew();
 	private static final UUID LIBRARIAN = UUIDHelper.generateNew();
@@ -35,13 +35,13 @@ class LendBookInteractorTest {
 
 	private FakeUseCase useCase;
 	private List<String> audited;
-	private LendBookInteractor interactor;
+	private LendBookInputAdapter inputAdapter;
 
 	@BeforeEach
 	void prepare() {
 		useCase = new FakeUseCase();
 		audited = new ArrayList<>();
-		interactor = new LendBookInteractor(useCase, new FakeSession(), new LendBookMapperImpl(),
+		inputAdapter = new LendBookInputAdapter(useCase, new FakeSession(), new LendBookMapperImpl(),
 				(action, institution, person, detail) -> audited.add(action + " " + institution + " " + person + " " + detail));
 	}
 
@@ -51,7 +51,7 @@ class LendBookInteractorTest {
 		final UUID bookCopy = UUIDHelper.generateNew();
 		final UUID user = UUIDHelper.generateNew();
 
-		interactor.execute(new LendBookRequestDTO(bookCopy, user));
+		inputAdapter.execute(new LendBookRequestDTO(bookCopy, user));
 
 		assertEquals(bookCopy, useCase.received.getBookCopy());
 		assertEquals(user, useCase.received.getUser());
@@ -63,7 +63,7 @@ class LendBookInteractorTest {
 	@Test
 	@DisplayName("devuelve el número del préstamo y la fecha de entrega que registró el caso de uso")
 	void returnsRegisteredLoan() {
-		final LendBookResponseDTO response = interactor.execute(
+		final LendBookResponseDTO response = inputAdapter.execute(
 				new LendBookRequestDTO(UUIDHelper.generateNew(), UUIDHelper.generateNew()));
 
 		assertEquals(LOAN, response.getLoan());
@@ -73,7 +73,7 @@ class LendBookInteractorTest {
 	@Test
 	@DisplayName("deja constancia del préstamo registrado con la institución y quien lo atendió")
 	void auditsRegisteredLoan() {
-		interactor.execute(new LendBookRequestDTO(UUIDHelper.generateNew(), UUIDHelper.generateNew()));
+		inputAdapter.execute(new LendBookRequestDTO(UUIDHelper.generateNew(), UUIDHelper.generateNew()));
 
 		assertEquals(List.of(AuditPort.LOAN_REGISTERED + " " + INSTITUTION + " " + LIBRARIAN + " " + LOAN), audited);
 	}
@@ -81,7 +81,7 @@ class LendBookInteractorTest {
 	@Test
 	@DisplayName("si la petición llega vacía no llama al caso de uso")
 	void rejectsNullRequest() {
-		final BookHiveException exception = assertThrows(BookHiveException.class, () -> interactor.execute(null));
+		final BookHiveException exception = assertThrows(BookHiveException.class, () -> inputAdapter.execute(null));
 
 		assertEquals(MessageKey.LOAN_DATA_REQUIRED, exception.getUserMessageKey());
 		assertNull(useCase.received);

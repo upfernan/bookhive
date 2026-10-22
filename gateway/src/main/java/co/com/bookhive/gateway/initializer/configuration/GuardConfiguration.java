@@ -10,7 +10,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import co.com.bookhive.gateway.domain.attempt.AttemptPolicy;
 import co.com.bookhive.gateway.infrastructure.input.filters.GatewayMessagesProperties;
 import co.com.bookhive.gateway.infrastructure.input.rules.EntryRulesProperties;
-import co.com.bookhive.gateway.services.input.adapters.GuardAttemptsInteractor;
+import co.com.bookhive.gateway.services.input.adapters.GuardAttemptsInputAdapter;
 import co.com.bookhive.gateway.services.input.ports.GuardAttemptsInputPort;
 import co.com.bookhive.gateway.services.output.ports.AttemptStore;
 import co.com.bookhive.gateway.services.output.ports.AuditPort;
@@ -50,7 +50,7 @@ public class GuardConfiguration {
 
 	@Bean
 	GuardAttemptsInputPort guardAttemptsInputPort(final GuardAttemptsUseCase useCase) {
-		return new GuardAttemptsInteractor(useCase);
+		return new GuardAttemptsInputAdapter(useCase);
 	}
 
 }

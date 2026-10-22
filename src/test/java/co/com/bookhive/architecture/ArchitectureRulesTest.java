@@ -96,7 +96,7 @@ class ArchitectureRulesTest {
 						"..services.input.adapters..",
 						"..domain..",
 						"..infrastructure.output..")
-				.because("el controlador nunca llama al caso de uso ni al interactor: llama al puerto")
+				.because("el controlador nunca llama al caso de uso ni al adaptador de entrada: llama al puerto")
 				.check(BOOKHIVE);
 	}
 

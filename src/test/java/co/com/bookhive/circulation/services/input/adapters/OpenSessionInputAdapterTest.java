@@ -18,7 +18,7 @@ import co.com.bookhive.circulation.services.output.ports.repositories.entities.P
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.messages.MessageKey;
 
-class OpenSessionInteractorTest {
+class OpenSessionInputAdapterTest {
 
 	private static final String ID_TOKEN = "pase-del-proveedor";
 	private static final String SESSION = "cookie-de-sesion";
@@ -36,9 +36,9 @@ class OpenSessionInteractorTest {
 	@Test
 	@DisplayName("abre la sesión con el pase y devuelve la cookie cuando la persona está registrada")
 	void opensSessionForRegisteredPerson() {
-		final OpenSessionInteractor interactor = new OpenSessionInteractor(identityProvider, registeredPeople());
+		final OpenSessionInputAdapter inputAdapter = new OpenSessionInputAdapter(identityProvider, registeredPeople());
 
-		final OpenSessionResponseDTO response = interactor.execute(new OpenSessionRequestDTO("  " + ID_TOKEN + "  "));
+		final OpenSessionResponseDTO response = inputAdapter.execute(new OpenSessionRequestDTO("  " + ID_TOKEN + "  "));
 
 		assertEquals(SESSION, response.sessionToken());
 		assertEquals(ID_TOKEN, identityProvider.receivedIdToken);
@@ -48,12 +48,12 @@ class OpenSessionInteractorTest {
 	@Test
 	@DisplayName("no abre la sesión si la persona no está registrada en BookHive")
 	void rejectsUnregisteredPerson() {
-		final OpenSessionInteractor interactor = new OpenSessionInteractor(identityProvider, identity -> {
+		final OpenSessionInputAdapter inputAdapter = new OpenSessionInputAdapter(identityProvider, identity -> {
 			throw BookHiveException.createConflict(MessageKey.SESSION_NOT_RESOLVED, "No está registrada.");
 		});
 		final OpenSessionRequestDTO request = new OpenSessionRequestDTO(ID_TOKEN);
 
-		final BookHiveException exception = assertThrows(BookHiveException.class, () -> interactor.execute(request));
+		final BookHiveException exception = assertThrows(BookHiveException.class, () -> inputAdapter.execute(request));
 
 		assertEquals(MessageKey.SESSION_NOT_RESOLVED, exception.getUserMessageKey());
 	}
@@ -61,10 +61,10 @@ class OpenSessionInteractorTest {
 	@Test
 	@DisplayName("pide el pase cuando llega vacío y no llama al proveedor")
 	void requiresIdToken() {
-		final OpenSessionInteractor interactor = new OpenSessionInteractor(identityProvider, registeredPeople());
+		final OpenSessionInputAdapter inputAdapter = new OpenSessionInputAdapter(identityProvider, registeredPeople());
 		final OpenSessionRequestDTO request = new OpenSessionRequestDTO();
 
-		final BookHiveException exception = assertThrows(BookHiveException.class, () -> interactor.execute(request));
+		final BookHiveException exception = assertThrows(BookHiveException.class, () -> inputAdapter.execute(request));
 
 		assertEquals(MessageKey.SESSION_ID_TOKEN_REQUIRED, exception.getUserMessageKey());
 		assertEquals(BookHiveException.Kind.MISSING_DATA, exception.getKind());
@@ -74,9 +74,9 @@ class OpenSessionInteractorTest {
 	@Test
 	@DisplayName("pide el pase cuando no llega la petición")
 	void requiresRequest() {
-		final OpenSessionInteractor interactor = new OpenSessionInteractor(identityProvider, registeredPeople());
+		final OpenSessionInputAdapter inputAdapter = new OpenSessionInputAdapter(identityProvider, registeredPeople());
 
-		final BookHiveException exception = assertThrows(BookHiveException.class, () -> interactor.execute(null));
+		final BookHiveException exception = assertThrows(BookHiveException.class, () -> inputAdapter.execute(null));
 
 		assertEquals(MessageKey.SESSION_ID_TOKEN_REQUIRED, exception.getUserMessageKey());
 	}
