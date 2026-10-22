@@ -3,6 +3,7 @@ package co.com.bookhive.architecture;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
+import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,8 @@ class ArchitectureRulesTest {
 	private static final JavaClasses BOOKHIVE = new ClassFileImporter()
 			.withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
 			.importPackages("co.com.bookhive");
+
+	private static final String ROOT = "co.com.bookhive.";
 
 	private static final String[] FRAMEWORKS = {
 			"org.springframework..",
@@ -120,11 +123,21 @@ class ArchitectureRulesTest {
 	}
 
 	@Test
-	@DisplayName("el crosscutting no depende de ningún módulo")
-	void crosscuttingIsIndependent() {
+	@DisplayName("el crosscutting y lo compartido no dependen de ningún módulo")
+	void crosscuttingAndSharedAreIndependent() {
 		noClasses()
-				.that().resideInAPackage("..crosscutting..")
-				.should().dependOnClassesThat().resideInAnyPackage("..circulation..", "..initializer..")
+				.that().resideInAnyPackage(ROOT + "crosscutting..", ROOT + "shared..")
+				.should().dependOnClassesThat().resideInAnyPackage(ROOT + "circulation..", ROOT + "initializer..")
+				.because("lo compartido lo usan todos los módulos, así que no puede conocer a ninguno")
+				.check(BOOKHIVE);
+	}
+
+	@Test
+	@DisplayName("los módulos no forman ciclos entre sí")
+	void modulesAreFreeOfCycles() {
+		slices()
+				.matching(ROOT + "(*)..")
+				.should().beFreeOfCycles()
 				.check(BOOKHIVE);
 	}
 

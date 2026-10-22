@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Configuration;
 import co.com.bookhive.circulation.services.input.adapters.LendBookInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.mapper.LendBookMapperImpl;
 import co.com.bookhive.circulation.services.input.ports.LendBookInputPort;
-import co.com.bookhive.circulation.services.output.ports.AuditPort;
 import co.com.bookhive.circulation.services.output.ports.SessionContextPort;
 import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.FineRepository;
@@ -15,6 +14,7 @@ import co.com.bookhive.circulation.services.output.ports.repositories.LoanReposi
 import co.com.bookhive.circulation.services.usecase.lendbook.LendBookUseCase;
 import co.com.bookhive.circulation.services.usecase.lendbook.impl.LendBookUseCaseImpl;
 import co.com.bookhive.circulation.services.usecase.lendbook.impl.mapper.LoanDomainMapperImpl;
+import co.com.bookhive.shared.services.output.ports.AuditPort;
 
 @Configuration
 public class CirculationConfiguration {

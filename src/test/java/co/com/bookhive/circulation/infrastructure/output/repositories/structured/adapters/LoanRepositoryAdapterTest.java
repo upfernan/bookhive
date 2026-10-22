@@ -1,23 +1,31 @@
 package co.com.bookhive.circulation.infrastructure.output.repositories.structured.adapters;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Proxy;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.LoanJpaRepository;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.LoanJpaEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.LoanCriteria;
-import co.com.bookhive.circulation.services.output.ports.repositories.criteria.PageCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanEntity;
 import co.com.bookhive.circulation.testdata.FakeEntityMapper;
 import co.com.bookhive.circulation.testdata.FakeJpaRepository;
+import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
+import co.com.bookhive.crosscutting.messages.MessageKey;
+import co.com.bookhive.shared.services.output.ports.repositories.criteria.PageCriteria;
 
 class LoanRepositoryAdapterTest {
 
@@ -95,6 +103,68 @@ class LoanRepositoryAdapterTest {
 		adapter(repository).findByCriteria(LoanCriteria.activeByUser(null));
 
 		assertEquals(List.of("status=" + LoanEntity.STATUS_ACTIVE), repository.filters());
+	}
+
+	@Test
+	@DisplayName("si dos préstamos del mismo ejemplar llegan al tiempo el segundo se rechaza como ejemplar no disponible")
+	void simultaneousLoanIsConflict() {
+		final LoanRepositoryAdapter adapter = failingOnSave(new DataIntegrityViolationException(
+				"No se pudo guardar.",
+				new ConstraintViolationException("Duplicado.", new SQLException("Duplicado.", "23505"),
+						"uq_loan_book_copy_active")));
+		final LoanEntity loan = new LoanEntity();
+
+		final BookHiveException exception = assertThrows(BookHiveException.class, () -> adapter.create(loan));
+
+		assertEquals(BookHiveException.Kind.STATE_DOES_NOT_ALLOW_IT, exception.getKind());
+		assertEquals(MessageKey.BOOK_COPY_NOT_AVAILABLE, exception.getUserMessageKey());
+	}
+
+	@Test
+	@DisplayName("el choque también se reconoce cuando solo llega el error del driver")
+	void simultaneousLoanFromDriverIsConflict() {
+		final LoanRepositoryAdapter adapter = failingOnSave(new DataIntegrityViolationException(
+				"No se pudo guardar.",
+				new SQLException("duplicate key value violates unique constraint \"uq_loan_book_copy_active\"",
+						"23505")));
+		final LoanEntity loan = new LoanEntity();
+
+		final BookHiveException exception = assertThrows(BookHiveException.class, () -> adapter.create(loan));
+
+		assertEquals(MessageKey.BOOK_COPY_NOT_AVAILABLE, exception.getUserMessageKey());
+	}
+
+	@Test
+	@DisplayName("otra restricción de la base de datos sigue como error inesperado")
+	void otherConstraintIsRethrown() {
+		final DataIntegrityViolationException failure = new DataIntegrityViolationException(
+				"No se pudo guardar.",
+				new ConstraintViolationException("Otra.", new SQLException("Otra.", "23505"), "uq_book_copy_barcode"));
+		final LoanRepositoryAdapter adapter = failingOnSave(failure);
+		final LoanEntity loan = new LoanEntity();
+
+		assertSame(failure, assertThrows(DataIntegrityViolationException.class, () -> adapter.create(loan)));
+	}
+
+	@Test
+	@DisplayName("un error del driver que no es de duplicado sigue como error inesperado")
+	void otherDriverErrorIsRethrown() {
+		final IllegalStateException failure =
+				new IllegalStateException("Falló.", new SQLException("uq_loan_book_copy_active", "08006"));
+		final LoanRepositoryAdapter adapter = failingOnSave(failure);
+		final LoanEntity loan = new LoanEntity();
+
+		assertSame(failure, assertThrows(IllegalStateException.class, () -> adapter.create(loan)));
+	}
+
+	private static LoanRepositoryAdapter failingOnSave(final RuntimeException failure) {
+		final LoanJpaRepository repository = (LoanJpaRepository) Proxy.newProxyInstance(
+				LoanJpaRepository.class.getClassLoader(),
+				new Class<?>[] { LoanJpaRepository.class },
+				(instance, method, arguments) -> {
+					throw failure;
+				});
+		return new LoanRepositoryAdapter(repository, new FakeEntityMapper<>(LoanRepositoryAdapterTest::toEntity, LoanRepositoryAdapterTest::toJpaEntity));
 	}
 
 	private static LoanRepositoryAdapter adapter(final FakeJpaRepository<LoanJpaEntity> repository) {

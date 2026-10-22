@@ -18,13 +18,13 @@ import co.com.bookhive.circulation.domain.loan.lendbook.LendBookDomain;
 import co.com.bookhive.circulation.services.input.adapters.mapper.LendBookMapperImpl;
 import co.com.bookhive.circulation.services.input.dto.request.LendBookRequestDTO;
 import co.com.bookhive.circulation.services.input.dto.response.LendBookResponseDTO;
-import co.com.bookhive.circulation.services.output.ports.AuditPort;
 import co.com.bookhive.circulation.services.output.ports.SessionContextPort;
 import co.com.bookhive.circulation.services.usecase.lendbook.LendBookUseCase;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.DateHelper;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;
+import co.com.bookhive.shared.services.output.ports.AuditPort;
 
 class LendBookInputAdapterTest {
 

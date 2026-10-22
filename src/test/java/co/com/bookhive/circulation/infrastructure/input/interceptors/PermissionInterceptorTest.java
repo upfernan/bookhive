@@ -14,12 +14,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.web.method.HandlerMethod;
 
 import co.com.bookhive.circulation.infrastructure.input.security.RequiredPermission;
-import co.com.bookhive.circulation.services.output.ports.AuditPort;
 import co.com.bookhive.circulation.services.output.ports.SessionContextPort;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;
 import co.com.bookhive.crosscutting.security.PermissionCode;
+import co.com.bookhive.shared.services.output.ports.AuditPort;
 
 class PermissionInterceptorTest {
 

@@ -11,9 +11,9 @@ import co.com.bookhive.circulation.infrastructure.output.repositories.structured
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.InstitutionParametersJpaEntity;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.mapper.EntityMapper;
 import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionParametersRepository;
-import co.com.bookhive.circulation.services.output.ports.repositories.criteria.PageCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.InstitutionParametersEntity;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
+import co.com.bookhive.shared.services.output.ports.repositories.criteria.PageCriteria;
 
 @Component
 public class InstitutionParametersRepositoryAdapter implements InstitutionParametersRepository {
