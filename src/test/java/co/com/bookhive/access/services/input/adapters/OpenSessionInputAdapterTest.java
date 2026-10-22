@@ -1,113 +1,37 @@
 package co.com.bookhive.access.services.input.adapters;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import co.com.bookhive.access.services.input.dto.request.OpenSessionRequestDTO;
-import co.com.bookhive.access.services.input.dto.response.OpenSessionResponseDTO;
-import co.com.bookhive.access.services.output.ports.IdentityProviderPort;
-import co.com.bookhive.access.services.output.ports.repositories.PersonRepository;
-import co.com.bookhive.access.services.output.ports.repositories.entities.PersonEntity;
-import co.com.bookhive.crosscutting.exception.BookHiveException;
-import co.com.bookhive.crosscutting.messages.MessageKey;
 
 class OpenSessionInputAdapterTest {
 
-	private static final String ID_TOKEN = "pase-del-proveedor";
-	private static final String SESSION = "cookie-de-sesion";
-	private static final String IDENTITY = "uid-bibliotecario";
+	private final List<String> receivedIdTokens = new ArrayList<>();
 
-	private FakeIdentityProvider identityProvider;
-	private List<String> searchedPeople;
+	private final OpenSessionInputAdapter adapter = new OpenSessionInputAdapter(session -> {
+		receivedIdTokens.add(session.getIdToken());
+		return session.withSessionToken("cookie-de-sesion");
+	});
 
-	@BeforeEach
-	void prepare() {
-		identityProvider = new FakeIdentityProvider();
-		searchedPeople = new ArrayList<>();
+	@Test
+	@DisplayName("convierte la petición en dominio y devuelve la cookie que abrió el caso de uso")
+	void returnsOpenedSession() {
+		assertEquals("cookie-de-sesion", adapter.execute(new OpenSessionRequestDTO(" pase ")).sessionToken());
+		assertEquals(List.of("pase"), receivedIdTokens);
 	}
 
 	@Test
-	@DisplayName("abre la sesión con el pase y devuelve la cookie cuando la persona está registrada")
-	void opensSessionForRegisteredPerson() {
-		final OpenSessionInputAdapter inputAdapter = new OpenSessionInputAdapter(identityProvider, registeredPeople());
+	@DisplayName("si no llega petición le pasa al caso de uso un pase vacío")
+	void handlesMissingRequest() {
+		adapter.execute(null);
 
-		final OpenSessionResponseDTO response = inputAdapter.execute(new OpenSessionRequestDTO("  " + ID_TOKEN + "  "));
-
-		assertEquals(SESSION, response.sessionToken());
-		assertEquals(ID_TOKEN, identityProvider.receivedIdToken);
-		assertEquals(List.of(IDENTITY), searchedPeople);
-	}
-
-	@Test
-	@DisplayName("no abre la sesión si la persona no está registrada en BookHive")
-	void rejectsUnregisteredPerson() {
-		final OpenSessionInputAdapter inputAdapter = new OpenSessionInputAdapter(identityProvider, identity -> {
-			throw BookHiveException.createConflict(MessageKey.SESSION_NOT_RESOLVED, "No está registrada.");
-		});
-		final OpenSessionRequestDTO request = new OpenSessionRequestDTO(ID_TOKEN);
-
-		final BookHiveException exception = assertThrows(BookHiveException.class, () -> inputAdapter.execute(request));
-
-		assertEquals(MessageKey.SESSION_NOT_RESOLVED, exception.getUserMessageKey());
-	}
-
-	@Test
-	@DisplayName("pide el pase cuando llega vacío y no llama al proveedor")
-	void requiresIdToken() {
-		final OpenSessionInputAdapter inputAdapter = new OpenSessionInputAdapter(identityProvider, registeredPeople());
-		final OpenSessionRequestDTO request = new OpenSessionRequestDTO();
-
-		final BookHiveException exception = assertThrows(BookHiveException.class, () -> inputAdapter.execute(request));
-
-		assertEquals(MessageKey.SESSION_ID_TOKEN_REQUIRED, exception.getUserMessageKey());
-		assertEquals(BookHiveException.Kind.MISSING_DATA, exception.getKind());
-		assertEquals("", identityProvider.receivedIdToken);
-	}
-
-	@Test
-	@DisplayName("pide el pase cuando no llega la petición")
-	void requiresRequest() {
-		final OpenSessionInputAdapter inputAdapter = new OpenSessionInputAdapter(identityProvider, registeredPeople());
-
-		final BookHiveException exception = assertThrows(BookHiveException.class, () -> inputAdapter.execute(null));
-
-		assertEquals(MessageKey.SESSION_ID_TOKEN_REQUIRED, exception.getUserMessageKey());
-	}
-
-	private PersonRepository registeredPeople() {
-		return identity -> {
-			searchedPeople.add(identity);
-			return new PersonEntity();
-		};
-	}
-
-	private static final class FakeIdentityProvider implements IdentityProviderPort {
-
-		private String receivedIdToken = "";
-
-		@Override
-		public String openSession(final String idToken) {
-			receivedIdToken = idToken;
-			return SESSION;
-		}
-
-		@Override
-		public String identityOf(final String sessionToken) {
-			return SESSION.equals(sessionToken) ? IDENTITY : "";
-		}
-
-		@Override
-		public void closeSession(final String sessionToken) {
-			throw new UnsupportedOperationException("Abrir una sesión no la cierra.");
-		}
-
+		assertEquals(List.of(""), receivedIdTokens);
 	}
 
 }

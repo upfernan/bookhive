@@ -98,16 +98,31 @@ class ArchitectureRulesTest {
 	}
 
 	@Test
-	@DisplayName("los controladores solo hablan con los puertos de entrada")
-	void controllersOnlyUseInputPorts() {
+	@DisplayName("la infraestructura de entrada solo habla con los puertos de entrada")
+	void inputInfrastructureOnlyUsesInputPorts() {
 		noClasses()
-				.that().resideInAPackage("..infrastructure.input.controllers..")
+				.that().resideInAPackage("..infrastructure.input..")
 				.should().dependOnClassesThat().resideInAnyPackage(
 						"..services.usecase..",
 						"..services.input.adapters..",
+						"..services.output..",
 						"..domain..",
 						"..infrastructure.output..")
-				.because("el controlador nunca llama al caso de uso ni al adaptador de entrada: llama al puerto")
+				.because("controladores e interceptores nunca llaman al caso de uso, al adaptador ni a la salida:"
+						+ " llaman al puerto de entrada")
+				.check(BOOKHIVE);
+	}
+
+	@Test
+	@DisplayName("los adaptadores de entrada solo llaman a su caso de uso")
+	void inputAdaptersOnlyCallUseCases() {
+		noClasses()
+				.that().resideInAnyPackage(
+						ROOT + "access.services.input.adapters..",
+						ROOT + "shared.services.input.adapters..")
+				.should().dependOnClassesThat().resideInAnyPackage("..services.output..", "..infrastructure..")
+				.because("el adaptador de entrada convierte el DTO en dominio y se lo pasa al caso de uso,"
+						+ " que es el único que sale por los puertos de salida")
 				.check(BOOKHIVE);
 	}
 

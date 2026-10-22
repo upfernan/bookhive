@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import co.com.bookhive.access.infrastructure.input.security.SessionCookieTokenResolver;
+import co.com.bookhive.access.services.input.dto.request.CloseSessionRequestDTO;
 import co.com.bookhive.access.services.input.dto.request.OpenSessionRequestDTO;
 import co.com.bookhive.access.services.input.dto.response.OpenSessionResponseDTO;
 import co.com.bookhive.access.services.input.ports.CloseSessionInputPort;
@@ -63,7 +64,7 @@ public class SessionController {
 	public ResponseEntity<Void> close(
 			@CookieValue(name = SessionCookieTokenResolver.SESSION_COOKIE, required = false) final String sessionToken) {
 
-		closeSessionInputPort.execute(TextHelper.getDefaultValue(sessionToken));
+		closeSessionInputPort.execute(new CloseSessionRequestDTO(sessionToken));
 
 		logger.info("Sesión cerrada.");
 

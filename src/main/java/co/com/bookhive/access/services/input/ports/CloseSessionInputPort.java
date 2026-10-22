@@ -1,7 +1,8 @@
 package co.com.bookhive.access.services.input.ports;
 
-public interface CloseSessionInputPort {
+import co.com.bookhive.access.services.input.dto.request.CloseSessionRequestDTO;
+import co.com.bookhive.shared.services.input.ports.InputPortWithoutReturn;
 
-	void execute(String sessionToken);
+public interface CloseSessionInputPort extends InputPortWithoutReturn<CloseSessionRequestDTO> {
 
 }

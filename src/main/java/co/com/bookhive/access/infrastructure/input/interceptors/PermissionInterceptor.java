@@ -1,18 +1,13 @@
 package co.com.bookhive.access.infrastructure.input.interceptors;
 
-import java.util.UUID;
-
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import co.com.bookhive.access.services.output.ports.SessionContextPort;
-import co.com.bookhive.access.services.output.ports.repositories.PermissionRepository;
-import co.com.bookhive.crosscutting.exception.BookHiveException;
+import co.com.bookhive.access.services.input.dto.request.AuthorizeOperationRequestDTO;
+import co.com.bookhive.access.services.input.ports.AuthorizeOperationInputPort;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
-import co.com.bookhive.crosscutting.messages.MessageKey;
 import co.com.bookhive.crosscutting.security.RequiredPermission;
-import co.com.bookhive.shared.services.output.ports.AuditPort;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,19 +15,11 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class PermissionInterceptor implements HandlerInterceptor {
 
-	private final SessionContextPort sessionContext;
-	private final PermissionRepository permissionRepository;
-	private final AuditPort audit;
+	private final AuthorizeOperationInputPort authorizeOperation;
 
-	public PermissionInterceptor(
-			final SessionContextPort sessionContext,
-			final PermissionRepository permissionRepository,
-			final AuditPort audit) {
-
+	public PermissionInterceptor(final AuthorizeOperationInputPort authorizeOperation) {
 		super();
-		this.sessionContext = sessionContext;
-		this.permissionRepository = permissionRepository;
-		this.audit = audit;
+		this.authorizeOperation = authorizeOperation;
 	}
 
 	@Override
@@ -46,22 +33,9 @@ public class PermissionInterceptor implements HandlerInterceptor {
 		}
 
 		final RequiredPermission required = method.getMethodAnnotation(RequiredPermission.class);
+		final String permission = ObjectHelper.isNull(required) ? "" : required.value();
 
-		if (ObjectHelper.isNull(required)) {
-			throw BookHiveException.createNotAllowed(
-					MessageKey.PERMISSION_DENIED,
-					"La operación " + method.getShortLogMessage() + " no declara qué permiso exige,"
-							+ " así que nadie puede usarla (ADR-027).");
-		}
-
-		final UUID person = sessionContext.getLibrarian();
-
-		if (!permissionRepository.isGranted(person, required.value())) {
-			audit.record(AuditPort.PERMISSION_DENIED, sessionContext.getInstitution(), person, required.value());
-			throw BookHiveException.createNotAllowed(
-					MessageKey.PERMISSION_DENIED,
-					"La persona en sesión no tiene el permiso " + required.value() + ".");
-		}
+		authorizeOperation.execute(new AuthorizeOperationRequestDTO(permission, method.getShortLogMessage()));
 
 		return true;
 	}

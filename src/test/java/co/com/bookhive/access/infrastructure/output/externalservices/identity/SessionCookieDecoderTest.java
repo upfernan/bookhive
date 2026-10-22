@@ -1,4 +1,4 @@
-package co.com.bookhive.access.infrastructure.input.security;
+package co.com.bookhive.access.infrastructure.output.externalservices.identity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

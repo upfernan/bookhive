@@ -1,26 +1,24 @@
 package co.com.bookhive.access.services.input.adapters;
 
+import co.com.bookhive.access.domain.session.closesession.CloseSessionDomain;
+import co.com.bookhive.access.services.input.dto.request.CloseSessionRequestDTO;
 import co.com.bookhive.access.services.input.ports.CloseSessionInputPort;
-import co.com.bookhive.access.services.output.ports.IdentityProviderPort;
-import co.com.bookhive.crosscutting.helper.TextHelper;
+import co.com.bookhive.access.services.usecase.session.closesession.CloseSessionUseCase;
+import co.com.bookhive.crosscutting.helper.ObjectHelper;
 
-public class CloseSessionInputAdapter implements CloseSessionInputPort {
+public final class CloseSessionInputAdapter implements CloseSessionInputPort {
 
-	private final IdentityProviderPort identityProvider;
+	private final CloseSessionUseCase useCase;
 
-	public CloseSessionInputAdapter(final IdentityProviderPort identityProvider) {
+	public CloseSessionInputAdapter(final CloseSessionUseCase useCase) {
 		super();
-		this.identityProvider = identityProvider;
+		this.useCase = useCase;
 	}
 
 	@Override
-	public void execute(final String sessionToken) {
-
-		if (TextHelper.isDefaultValue(sessionToken)) {
-			return;
-		}
-
-		identityProvider.closeSession(TextHelper.getDefaultValue(sessionToken));
+	public void execute(final CloseSessionRequestDTO input) {
+		final CloseSessionRequestDTO request = ObjectHelper.getDefaultValue(input, new CloseSessionRequestDTO(""));
+		useCase.execute(new CloseSessionDomain(request.sessionToken()));
 	}
 
 }
