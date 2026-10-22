@@ -10,12 +10,12 @@ import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;
 
-public class OpenSessionInteractor implements OpenSessionInputPort {
+public class OpenSessionInputAdapter implements OpenSessionInputPort {
 
 	private final IdentityProviderPort identityProvider;
 	private final PersonRepository personRepository;
 
-	public OpenSessionInteractor(
+	public OpenSessionInputAdapter(
 			final IdentityProviderPort identityProvider,
 			final PersonRepository personRepository) {
 

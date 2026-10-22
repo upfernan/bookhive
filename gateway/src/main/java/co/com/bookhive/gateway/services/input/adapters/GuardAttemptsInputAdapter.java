@@ -8,11 +8,11 @@ import co.com.bookhive.gateway.services.input.dto.VerdictDTO;
 import co.com.bookhive.gateway.services.input.ports.GuardAttemptsInputPort;
 import co.com.bookhive.gateway.services.usecase.guardattempts.GuardAttemptsUseCase;
 
-public final class GuardAttemptsInteractor implements GuardAttemptsInputPort {
+public final class GuardAttemptsInputAdapter implements GuardAttemptsInputPort {
 
 	private final GuardAttemptsUseCase useCase;
 
-	public GuardAttemptsInteractor(final GuardAttemptsUseCase useCase) {
+	public GuardAttemptsInputAdapter(final GuardAttemptsUseCase useCase) {
 		super();
 		this.useCase = useCase;
 	}

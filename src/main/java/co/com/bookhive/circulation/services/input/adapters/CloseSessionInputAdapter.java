@@ -4,11 +4,11 @@ import co.com.bookhive.circulation.services.input.ports.CloseSessionInputPort;
 import co.com.bookhive.circulation.services.output.ports.IdentityProviderPort;
 import co.com.bookhive.crosscutting.helper.TextHelper;
 
-public class CloseSessionInteractor implements CloseSessionInputPort {
+public class CloseSessionInputAdapter implements CloseSessionInputPort {
 
 	private final IdentityProviderPort identityProvider;
 
-	public CloseSessionInteractor(final IdentityProviderPort identityProvider) {
+	public CloseSessionInputAdapter(final IdentityProviderPort identityProvider) {
 		super();
 		this.identityProvider = identityProvider;
 	}

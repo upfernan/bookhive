@@ -3,7 +3,7 @@ package co.com.bookhive.initializer.configuration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import co.com.bookhive.circulation.services.input.adapters.LendBookInteractor;
+import co.com.bookhive.circulation.services.input.adapters.LendBookInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.mapper.LendBookMapperImpl;
 import co.com.bookhive.circulation.services.input.ports.LendBookInputPort;
 import co.com.bookhive.circulation.services.output.ports.AuditPort;
@@ -40,7 +40,7 @@ public class CirculationConfiguration {
 			final SessionContextPort sessionContext,
 			final AuditPort audit) {
 
-		return new LendBookInteractor(lendBookUseCase, sessionContext, new LendBookMapperImpl(), audit);
+		return new LendBookInputAdapter(lendBookUseCase, sessionContext, new LendBookMapperImpl(), audit);
 	}
 
 }

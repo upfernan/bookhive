@@ -12,15 +12,15 @@ import org.junit.jupiter.api.Test;
 
 import co.com.bookhive.circulation.services.output.ports.IdentityProviderPort;
 
-class CloseSessionInteractorTest {
+class CloseSessionInputAdapterTest {
 
 	private List<String> closedSessions;
-	private CloseSessionInteractor interactor;
+	private CloseSessionInputAdapter inputAdapter;
 
 	@BeforeEach
 	void prepare() {
 		closedSessions = new ArrayList<>();
-		interactor = new CloseSessionInteractor(new IdentityProviderPort() {
+		inputAdapter = new CloseSessionInputAdapter(new IdentityProviderPort() {
 
 			@Override
 			public String openSession(final String idToken) {
@@ -43,7 +43,7 @@ class CloseSessionInteractorTest {
 	@Test
 	@DisplayName("le pide al proveedor cerrar la sesión de la cookie")
 	void closesSession() {
-		interactor.execute(" cookie-de-sesion ");
+		inputAdapter.execute(" cookie-de-sesion ");
 
 		assertEquals(List.of("cookie-de-sesion"), closedSessions);
 	}
@@ -51,8 +51,8 @@ class CloseSessionInteractorTest {
 	@Test
 	@DisplayName("si no llega cookie no hay nada que cerrar")
 	void ignoresMissingCookie() {
-		interactor.execute(null);
-		interactor.execute("   ");
+		inputAdapter.execute(null);
+		inputAdapter.execute("   ");
 
 		assertTrue(closedSessions.isEmpty());
 	}

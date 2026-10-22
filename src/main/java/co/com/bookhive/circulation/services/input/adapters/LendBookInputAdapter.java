@@ -9,14 +9,14 @@ import co.com.bookhive.circulation.services.input.ports.LendBookInputPort;
 import co.com.bookhive.circulation.services.output.ports.AuditPort;
 import co.com.bookhive.circulation.services.output.ports.SessionContextPort;
 
-public class LendBookInteractor implements LendBookInputPort {
+public class LendBookInputAdapter implements LendBookInputPort {
 
 	private final LendBookUseCase useCase;
 	private final SessionContextPort sessionContext;
 	private final LendBookMapper mapper;
 	private final AuditPort audit;
 
-	public LendBookInteractor(
+	public LendBookInputAdapter(
 			final LendBookUseCase useCase,
 			final SessionContextPort sessionContext,
 			final LendBookMapper mapper,

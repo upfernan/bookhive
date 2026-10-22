@@ -3,8 +3,8 @@ package co.com.bookhive.initializer.configuration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import co.com.bookhive.circulation.services.input.adapters.CloseSessionInteractor;
-import co.com.bookhive.circulation.services.input.adapters.OpenSessionInteractor;
+import co.com.bookhive.circulation.services.input.adapters.CloseSessionInputAdapter;
+import co.com.bookhive.circulation.services.input.adapters.OpenSessionInputAdapter;
 import co.com.bookhive.circulation.services.input.ports.CloseSessionInputPort;
 import co.com.bookhive.circulation.services.input.ports.OpenSessionInputPort;
 import co.com.bookhive.circulation.services.output.ports.IdentityProviderPort;
@@ -18,12 +18,12 @@ public class SessionConfiguration {
 			final IdentityProviderPort identityProvider,
 			final PersonRepository personRepository) {
 
-		return new OpenSessionInteractor(identityProvider, personRepository);
+		return new OpenSessionInputAdapter(identityProvider, personRepository);
 	}
 
 	@Bean
 	CloseSessionInputPort closeSessionInputPort(final IdentityProviderPort identityProvider) {
-		return new CloseSessionInteractor(identityProvider);
+		return new CloseSessionInputAdapter(identityProvider);
 	}
 
 }
