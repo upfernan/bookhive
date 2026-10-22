@@ -29,6 +29,9 @@ public final class MessageKey {
 
 	public static final String PERMISSION_DENIED = "permission.denied";
 
+	public static final String SEARCH_TEXT_TOO_LONG = "search.text.too-long";
+	public static final String SEARCH_PAGE_INVALID = "search.page.invalid";
+	public static final String SEARCH_UNAVAILABLE = "search.unavailable";
 	public static final String REQUEST_UNEXPECTED = "request.unexpected";
 	public static final String REQUEST_INVALID_DATA = "request.invalid-data";
 	public static final String REQUEST_UNHANDLED = "request.unhandled";

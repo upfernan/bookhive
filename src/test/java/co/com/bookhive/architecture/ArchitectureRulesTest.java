@@ -26,7 +26,7 @@ class ArchitectureRulesTest {
 
 	private static final String ROOT = "co.com.bookhive.";
 
-	private static final String[] MODULES = { "access", "circulation" };
+	private static final String[] MODULES = { "access", "catalog", "circulation" };
 
 	private static final String[] FRAMEWORKS = {
 			"org.springframework..",

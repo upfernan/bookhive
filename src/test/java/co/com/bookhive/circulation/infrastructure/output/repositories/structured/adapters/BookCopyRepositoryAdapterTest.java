@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.BookCopyJpaRepository;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.BookCopyJpaEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.criteria.BookCopyCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
 import co.com.bookhive.circulation.testdata.FakeEntityMapper;
 import co.com.bookhive.circulation.testdata.FakeJpaRepository;
@@ -48,6 +49,30 @@ class BookCopyRepositoryAdapterTest {
 		assertEquals(1, bookCopies.size());
 		assertEquals(1, repository.pages().get(0).getPageNumber());
 		assertEquals(5, repository.pages().get(0).getPageSize());
+	}
+
+	@Test
+	@DisplayName("busca los ejemplares de varios libros dejando por fuera los dados de baja")
+	void findsCopiesOfBooksExceptWithdrawn() {
+		final FakeJpaRepository<BookCopyJpaEntity> repository = FakeJpaRepository.storing(jpaBookCopy());
+		final UUID book = UUIDHelper.generateNew();
+
+		final List<BookCopyEntity> bookCopies =
+				adapter(repository).findByCriteria(BookCopyCriteria.inService(List.of(book)));
+
+		assertEquals(1, bookCopies.size());
+		assertEquals(List.of("book en [" + book + "]", "status!=" + BookCopyEntity.STATUS_WITHDRAWN), repository.filters());
+	}
+
+	@Test
+	@DisplayName("sin libros no consulta ejemplares")
+	void skipsSearchWithoutBooks() {
+		final FakeJpaRepository<BookCopyJpaEntity> repository = FakeJpaRepository.storing(jpaBookCopy());
+		final BookCopyRepositoryAdapter adapter = adapter(repository);
+
+		assertTrue(adapter.findByCriteria(null).isEmpty());
+		assertTrue(adapter.findByCriteria(BookCopyCriteria.inService(List.of())).isEmpty());
+		assertTrue(repository.filters().isEmpty());
 	}
 
 	@Test

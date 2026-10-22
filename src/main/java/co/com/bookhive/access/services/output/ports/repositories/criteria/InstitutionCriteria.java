@@ -21,6 +21,10 @@ public final class InstitutionCriteria {
 		return new InstitutionCriteria(id, InstitutionEntity.STATUS_ACTIVE);
 	}
 
+	public static InstitutionCriteria active() {
+		return new InstitutionCriteria(UUIDHelper.getDefaultValue(), InstitutionEntity.STATUS_ACTIVE);
+	}
+
 	public UUID getId() {
 		return id;
 	}
