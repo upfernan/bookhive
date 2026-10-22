@@ -96,6 +96,12 @@ public final class FakeJpaRepository<T> implements InvocationHandler {
 		if ("equal".equals(name)) {
 			filters.add(arguments[0] + "=" + arguments[1]);
 		}
+		if ("notEqual".equals(name)) {
+			filters.add(arguments[0] + "!=" + arguments[1]);
+		}
+		if ("in".equals(name)) {
+			filters.add(path + " en " + arguments[0]);
+		}
 		if ("toString".equals(name)) {
 			return path;
 		}

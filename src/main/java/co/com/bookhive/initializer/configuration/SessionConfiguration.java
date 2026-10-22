@@ -6,11 +6,13 @@ import org.springframework.context.annotation.Configuration;
 import co.com.bookhive.access.services.input.adapters.AuthorizeOperationInputAdapter;
 import co.com.bookhive.access.services.input.adapters.CloseSessionInputAdapter;
 import co.com.bookhive.access.services.input.adapters.CurrentSessionInputAdapter;
+import co.com.bookhive.access.services.input.adapters.ListActiveSchemasInputAdapter;
 import co.com.bookhive.access.services.input.adapters.OpenSessionInputAdapter;
 import co.com.bookhive.access.services.input.adapters.ResolveSchemaInputAdapter;
 import co.com.bookhive.access.services.input.ports.AuthorizeOperationInputPort;
 import co.com.bookhive.access.services.input.ports.CloseSessionInputPort;
 import co.com.bookhive.access.services.input.ports.CurrentSessionInputPort;
+import co.com.bookhive.access.services.input.ports.ListActiveSchemasInputPort;
 import co.com.bookhive.access.services.input.ports.OpenSessionInputPort;
 import co.com.bookhive.access.services.input.ports.ResolveSchemaInputPort;
 import co.com.bookhive.access.services.output.ports.IdentityProviderPort;
@@ -18,6 +20,8 @@ import co.com.bookhive.access.services.output.ports.SessionIdentityPort;
 import co.com.bookhive.access.services.output.ports.repositories.InstitutionRepository;
 import co.com.bookhive.access.services.output.ports.repositories.PermissionRepository;
 import co.com.bookhive.access.services.output.ports.repositories.PersonRepository;
+import co.com.bookhive.access.services.usecase.institution.listactiveschemas.ListActiveSchemasUseCase;
+import co.com.bookhive.access.services.usecase.institution.listactiveschemas.impl.ListActiveSchemasUseCaseImpl;
 import co.com.bookhive.access.services.usecase.permission.authorizeoperation.AuthorizeOperationUseCase;
 import co.com.bookhive.access.services.usecase.permission.authorizeoperation.impl.AuthorizeOperationUseCaseImpl;
 import co.com.bookhive.access.services.usecase.session.closesession.CloseSessionUseCase;
@@ -96,6 +100,16 @@ public class SessionConfiguration {
 			final AuthorizeOperationUseCase authorizeOperationUseCase) {
 
 		return new AuthorizeOperationInputAdapter(authorizeOperationUseCase);
+	}
+
+	@Bean
+	ListActiveSchemasUseCase listActiveSchemasUseCase(final InstitutionRepository institutionRepository) {
+		return new ListActiveSchemasUseCaseImpl(institutionRepository);
+	}
+
+	@Bean
+	ListActiveSchemasInputPort listActiveSchemasInputPort(final ListActiveSchemasUseCase listActiveSchemasUseCase) {
+		return new ListActiveSchemasInputAdapter(listActiveSchemasUseCase);
 	}
 
 }

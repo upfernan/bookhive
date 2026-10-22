@@ -1,19 +1,24 @@
 package co.com.bookhive.circulation.infrastructure.output.repositories.structured.adapters;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.BookCopyJpaRepository;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.BookCopyJpaEntity;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.mapper.EntityMapper;
 import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRepository;
+import co.com.bookhive.circulation.services.output.ports.repositories.criteria.BookCopyCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.shared.services.output.ports.repositories.criteria.PageCriteria;
+
+import jakarta.persistence.criteria.Predicate;
 
 @Component
 public class BookCopyRepositoryAdapter implements BookCopyRepository {
@@ -43,8 +48,28 @@ public class BookCopyRepositoryAdapter implements BookCopyRepository {
 	}
 
 	@Override
+	public List<BookCopyEntity> findByCriteria(final BookCopyCriteria criteria) {
+		if (ObjectHelper.isNull(criteria) || !criteria.filtersByBooks()) {
+			return List.of();
+		}
+		return repository.findAll(specificationOf(criteria))
+				.stream().map(mapper::toEntity).toList();
+	}
+
+	@Override
 	public void update(final BookCopyEntity entity) {
 		repository.save(mapper.toJpaEntity(entity));
+	}
+
+	private static Specification<BookCopyJpaEntity> specificationOf(final BookCopyCriteria criteria) {
+		return (root, query, builder) -> {
+			final List<Predicate> predicates = new ArrayList<>();
+			predicates.add(root.get("book").in(criteria.getBooks()));
+			if (criteria.excludesStatus()) {
+				predicates.add(builder.notEqual(root.get("status"), criteria.getExcludedStatus()));
+			}
+			return builder.and(predicates.toArray(new Predicate[0]));
+		};
 	}
 
 }

@@ -9,6 +9,7 @@ import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRe
 import co.com.bookhive.circulation.services.output.ports.repositories.FineRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionParametersRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.LoanRepository;
+import co.com.bookhive.circulation.services.output.ports.repositories.criteria.BookCopyCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.FineCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.LoanCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
@@ -28,6 +29,12 @@ public final class FakeRepositories {
 		bookCopy.setId(id);
 		bookCopy.setStatus(status);
 		bookCopy.setLendable(lendable);
+		return bookCopy;
+	}
+
+	public static BookCopyEntity bookCopyOf(final UUID book, final String status) {
+		final BookCopyEntity bookCopy = bookCopy(UUID.randomUUID(), status, true);
+		bookCopy.setBook(book);
 		return bookCopy;
 	}
 
@@ -53,6 +60,14 @@ public final class FakeRepositories {
 		@Override
 		public List<BookCopyEntity> findAll(final PageCriteria page) {
 			return List.copyOf(stored);
+		}
+
+		@Override
+		public List<BookCopyEntity> findByCriteria(final BookCopyCriteria criteria) {
+			return stored.stream()
+					.filter(bookCopy -> criteria.getBooks().contains(bookCopy.getBook()))
+					.filter(bookCopy -> !bookCopy.getStatus().equals(criteria.getExcludedStatus()))
+					.toList();
 		}
 
 		@Override
