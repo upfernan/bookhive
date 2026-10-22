@@ -15,7 +15,7 @@ public final class ResolveSchemaInputAdapter implements ResolveSchemaInputPort {
 
 	@Override
 	public ResolveSchemaResponseDTO execute() {
-		return new ResolveSchemaResponseDTO(useCase.execute().getSchema());
+		return new ResolveSchemaResponseDTO(useCase.execute().schema());
 	}
 
 }

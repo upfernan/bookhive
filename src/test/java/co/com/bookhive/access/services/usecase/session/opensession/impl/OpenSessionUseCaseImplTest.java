@@ -30,7 +30,7 @@ class OpenSessionUseCaseImplTest {
 		final OpenSessionDomain session =
 				new OpenSessionUseCaseImpl(provider, people).execute(new OpenSessionDomain("  pase  ", ""));
 
-		assertEquals("cookie-de-sesion", session.getSessionToken());
+		assertEquals("cookie-de-sesion", session.sessionToken());
 		assertEquals(List.of("pase"), provider.receivedIdTokens());
 		assertEquals(IDENTITY, people.searches().get(0).getIdentity());
 		assertEquals(PersonEntity.STATUS_ACTIVE, people.searches().get(0).getStatus());

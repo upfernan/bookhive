@@ -17,7 +17,7 @@ public final class CurrentSessionInputAdapter implements CurrentSessionInputPort
 	@Override
 	public CurrentSessionResponseDTO execute() {
 		final ResolveSessionDomain session = useCase.execute();
-		return new CurrentSessionResponseDTO(session.getInstitution(), session.getPerson());
+		return new CurrentSessionResponseDTO(session.institution(), session.person());
 	}
 
 }

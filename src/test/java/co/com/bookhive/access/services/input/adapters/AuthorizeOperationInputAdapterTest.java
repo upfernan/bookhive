@@ -16,7 +16,7 @@ class AuthorizeOperationInputAdapterTest {
 	private final List<String> received = new ArrayList<>();
 
 	private final AuthorizeOperationInputAdapter adapter = new AuthorizeOperationInputAdapter(
-			operation -> received.add(operation.getPermission() + " " + operation.getOperation()));
+			operation -> received.add(operation.permission() + " " + operation.operation()));
 
 	@Test
 	@DisplayName("le pasa al caso de uso el permiso y la operación")

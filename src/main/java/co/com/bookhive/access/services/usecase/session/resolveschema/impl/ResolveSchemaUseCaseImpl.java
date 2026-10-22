@@ -31,15 +31,15 @@ public final class ResolveSchemaUseCaseImpl implements ResolveSchemaUseCase {
 
 		final ResolveSessionDomain session = resolveSession.execute();
 		final List<InstitutionEntity> institutions =
-				institutionRepository.findByCriteria(InstitutionCriteria.activeById(session.getInstitution()));
+				institutionRepository.findByCriteria(InstitutionCriteria.activeById(session.institution()));
 
 		if (institutions.isEmpty()) {
 			throw BookHiveException.createConflict(
 					MessageKey.INSTITUTION_NOT_ACTIVE,
-					"La institución " + session.getInstitution() + " no está activa en BookHive.");
+					"La institución " + session.institution() + " no está activa en BookHive.");
 		}
 
-		return new ResolveSchemaDomain(session.getInstitution(), institutions.get(0).getSchema());
+		return new ResolveSchemaDomain(session.institution(), institutions.get(0).getSchema());
 	}
 
 }

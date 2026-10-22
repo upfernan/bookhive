@@ -1,6 +1,5 @@
 package co.com.bookhive.access.infrastructure.output.repositories.structured.adapters;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -24,12 +23,10 @@ final class SqlFilter {
 		return query.toString();
 	}
 
-	PreparedStatement prepare(final Connection connection) throws SQLException {
-		final PreparedStatement statement = connection.prepareStatement(query());
+	void bind(final PreparedStatement statement) throws SQLException {
 		for (int position = 0; position < values.size(); position++) {
 			statement.setObject(position + 1, values.get(position));
 		}
-		return statement;
 	}
 
 }

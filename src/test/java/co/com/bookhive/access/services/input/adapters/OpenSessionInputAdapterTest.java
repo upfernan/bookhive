@@ -15,7 +15,7 @@ class OpenSessionInputAdapterTest {
 	private final List<String> receivedIdTokens = new ArrayList<>();
 
 	private final OpenSessionInputAdapter adapter = new OpenSessionInputAdapter(session -> {
-		receivedIdTokens.add(session.getIdToken());
+		receivedIdTokens.add(session.idToken());
 		return session.withSessionToken("cookie-de-sesion");
 	});
 

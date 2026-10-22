@@ -47,8 +47,9 @@ public class PersonRepositoryAdapter implements PersonRepository {
 		}
 
 		try (Connection connection = dataSource.getConnection();
-			 PreparedStatement statement = filter.prepare(connection)) {
+			 PreparedStatement statement = connection.prepareStatement(filter.query())) {
 
+			filter.bind(statement);
 			return readPeople(statement);
 
 		} catch (final SQLException exception) {

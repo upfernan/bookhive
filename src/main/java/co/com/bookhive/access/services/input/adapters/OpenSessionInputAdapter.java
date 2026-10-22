@@ -20,7 +20,7 @@ public final class OpenSessionInputAdapter implements OpenSessionInputPort {
 	public OpenSessionResponseDTO execute(final OpenSessionRequestDTO input) {
 		final OpenSessionRequestDTO request = ObjectHelper.getDefaultValue(input, new OpenSessionRequestDTO());
 		final OpenSessionDomain session = useCase.execute(new OpenSessionDomain(request.getIdToken(), ""));
-		return new OpenSessionResponseDTO(session.getSessionToken());
+		return new OpenSessionResponseDTO(session.sessionToken());
 	}
 
 }

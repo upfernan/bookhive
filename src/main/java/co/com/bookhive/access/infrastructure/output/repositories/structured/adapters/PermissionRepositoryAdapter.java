@@ -57,7 +57,8 @@ public class PermissionRepositoryAdapter implements PermissionRepository {
 
 			TenantSession.enter(connection, schema);
 
-			try (PreparedStatement statement = filter.prepare(connection)) {
+			try (PreparedStatement statement = connection.prepareStatement(filter.query())) {
+				filter.bind(statement);
 				return readPermissions(statement);
 			} finally {
 				TenantSession.leave(connection);

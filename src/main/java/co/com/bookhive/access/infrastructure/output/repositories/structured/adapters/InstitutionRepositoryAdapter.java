@@ -48,8 +48,9 @@ public class InstitutionRepositoryAdapter implements InstitutionRepository {
 		}
 
 		try (Connection connection = dataSource.getConnection();
-			 PreparedStatement statement = filter.prepare(connection)) {
+			 PreparedStatement statement = connection.prepareStatement(filter.query())) {
 
+			filter.bind(statement);
 			return readInstitutions(statement);
 
 		} catch (final SQLException exception) {

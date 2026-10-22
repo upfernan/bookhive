@@ -3,7 +3,6 @@ package co.com.bookhive.access.infrastructure.output.repositories.structured.ada
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.lang.reflect.Proxy;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,30 +24,20 @@ class SqlFilterTest {
 		final SqlFilter filter = new SqlFilter("SELECT id FROM persona");
 		filter.add("identidad = ?", "uid");
 		filter.add("estado = ?", "ACTIVA");
-		final List<String> prepared = new ArrayList<>();
 		final List<String> bound = new ArrayList<>();
 
-		filter.prepare(connection(prepared, bound));
+		filter.bind(statement(bound));
 
-		assertEquals(List.of("SELECT id FROM persona WHERE identidad = ? AND estado = ?"), prepared);
+		assertEquals("SELECT id FROM persona WHERE identidad = ? AND estado = ?", filter.query());
 		assertEquals(List.of("1=uid", "2=ACTIVA"), bound);
 	}
 
-	private static Connection connection(final List<String> prepared, final List<String> bound) {
-		final PreparedStatement statement = (PreparedStatement) Proxy.newProxyInstance(
+	private static PreparedStatement statement(final List<String> bound) {
+		return (PreparedStatement) Proxy.newProxyInstance(
 				SqlFilterTest.class.getClassLoader(), new Class<?>[] { PreparedStatement.class },
 				(instance, method, arguments) -> {
 					if ("setObject".equals(method.getName())) {
 						bound.add(arguments[0] + "=" + arguments[1]);
-					}
-					return null;
-				});
-		return (Connection) Proxy.newProxyInstance(
-				SqlFilterTest.class.getClassLoader(), new Class<?>[] { Connection.class },
-				(instance, method, arguments) -> {
-					if ("prepareStatement".equals(method.getName())) {
-						prepared.add(String.valueOf(arguments[0]));
-						return statement;
 					}
 					return null;
 				});

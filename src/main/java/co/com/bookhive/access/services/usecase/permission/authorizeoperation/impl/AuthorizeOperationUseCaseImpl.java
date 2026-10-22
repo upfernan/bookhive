@@ -35,14 +35,14 @@ public final class AuthorizeOperationUseCaseImpl implements AuthorizeOperationUs
 		operation.validate();
 
 		final ResolveSessionDomain session = resolveSession.execute();
-		final PermissionCriteria criteria = PermissionCriteria.grantedTo(session.getPerson(), operation.getPermission());
+		final PermissionCriteria criteria = PermissionCriteria.grantedTo(session.person(), operation.permission());
 
 		if (permissionRepository.findByCriteria(criteria).isEmpty()) {
-			audit.record(AuditPort.PERMISSION_DENIED, session.getInstitution(), session.getPerson(),
-					operation.getPermission());
+			audit.record(AuditPort.PERMISSION_DENIED, session.institution(), session.person(),
+					operation.permission());
 			throw BookHiveException.createNotAllowed(
 					MessageKey.PERMISSION_DENIED,
-					"La persona en sesión no tiene el permiso " + operation.getPermission() + ".");
+					"La persona en sesión no tiene el permiso " + operation.permission() + ".");
 		}
 	}
 

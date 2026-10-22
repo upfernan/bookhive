@@ -29,8 +29,8 @@ class ResolveSchemaUseCaseImplTest {
 		final ResolveSchemaDomain schema = new ResolveSchemaUseCaseImpl(
 				() -> new ResolveSessionDomain(UUIDHelper.generateNew(), INSTITUTION), institutions).execute();
 
-		assertEquals("uco", schema.getSchema());
-		assertEquals(INSTITUTION, schema.getInstitution());
+		assertEquals("uco", schema.schema());
+		assertEquals(INSTITUTION, schema.institution());
 		assertEquals(INSTITUTION, institutions.searches().get(0).getId());
 		assertEquals(InstitutionEntity.STATUS_ACTIVE, institutions.searches().get(0).getStatus());
 	}

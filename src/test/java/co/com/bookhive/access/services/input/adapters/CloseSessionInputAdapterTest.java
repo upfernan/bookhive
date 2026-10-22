@@ -15,7 +15,7 @@ class CloseSessionInputAdapterTest {
 	private final List<String> closedSessions = new ArrayList<>();
 
 	private final CloseSessionInputAdapter adapter =
-			new CloseSessionInputAdapter(session -> closedSessions.add(session.getSessionToken()));
+			new CloseSessionInputAdapter(session -> closedSessions.add(session.sessionToken()));
 
 	@Test
 	@DisplayName("le pasa al caso de uso la cookie que llegó")

@@ -20,7 +20,7 @@ public final class CloseSessionUseCaseImpl implements CloseSessionUseCase {
 		final CloseSessionDomain session = ObjectHelper.getDefaultValue(input, new CloseSessionDomain(""));
 
 		if (session.hasSession()) {
-			identityProvider.closeSession(session.getSessionToken());
+			identityProvider.closeSession(session.sessionToken());
 		}
 	}
 

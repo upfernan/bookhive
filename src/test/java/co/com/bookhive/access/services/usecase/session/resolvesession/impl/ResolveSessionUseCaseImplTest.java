@@ -26,8 +26,8 @@ class ResolveSessionUseCaseImplTest {
 
 		final ResolveSessionDomain session = new ResolveSessionUseCaseImpl(() -> "uid", people).execute();
 
-		assertEquals(PERSON, session.getPerson());
-		assertEquals(INSTITUTION, session.getInstitution());
+		assertEquals(PERSON, session.person());
+		assertEquals(INSTITUTION, session.institution());
 		assertEquals("uid", people.searches().get(0).getIdentity());
 	}
 

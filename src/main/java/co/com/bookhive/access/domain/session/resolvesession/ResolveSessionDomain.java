@@ -4,23 +4,11 @@ import java.util.UUID;
 
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
 
-public final class ResolveSessionDomain {
+public record ResolveSessionDomain(UUID person, UUID institution) {
 
-	private final UUID person;
-	private final UUID institution;
-
-	public ResolveSessionDomain(final UUID person, final UUID institution) {
-		super();
-		this.person = UUIDHelper.getDefaultValue(person);
-		this.institution = UUIDHelper.getDefaultValue(institution);
-	}
-
-	public UUID getPerson() {
-		return person;
-	}
-
-	public UUID getInstitution() {
-		return institution;
+	public ResolveSessionDomain {
+		person = UUIDHelper.getDefaultValue(person);
+		institution = UUIDHelper.getDefaultValue(institution);
 	}
 
 }

@@ -30,7 +30,7 @@ public final class OpenSessionUseCaseImpl implements OpenSessionUseCase {
 		final OpenSessionDomain session = ObjectHelper.getDefaultValue(input, new OpenSessionDomain("", ""));
 		session.validate();
 
-		final String sessionToken = identityProvider.openSession(session.getIdToken());
+		final String sessionToken = identityProvider.openSession(session.idToken());
 		final String identity = identityProvider.identityOf(sessionToken);
 
 		if (TextHelper.isDefaultValue(identity)) {
