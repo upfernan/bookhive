@@ -1,5 +1,7 @@
 package co.com.bookhive.shared.infrastructure.input.controllers;
 
+import java.sql.SQLTransientConnectionException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import co.com.bookhive.crosscutting.exception.BookHiveException;
+import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;
 import co.com.bookhive.shared.infrastructure.input.controllers.dto.ErrorResponseDTO;
@@ -28,6 +31,10 @@ public class ApiExceptionHandler {
 	private static final String UNHANDLED_TECHNICAL_MESSAGE =
 			"Se generó una excepción no controlada en el sistema. Por favor revisar los registros de errores.";
 
+	private static final String BUSY_TECHNICAL_MESSAGE =
+			"No hubo una conexión libre a la base de datos dentro del tiempo de espera; se rechaza la solicitud"
+					+ " en lugar de dejarla esperando (ADR-005).";
+
 	private final ResolveMessageInputPort messages;
 
 	public ApiExceptionHandler(final ResolveMessageInputPort messages) {
@@ -37,6 +44,10 @@ public class ApiExceptionHandler {
 
 	@ExceptionHandler(BookHiveException.class)
 	public ResponseEntity<ErrorResponseDTO> handle(final BookHiveException exception) {
+
+		if (isDatabaseBusy(exception.getRootCause())) {
+			return busy();
+		}
 
 		if (BookHiveException.Kind.UNEXPECTED.equals(exception.getKind())) {
 			logger.error("Error inesperado: {}", exception.getTechnicalMessage(), exception.getRootCause());
@@ -60,9 +71,32 @@ public class ApiExceptionHandler {
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ErrorResponseDTO> handle(final Exception exception) {
 
+		if (isDatabaseBusy(exception)) {
+			return busy();
+		}
+
 		logger.error(UNHANDLED_TECHNICAL_MESSAGE, exception);
 
 		return respond(HttpStatus.INTERNAL_SERVER_ERROR, MessageKey.REQUEST_UNHANDLED);
+	}
+
+	private ResponseEntity<ErrorResponseDTO> busy() {
+		logger.warn(BUSY_TECHNICAL_MESSAGE);
+		return respond(HttpStatus.SERVICE_UNAVAILABLE, MessageKey.REQUEST_BUSY);
+	}
+
+	private static boolean isDatabaseBusy(final Throwable exception) {
+
+		Throwable current = exception;
+
+		while (!ObjectHelper.isNull(current)) {
+			if (current instanceof SQLTransientConnectionException) {
+				return true;
+			}
+			current = current.getCause();
+		}
+
+		return false;
 	}
 
 	private static HttpStatus statusOf(final BookHiveException exception) {
