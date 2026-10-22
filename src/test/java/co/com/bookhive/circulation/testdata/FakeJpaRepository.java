@@ -52,7 +52,7 @@ public final class FakeJpaRepository<T> implements InvocationHandler {
 	@SuppressWarnings("unchecked")
 	public Object invoke(final Object repository, final Method method, final Object[] arguments) {
 		return switch (method.getName()) {
-			case "save" -> save((T) arguments[0]);
+			case "save", "saveAndFlush" -> save((T) arguments[0]);
 			case "findById" -> stored.stream().findFirst();
 			case "findAll" -> findAll(arguments[0]);
 			case "hashCode" -> System.identityHashCode(repository);

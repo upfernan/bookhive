@@ -7,12 +7,12 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import co.com.bookhive.circulation.infrastructure.input.security.RequiredPermission;
-import co.com.bookhive.circulation.services.output.ports.AuditPort;
 import co.com.bookhive.circulation.services.output.ports.SessionContextPort;
 import co.com.bookhive.circulation.services.output.ports.repositories.PermissionRepository;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;
+import co.com.bookhive.shared.services.output.ports.AuditPort;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

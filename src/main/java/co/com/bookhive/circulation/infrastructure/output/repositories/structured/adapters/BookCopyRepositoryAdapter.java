@@ -11,9 +11,9 @@ import co.com.bookhive.circulation.infrastructure.output.repositories.structured
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.BookCopyJpaEntity;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.mapper.EntityMapper;
 import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRepository;
-import co.com.bookhive.circulation.services.output.ports.repositories.criteria.PageCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
+import co.com.bookhive.shared.services.output.ports.repositories.criteria.PageCriteria;
 
 @Component
 public class BookCopyRepositoryAdapter implements BookCopyRepository {

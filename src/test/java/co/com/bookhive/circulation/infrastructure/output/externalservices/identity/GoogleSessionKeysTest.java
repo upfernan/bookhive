@@ -97,7 +97,7 @@ class GoogleSessionKeysTest {
 		try (InputStream pem = Objects.requireNonNull(
 				GoogleSessionKeysTest.class.getResourceAsStream("/identity/session-key-certificate.pem"))) {
 			final String certificate = new String(pem.readAllBytes(), StandardCharsets.US_ASCII);
-			return "{\"" + keyId + "\":\"" + certificate.replace("\n", "\\n") + "\"}";
+			return "{\"" + keyId + "\":\"" + certificate.replace("\r", "").replace("\n", "\\n") + "\"}";
 		}
 	}
 
