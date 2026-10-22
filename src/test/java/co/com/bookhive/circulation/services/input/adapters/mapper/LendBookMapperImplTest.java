@@ -22,19 +22,17 @@ class LendBookMapperImplTest {
 	private final LendBookMapper mapper = new LendBookMapperImpl();
 
 	@Test
-	@DisplayName("arma el dominio con la petición, la sesión y la fecha de hoy en UTC")
+	@DisplayName("arma el dominio con la petición y la fecha de hoy en UTC, sin datos de la sesión")
 	void buildsDomain() {
 		final UUID bookCopy = UUIDHelper.generateNew();
 		final UUID user = UUIDHelper.generateNew();
-		final UUID institution = UUIDHelper.generateNew();
-		final UUID librarian = UUIDHelper.generateNew();
 
-		final LendBookDomain domain = mapper.toDomain(new LendBookRequestDTO(bookCopy, user), institution, librarian);
+		final LendBookDomain domain = mapper.toDomain(new LendBookRequestDTO(bookCopy, user));
 
 		assertEquals(bookCopy, domain.getBookCopy());
 		assertEquals(user, domain.getUser());
-		assertEquals(institution, domain.getInstitution());
-		assertEquals(librarian, domain.getLibrarian());
+		assertEquals(UUIDHelper.getDefaultValue(), domain.getInstitution());
+		assertEquals(UUIDHelper.getDefaultValue(), domain.getLibrarian());
 		assertEquals(DateHelper.todayInUtc(), domain.getLoanDate());
 		assertEquals(UUIDHelper.getDefaultValue(), domain.getId());
 	}
@@ -42,11 +40,8 @@ class LendBookMapperImplTest {
 	@Test
 	@DisplayName("rechaza una petición vacía")
 	void rejectsNullRequest() {
-		final UUID institution = UUIDHelper.generateNew();
-		final UUID librarian = UUIDHelper.generateNew();
-
 		final BookHiveException exception = assertThrows(BookHiveException.class,
-				() -> mapper.toDomain(null, institution, librarian));
+				() -> mapper.toDomain(null));
 
 		assertEquals(MessageKey.LOAN_DATA_REQUIRED, exception.getUserMessageKey());
 	}

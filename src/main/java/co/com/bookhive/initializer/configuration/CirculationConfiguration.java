@@ -24,23 +24,24 @@ public class CirculationConfiguration {
 			final InstitutionParametersRepository institutionParametersRepository,
 			final BookCopyRepository bookCopyRepository,
 			final FineRepository fineRepository,
-			final LoanRepository loanRepository) {
+			final LoanRepository loanRepository,
+			final SessionContextPort sessionContext,
+			final AuditPort audit) {
 
 		return new LendBookUseCaseImpl(
 				institutionParametersRepository,
 				bookCopyRepository,
 				fineRepository,
 				loanRepository,
-				new LoanDomainMapperImpl());
+				new LoanDomainMapperImpl(),
+				sessionContext,
+				audit);
 	}
 
 	@Bean
-	LendBookInputPort lendBookInputPort(
-			final LendBookUseCase lendBookUseCase,
-			final SessionContextPort sessionContext,
-			final AuditPort audit) {
+	LendBookInputPort lendBookInputPort(final LendBookUseCase lendBookUseCase) {
 
-		return new LendBookInputAdapter(lendBookUseCase, sessionContext, new LendBookMapperImpl(), audit);
+		return new LendBookInputAdapter(lendBookUseCase, new LendBookMapperImpl());
 	}
 
 }
