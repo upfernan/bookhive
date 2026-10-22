@@ -1,7 +1,5 @@
 package co.com.bookhive.circulation.services.input.adapters.mapper;
 
-import java.util.UUID;
-
 import co.com.bookhive.circulation.domain.loan.lendbook.LendBookDomain;
 import co.com.bookhive.circulation.services.input.dto.request.LendBookRequestDTO;
 import co.com.bookhive.circulation.services.input.dto.response.LendBookResponseDTO;
@@ -14,10 +12,7 @@ import co.com.bookhive.crosscutting.messages.MessageKey;
 public final class LendBookMapperImpl implements LendBookMapper {
 
 	@Override
-	public LendBookDomain toDomain(
-			final LendBookRequestDTO request,
-			final UUID institution,
-			final UUID librarian) {
+	public LendBookDomain toDomain(final LendBookRequestDTO request) {
 
 		if (ObjectHelper.isNull(request)) {
 			throw BookHiveException.create(
@@ -29,8 +24,8 @@ public final class LendBookMapperImpl implements LendBookMapper {
 				UUIDHelper.getDefaultValue(),
 				request.getBookCopy(),
 				request.getUser(),
-				institution,
-				librarian,
+				UUIDHelper.getDefaultValue(),
+				UUIDHelper.getDefaultValue(),
 				DateHelper.todayInUtc(),
 				DateHelper.getDefaultValue());
 	}
