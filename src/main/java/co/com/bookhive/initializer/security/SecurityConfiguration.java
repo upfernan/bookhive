@@ -9,8 +9,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
-import co.com.bookhive.circulation.infrastructure.input.controllers.SessionController;
-import co.com.bookhive.circulation.infrastructure.input.security.SessionCookieTokenResolver;
+import co.com.bookhive.access.infrastructure.input.controllers.SessionController;
+import co.com.bookhive.access.infrastructure.input.security.SessionCookieTokenResolver;
 
 @Configuration
 @EnableWebSecurity

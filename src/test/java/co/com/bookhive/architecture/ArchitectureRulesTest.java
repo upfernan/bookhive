@@ -1,9 +1,15 @@
 package co.com.bookhive.architecture;
 
+import static com.tngtech.archunit.base.DescribedPredicate.not;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPackage;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAnyPackage;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
+
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,6 +25,8 @@ class ArchitectureRulesTest {
 			.importPackages("co.com.bookhive");
 
 	private static final String ROOT = "co.com.bookhive.";
+
+	private static final String[] MODULES = { "access", "circulation" };
 
 	private static final String[] FRAMEWORKS = {
 			"org.springframework..",
@@ -127,7 +135,7 @@ class ArchitectureRulesTest {
 	void crosscuttingAndSharedAreIndependent() {
 		noClasses()
 				.that().resideInAnyPackage(ROOT + "crosscutting..", ROOT + "shared..")
-				.should().dependOnClassesThat().resideInAnyPackage(ROOT + "circulation..", ROOT + "initializer..")
+				.should().dependOnClassesThat().resideInAnyPackage(modulePackages(ROOT + "initializer.."))
 				.because("lo compartido lo usan todos los módulos, así que no puede conocer a ninguno")
 				.check(BOOKHIVE);
 	}
@@ -139,6 +147,51 @@ class ArchitectureRulesTest {
 				.matching(ROOT + "(*)..")
 				.should().beFreeOfCycles()
 				.check(BOOKHIVE);
+	}
+
+	@Test
+	@DisplayName("un módulo no usa nada de otro fuera de su infraestructura de salida")
+	void modulesMeetOnlyInOutputInfrastructure() {
+		for (final String module : MODULES) {
+			for (final String other : otherModules(module)) {
+				noClasses()
+						.that().resideInAPackage(ROOT + module + "..")
+						.and().resideOutsideOfPackage(ROOT + module + ".infrastructure.output..")
+						.should().dependOnClassesThat().resideInAPackage(ROOT + other + "..")
+						.because("ADR-051: los módulos solo se hablan desde la infraestructura de salida")
+						.check(BOOKHIVE);
+			}
+		}
+	}
+
+	@Test
+	@DisplayName("de otro módulo solo se usan sus puertos de entrada y sus DTO")
+	void modulesOnlyUseInputPortsOfOthers() {
+		for (final String module : MODULES) {
+			for (final String other : otherModules(module)) {
+				noClasses()
+						.that().resideInAPackage(ROOT + module + "..")
+						.should().dependOnClassesThat(resideInAPackage(ROOT + other + "..")
+								.and(not(resideInAnyPackage(
+										ROOT + other + ".services.input.ports..",
+										ROOT + other + ".services.input.dto.."))))
+						.because("ADR-051: lo demás de un módulo es privado")
+						.check(BOOKHIVE);
+			}
+		}
+	}
+
+	private static String[] otherModules(final String module) {
+		return Arrays.stream(MODULES)
+				.filter(other -> !other.equals(module))
+				.toArray(String[]::new);
+	}
+
+	private static String[] modulePackages(final String... extra) {
+		return Stream.concat(
+				Arrays.stream(MODULES).map(module -> ROOT + module + ".."),
+				Arrays.stream(extra))
+				.toArray(String[]::new);
 	}
 
 }
