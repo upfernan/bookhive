@@ -117,9 +117,7 @@ class ArchitectureRulesTest {
 	@DisplayName("los adaptadores de entrada solo llaman a su caso de uso")
 	void inputAdaptersOnlyCallUseCases() {
 		noClasses()
-				.that().resideInAnyPackage(
-						ROOT + "access.services.input.adapters..",
-						ROOT + "shared.services.input.adapters..")
+				.that().resideInAPackage("..services.input.adapters..")
 				.should().dependOnClassesThat().resideInAnyPackage("..services.output..", "..infrastructure..")
 				.because("el adaptador de entrada convierte el DTO en dominio y se lo pasa al caso de uso,"
 						+ " que es el único que sale por los puertos de salida")

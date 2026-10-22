@@ -3,10 +3,13 @@ package co.com.bookhive.shared.infrastructure.input.controllers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.sql.SQLTransientConnectionException;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.CannotCreateTransactionException;
 
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.messages.MessageKey;
@@ -46,6 +49,29 @@ class ApiExceptionHandlerTest {
 
 		assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
 		assertEquals("Texto de " + MessageKey.PERMISSION_DENIED, messageOf(response));
+	}
+
+	@Test
+	@DisplayName("si no hay conexión libre a la base de datos responde 503 para que se intente de nuevo")
+	void busyDatabaseIsServiceUnavailable() {
+		final ResponseEntity<ErrorResponseDTO> response = handler.handle(new CannotCreateTransactionException(
+				"No se pudo abrir la transacción.",
+				new SQLTransientConnectionException("Connection is not available, request timed out after 3000ms.")));
+
+		assertEquals(HttpStatus.SERVICE_UNAVAILABLE, response.getStatusCode());
+		assertEquals("Texto de " + MessageKey.REQUEST_BUSY, messageOf(response));
+	}
+
+	@Test
+	@DisplayName("también responde 503 cuando un repositorio no consiguió conexión libre")
+	void busyDatabaseFromRepositoryIsServiceUnavailable() {
+		final ResponseEntity<ErrorResponseDTO> response = handler.handle(BookHiveException.createUnexpected(
+				new SQLTransientConnectionException("Connection is not available."),
+				MessageKey.REQUEST_UNEXPECTED,
+				"Falló la consulta."));
+
+		assertEquals(HttpStatus.SERVICE_UNAVAILABLE, response.getStatusCode());
+		assertEquals("Texto de " + MessageKey.REQUEST_BUSY, messageOf(response));
 	}
 
 	@Test

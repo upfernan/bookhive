@@ -32,6 +32,7 @@ public final class MessageKey {
 	public static final String REQUEST_UNEXPECTED = "request.unexpected";
 	public static final String REQUEST_INVALID_DATA = "request.invalid-data";
 	public static final String REQUEST_UNHANDLED = "request.unhandled";
+	public static final String REQUEST_BUSY = "request.busy";
 
 	private MessageKey() {
 		super();
