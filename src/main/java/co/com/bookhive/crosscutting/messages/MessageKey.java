@@ -18,6 +18,8 @@ public final class MessageKey {
 
 	public static final String USER_WITH_PENDING_FINES = "user.with-pending-fines";
 	public static final String USER_AT_LOAN_LIMIT = "user.at-loan-limit";
+	public static final String USER_EMAIL_REQUIRED = "user.email.required";
+	public static final String USER_NOT_FOUND = "user.not-found";
 
 	public static final String INSTITUTION_NOT_ACTIVE = "institution.not-active";
 	public static final String INSTITUTION_WITHOUT_PARAMETERS = "institution.without-parameters";

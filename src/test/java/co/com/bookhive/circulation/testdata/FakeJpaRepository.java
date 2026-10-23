@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Root;
 
@@ -101,6 +102,9 @@ public final class FakeJpaRepository<T> implements InvocationHandler {
 		}
 		if ("in".equals(name)) {
 			filters.add(path + " en " + arguments[0]);
+		}
+		if ("lower".equals(name)) {
+			return criteria(Expression.class, "lower(" + arguments[0] + ")");
 		}
 		if ("toString".equals(name)) {
 			return path;

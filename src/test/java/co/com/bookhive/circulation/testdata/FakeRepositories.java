@@ -2,6 +2,7 @@ package co.com.bookhive.circulation.testdata;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -9,13 +10,16 @@ import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRe
 import co.com.bookhive.circulation.services.output.ports.repositories.FineRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionParametersRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.LoanRepository;
+import co.com.bookhive.circulation.services.output.ports.repositories.UserRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.BookCopyCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.FineCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.LoanCriteria;
+import co.com.bookhive.circulation.services.output.ports.repositories.criteria.UserCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.FineEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.InstitutionParametersEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.UserEntity;
 import co.com.bookhive.shared.services.output.ports.repositories.criteria.PageCriteria;
 
 public final class FakeRepositories {
@@ -36,6 +40,32 @@ public final class FakeRepositories {
 		final BookCopyEntity bookCopy = bookCopy(UUID.randomUUID(), status, true);
 		bookCopy.setBook(book);
 		return bookCopy;
+	}
+
+	public static UserEntity user(final UUID id, final String name, final String email) {
+		final UserEntity user = new UserEntity();
+		user.setId(id);
+		user.setName(name);
+		user.setEmail(email);
+		return user;
+	}
+
+	public static final class Users implements UserRepository {
+
+		private final List<UserEntity> stored = new ArrayList<>();
+
+		public Users with(final UserEntity user) {
+			stored.add(user);
+			return this;
+		}
+
+		@Override
+		public List<UserEntity> findByCriteria(final UserCriteria criteria) {
+			return stored.stream()
+					.filter(user -> user.getEmail().toLowerCase(Locale.ROOT).equals(criteria.getEmail()))
+					.toList();
+		}
+
 	}
 
 	public static final class BookCopies implements BookCopyRepository {
