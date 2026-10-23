@@ -34,6 +34,18 @@ class FineRepositoryAdapterTest {
 	}
 
 	@Test
+	@DisplayName("guarda la multa generada en la devolución")
+	void createsFine() {
+		final FakeJpaRepository<FineJpaEntity> repository = FakeJpaRepository.storing();
+		final FineEntity fine = new FineEntity();
+		fine.setId(FINE);
+
+		adapter(repository).create(fine);
+
+		assertEquals(FINE, repository.saved().get(0).getId());
+	}
+
+	@Test
 	@DisplayName("sin usuario solo filtra por estado")
 	void filtersOnlyByStatusWithoutUser() {
 		final FakeJpaRepository<FineJpaEntity> repository = FakeJpaRepository.storing();

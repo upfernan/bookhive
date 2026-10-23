@@ -31,6 +31,11 @@ public class FineRepositoryAdapter implements FineRepository {
 	}
 
 	@Override
+	public void create(final FineEntity entity) {
+		repository.saveAndFlush(mapper.toJpaEntity(entity));
+	}
+
+	@Override
 	public List<FineEntity> findByCriteria(final FineCriteria criteria) {
 		return repository.findAll(specificationOf(criteria))
 				.stream().map(mapper::toEntity).toList();

@@ -8,6 +8,7 @@ import co.com.bookhive.circulation.services.input.adapters.FindUserContactInputA
 import co.com.bookhive.circulation.services.input.adapters.FindUserInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.LendBookInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.RemindDueLoansInputAdapter;
+import co.com.bookhive.circulation.services.input.adapters.ReturnBookInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.ScheduleDueRemindersInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.mapper.FindUserMapperImpl;
 import co.com.bookhive.circulation.services.input.adapters.mapper.LendBookMapperImpl;
@@ -16,6 +17,7 @@ import co.com.bookhive.circulation.services.input.ports.FindUserContactInputPort
 import co.com.bookhive.circulation.services.input.ports.FindUserInputPort;
 import co.com.bookhive.circulation.services.input.ports.LendBookInputPort;
 import co.com.bookhive.circulation.services.input.ports.RemindDueLoansInputPort;
+import co.com.bookhive.circulation.services.input.ports.ReturnBookInputPort;
 import co.com.bookhive.circulation.services.input.ports.ScheduleDueRemindersInputPort;
 import co.com.bookhive.circulation.services.output.ports.InstitutionDirectoryPort;
 import co.com.bookhive.circulation.services.output.ports.InstitutionTaskPort;
@@ -25,6 +27,7 @@ import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRe
 import co.com.bookhive.circulation.services.output.ports.repositories.FineRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionParametersRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.LoanRepository;
+import co.com.bookhive.circulation.services.output.ports.repositories.LoanReturnRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.UserRepository;
 import co.com.bookhive.circulation.services.usecase.bookcopy.countbookcopies.CountBookCopiesUseCase;
 import co.com.bookhive.circulation.services.usecase.bookcopy.countbookcopies.impl.CountBookCopiesUseCaseImpl;
@@ -33,6 +36,8 @@ import co.com.bookhive.circulation.services.usecase.loan.lendbook.impl.LendBookU
 import co.com.bookhive.circulation.services.usecase.loan.lendbook.impl.mapper.LoanDomainMapperImpl;
 import co.com.bookhive.circulation.services.usecase.loan.reminddueloans.RemindDueLoansUseCase;
 import co.com.bookhive.circulation.services.usecase.loan.reminddueloans.impl.RemindDueLoansUseCaseImpl;
+import co.com.bookhive.circulation.services.usecase.loan.returnbook.ReturnBookUseCase;
+import co.com.bookhive.circulation.services.usecase.loan.returnbook.impl.ReturnBookUseCaseImpl;
 import co.com.bookhive.circulation.services.usecase.loan.scheduleduereminders.ScheduleDueRemindersUseCase;
 import co.com.bookhive.circulation.services.usecase.loan.scheduleduereminders.impl.ScheduleDueRemindersUseCaseImpl;
 import co.com.bookhive.circulation.services.usecase.user.finduser.FindUserUseCase;
@@ -136,5 +141,33 @@ public class CirculationConfiguration {
 			final ScheduleDueRemindersUseCase scheduleDueRemindersUseCase) {
 
 		return new ScheduleDueRemindersInputAdapter(scheduleDueRemindersUseCase);
+	}
+
+	@Bean
+	@SuppressWarnings("java:S107")
+	ReturnBookUseCase returnBookUseCase(
+			final InstitutionParametersRepository institutionParametersRepository,
+			final BookCopyRepository bookCopyRepository,
+			final LoanRepository loanRepository,
+			final LoanReturnRepository loanReturnRepository,
+			final FineRepository fineRepository,
+			final SessionContextPort sessionContext,
+			final AuditPort audit,
+			final NotificationRequestPort notificationRequests) {
+
+		return new ReturnBookUseCaseImpl(
+				institutionParametersRepository,
+				bookCopyRepository,
+				loanRepository,
+				loanReturnRepository,
+				fineRepository,
+				sessionContext,
+				audit,
+				notificationRequests);
+	}
+
+	@Bean
+	ReturnBookInputPort returnBookInputPort(final ReturnBookUseCase returnBookUseCase) {
+		return new ReturnBookInputAdapter(returnBookUseCase);
 	}
 }

@@ -31,6 +31,8 @@ class SendNotificationDomainTest {
 		assertEquals(MessageKey.EMAIL_LOAN_REGISTERED_BODY, registered.bodyKey());
 		assertEquals(MessageKey.EMAIL_LOAN_DUE_SOON_SUBJECT, dueSoon.subjectKey());
 		assertEquals(MessageKey.EMAIL_LOAN_DUE_SOON_BODY, dueSoon.bodyKey());
+		assertEquals(MessageKey.EMAIL_FINE_GENERATED_SUBJECT, notice(SendNotificationDomain.KIND_FINE_GENERATED).subjectKey());
+		assertEquals(MessageKey.EMAIL_FINE_GENERATED_BODY, notice(SendNotificationDomain.KIND_FINE_GENERATED).bodyKey());
 		assertEquals("", notice("OTRO").subjectKey());
 		assertDoesNotThrow(registered::validate);
 	}

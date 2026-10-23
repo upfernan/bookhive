@@ -1,5 +1,6 @@
 package co.com.bookhive.circulation.testdata;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -10,6 +11,7 @@ import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRe
 import co.com.bookhive.circulation.services.output.ports.repositories.FineRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionParametersRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.LoanRepository;
+import co.com.bookhive.circulation.services.output.ports.repositories.LoanReturnRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.UserRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.BookCopyCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.FineCriteria;
@@ -19,6 +21,7 @@ import co.com.bookhive.circulation.services.output.ports.repositories.entities.B
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.FineEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.InstitutionParametersEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanReturnEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.UserEntity;
 import co.com.bookhive.shared.services.output.ports.repositories.criteria.PageCriteria;
 
@@ -120,10 +123,20 @@ public final class FakeRepositories {
 	public static final class Fines implements FineRepository {
 
 		private final List<FineEntity> pending = new ArrayList<>();
+		private final List<FineEntity> created = new ArrayList<>();
 
 		public Fines withPendingFine() {
 			pending.add(new FineEntity());
 			return this;
+		}
+
+		public List<FineEntity> created() {
+			return created;
+		}
+
+		@Override
+		public void create(final FineEntity entity) {
+			created.add(entity);
 		}
 
 		@Override
@@ -137,6 +150,7 @@ public final class FakeRepositories {
 
 		private final List<LoanEntity> active = new ArrayList<>();
 		private final List<LoanEntity> created = new ArrayList<>();
+		private final List<LoanEntity> updated = new ArrayList<>();
 
 		private final List<LoanCriteria> searches = new ArrayList<>();
 
@@ -165,6 +179,15 @@ public final class FakeRepositories {
 			created.add(entity);
 		}
 
+		public List<LoanEntity> updated() {
+			return updated;
+		}
+
+		@Override
+		public void update(final LoanEntity entity) {
+			updated.add(entity);
+		}
+
 		@Override
 		public Optional<LoanEntity> findById(final UUID id) {
 			return created.stream().filter(loan -> loan.getId().equals(id)).findFirst();
@@ -188,9 +211,14 @@ public final class FakeRepositories {
 		private final List<InstitutionParametersEntity> stored = new ArrayList<>();
 
 		public Parameters with(final int loanDays, final int maxConcurrentLoans) {
+			return with(loanDays, maxConcurrentLoans, BigDecimal.ZERO);
+		}
+
+		public Parameters with(final int loanDays, final int maxConcurrentLoans, final BigDecimal dailyFineRate) {
 			final InstitutionParametersEntity parameters = new InstitutionParametersEntity();
 			parameters.setLoanDays(loanDays);
 			parameters.setMaxConcurrentLoans(maxConcurrentLoans);
+			parameters.setDailyFineRate(dailyFineRate);
 			stored.add(parameters);
 			return this;
 		}
@@ -203,6 +231,21 @@ public final class FakeRepositories {
 		@Override
 		public List<InstitutionParametersEntity> findAll(final PageCriteria page) {
 			return List.copyOf(stored);
+		}
+
+	}
+
+	public static final class LoanReturns implements LoanReturnRepository {
+
+		private final List<LoanReturnEntity> created = new ArrayList<>();
+
+		public List<LoanReturnEntity> created() {
+			return created;
+		}
+
+		@Override
+		public void create(final LoanReturnEntity entity) {
+			created.add(entity);
 		}
 
 	}

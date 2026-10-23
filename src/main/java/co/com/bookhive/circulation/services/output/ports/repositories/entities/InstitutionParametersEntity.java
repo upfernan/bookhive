@@ -1,9 +1,11 @@
 package co.com.bookhive.circulation.services.output.ports.repositories.entities;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
 import co.com.bookhive.crosscutting.helper.DateHelper;
+import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
 
 public class InstitutionParametersEntity {
@@ -11,6 +13,7 @@ public class InstitutionParametersEntity {
 	private UUID id;
 	private int loanDays;
 	private int maxConcurrentLoans;
+	private BigDecimal dailyFineRate;
 
 	private Instant createdAt;
 
@@ -19,6 +22,7 @@ public class InstitutionParametersEntity {
 		setId(UUIDHelper.getDefaultValue());
 		setLoanDays(0);
 		setMaxConcurrentLoans(0);
+		setDailyFineRate(BigDecimal.ZERO);
 		setCreatedAt(DateHelper.getDefaultTimestamp());
 	}
 
@@ -44,6 +48,15 @@ public class InstitutionParametersEntity {
 
 	public void setMaxConcurrentLoans(final int maxConcurrentLoans) {
 		this.maxConcurrentLoans = Math.max(maxConcurrentLoans, 0);
+	}
+
+	public BigDecimal getDailyFineRate() {
+		return dailyFineRate;
+	}
+
+	public void setDailyFineRate(final BigDecimal dailyFineRate) {
+		final BigDecimal rate = ObjectHelper.getDefaultValue(dailyFineRate, BigDecimal.ZERO);
+		this.dailyFineRate = rate.signum() < 0 ? BigDecimal.ZERO : rate;
 	}
 
 	public Instant getCreatedAt() {

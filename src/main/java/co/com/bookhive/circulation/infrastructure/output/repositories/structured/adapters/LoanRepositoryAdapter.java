@@ -59,6 +59,11 @@ public class LoanRepositoryAdapter implements LoanRepository {
 	}
 
 	@Override
+	public void update(final LoanEntity entity) {
+		repository.saveAndFlush(mapper.toJpaEntity(entity));
+	}
+
+	@Override
 	public Optional<LoanEntity> findById(final UUID id) {
 		return repository.findById(id).map(mapper::toEntity);
 	}
@@ -91,6 +96,11 @@ public class LoanRepositoryAdapter implements LoanRepository {
 			}
 			if (criteria.filtersByDueDate()) {
 				predicates.add(builder.equal(root.get("dueDate"), criteria.getDueDate()));
+			}
+
+			if (criteria.filtersByBookCopy()) {
+				predicates.add(builder.equal(root.get("bookCopy").get("id"), criteria.getBookCopy()));
+				predicates.add(root.get("status").in(criteria.getOpenStatuses()));
 			}
 
 			return builder.and(predicates.toArray(new Predicate[0]));

@@ -96,6 +96,29 @@ class LoanRepositoryAdapterTest {
 	}
 
 	@Test
+	@DisplayName("busca el préstamo activo o vencido del ejemplar que se devuelve")
+	void findsOpenLoanOfBookCopy() {
+		final FakeJpaRepository<LoanJpaEntity> repository = FakeJpaRepository.storing(jpaLoan());
+		final UUID bookCopy = UUID.randomUUID();
+
+		adapter(repository).findByCriteria(LoanCriteria.openForBookCopy(bookCopy));
+
+		assertEquals(List.of("bookCopy.id=" + bookCopy, "status en [ACTIVO, VENCIDO]"), repository.filters());
+	}
+
+	@Test
+	@DisplayName("actualiza el préstamo al devolverlo")
+	void updatesLoan() {
+		final FakeJpaRepository<LoanJpaEntity> repository = FakeJpaRepository.storing();
+		final LoanEntity loan = new LoanEntity();
+		loan.setId(LOAN);
+
+		adapter(repository).update(loan);
+
+		assertEquals(LOAN, repository.saved().get(0).getId());
+	}
+
+	@Test
 	@DisplayName("sin usuario solo filtra por estado")
 	void filtersOnlyByStatusWithoutUser() {
 		final FakeJpaRepository<LoanJpaEntity> repository = FakeJpaRepository.storing();
