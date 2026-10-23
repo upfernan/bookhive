@@ -41,4 +41,16 @@ class DateHelperTest {
 		assertFalse(DateHelper.isDefaultValue(LocalDate.of(2026, 10, 17)));
 	}
 
+	@Test
+	@DisplayName("calcula el día de hoy en la zona pedida, y sin zona o sin reloj usa UTC y la hora actual")
+	void usesRequestedZone() {
+		final Clock eightPmInBogota = Clock.fixed(Instant.parse("2026-10-24T01:00:00Z"), ZoneId.of("UTC"));
+
+		assertEquals(LocalDate.of(2026, 10, 23), DateHelper.todayIn(ZoneId.of("America/Bogota"), eightPmInBogota));
+		assertEquals(LocalDate.of(2026, 10, 24), DateHelper.todayIn(null, eightPmInBogota));
+		assertEquals(LocalDate.now(ZoneId.of("America/Bogota")), DateHelper.todayIn(ZoneId.of("America/Bogota"), null));
+		assertEquals(LocalDate.now(ZoneId.of("UTC")), DateHelper.todayIn(null));
+		assertEquals(LocalDate.now(ZoneId.of("Asia/Tokyo")), DateHelper.todayIn(ZoneId.of("Asia/Tokyo")));
+	}
+
 }

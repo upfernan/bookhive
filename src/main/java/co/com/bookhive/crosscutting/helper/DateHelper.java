@@ -33,13 +33,12 @@ public final class DateHelper {
 	}
 
 	public static LocalDate todayIn(final ZoneId zone) {
-		return todayIn(zone, UTC_CLOCK);
+		return LocalDate.now(ObjectHelper.isNull(zone) ? ZoneOffset.UTC : zone);
 	}
 
 	public static LocalDate todayIn(final ZoneId zone, final Clock clock) {
-		return LocalDate.ofInstant(
-				ObjectHelper.getDefaultValue(clock, UTC_CLOCK).instant(),
-				ObjectHelper.getDefaultValue(zone, ZoneOffset.UTC));
+		final Instant now = ObjectHelper.isNull(clock) ? Instant.now() : clock.instant();
+		return LocalDate.ofInstant(now, ObjectHelper.isNull(zone) ? ZoneOffset.UTC : zone);
 	}
 
 	public static LocalDate getDefaultValue(final LocalDate value) {

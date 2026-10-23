@@ -6,7 +6,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import co.com.bookhive.crosscutting.helper.DateHelper;
-import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
 
 public class InstitutionParametersEntity {
@@ -68,7 +67,10 @@ public class InstitutionParametersEntity {
 	}
 
 	public void setTimeZone(final String timeZone) {
-		this.timeZone = TextHelper.isDefaultValue(timeZone) ? DEFAULT_TIME_ZONE : timeZone.trim();
+		this.timeZone = Optional.ofNullable(timeZone)
+				.map(String::trim)
+				.filter(zone -> !zone.isEmpty())
+				.orElse(DEFAULT_TIME_ZONE);
 	}
 
 	public Instant getCreatedAt() {

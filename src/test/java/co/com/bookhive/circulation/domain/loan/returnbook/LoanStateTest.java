@@ -45,10 +45,12 @@ class LoanStateTest {
 	@Test
 	@DisplayName("sin préstamo o sin la fecha de hoy es un error inesperado")
 	void requiresLoanAndToday() {
+		final LoanEntity loan = loanDueOn(TODAY);
+
 		assertEquals(BookHiveException.Kind.UNEXPECTED,
 				assertThrows(BookHiveException.class, () -> LoanState.of(null, false, TODAY)).getKind());
 		assertEquals(BookHiveException.Kind.UNEXPECTED,
-				assertThrows(BookHiveException.class, () -> LoanState.of(loanDueOn(TODAY), false, null)).getKind());
+				assertThrows(BookHiveException.class, () -> LoanState.of(loan, false, null)).getKind());
 	}
 
 	private static LoanEntity loanDueOn(final LocalDate dueDate) {

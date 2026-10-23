@@ -70,7 +70,8 @@ public class BookCopyRepositoryAdapter implements BookCopyRepository {
 				|| TextHelper.isDefaultValue(newStatus)) {
 			return false;
 		}
-		return repository.changeStatus(bookCopy, expectedStatus.trim(), newStatus.trim()) == 1;
+		return repository.changeStatus(
+				bookCopy, TextHelper.getDefaultValue(expectedStatus), TextHelper.getDefaultValue(newStatus)) == 1;
 	}
 
 	private static Specification<BookCopyJpaEntity> specificationOf(final BookCopyCriteria criteria) {

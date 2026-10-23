@@ -37,7 +37,7 @@ public final class CurrentInstitution {
 				.orElse(InstitutionParametersEntity.DEFAULT_TIME_ZONE);
 		try {
 			return ZoneId.of(zone);
-		} catch (final DateTimeException exception) {
+		} catch (final DateTimeException _) {
 			return ZoneId.of(InstitutionParametersEntity.DEFAULT_TIME_ZONE);
 		}
 	}
