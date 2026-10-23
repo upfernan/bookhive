@@ -30,6 +30,7 @@ public final class LendBookUseCaseImpl implements LendBookUseCase {
 	private final AuditPort audit;
 	private final NotificationRequestPort notificationRequests;
 
+	@SuppressWarnings("java:S107")
 	public LendBookUseCaseImpl(
 			final InstitutionParametersRepository institutionParametersRepository,
 			final BookCopyRepository bookCopyRepository,

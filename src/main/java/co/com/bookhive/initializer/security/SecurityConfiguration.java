@@ -23,9 +23,10 @@ public class SecurityConfiguration {
 
 	@Bean
 	@Order(1)
+	@SuppressWarnings("java:S4502")
 	SecurityFilterChain internalCallsFilterChain(
 			final HttpSecurity http,
-			final ServiceCallerDecoder serviceCallerDecoder) throws Exception {
+			final ServiceCallerDecoder serviceCallerDecoder) {
 
 		http.securityMatcher(InternalPaths.all())
 				.sessionManagement(session -> session
@@ -41,7 +42,7 @@ public class SecurityConfiguration {
 	@Order(2)
 	SecurityFilterChain securityFilterChain(
 			final HttpSecurity http,
-			final SessionCookieTokenResolver tokenResolver) throws Exception {
+			final SessionCookieTokenResolver tokenResolver) {
 
 		http.sessionManagement(session -> session
 						.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

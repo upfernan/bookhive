@@ -55,7 +55,7 @@ public class ServiceCallerDecoder {
 		final Jwt jwt = signatureDecoder.decode(token);
 		final OAuth2TokenValidatorResult result = fromGoogleForUs().validate(jwt);
 		if (result.hasErrors()) {
-			throw new BadJwtException(result.getErrors().iterator().next().getDescription());
+			throw new BadJwtException(TextHelper.getDefaultValue(result.getErrors().iterator().next().getDescription()));
 		}
 		return jwt;
 	}

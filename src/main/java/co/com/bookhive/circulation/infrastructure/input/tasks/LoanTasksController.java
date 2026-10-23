@@ -54,10 +54,11 @@ public class LoanTasksController {
 	public ResponseEntity<Void> runInstitutionTask(@RequestBody final PubSubPushMessage push) {
 		final String task = push.attribute("tarea");
 		final String institution = push.attribute("institucion");
+		final String messageId = push.messageId();
 
 		if (!RemindDueLoansRequestDTO.TASK.equals(task) || !INSTITUTION.matcher(institution).matches()) {
 			logger.warn("Se descartó la tarea {} del mensaje {}: no es de préstamos o no trae una institución válida.",
-					task, push.messageId());
+					task, messageId);
 			return ResponseEntity.noContent().build();
 		}
 

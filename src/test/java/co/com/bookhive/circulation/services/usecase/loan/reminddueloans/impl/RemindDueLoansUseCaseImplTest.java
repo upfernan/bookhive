@@ -64,9 +64,11 @@ class RemindDueLoansUseCaseImplTest {
 		final RemindDueLoansInputAdapter adapter =
 				new RemindDueLoansInputAdapter(domain -> domain.withReminded(3));
 
+		final RemindDueLoansInputAdapter realAdapter = new RemindDueLoansInputAdapter(
+				new RemindDueLoansUseCaseImpl(new FakeRepositories.Loans(), notices::add));
+
 		assertEquals(3, adapter.execute(new RemindDueLoansRequestDTO(DUE_ON)).reminded());
-		assertThrows(BookHiveException.class, () -> new RemindDueLoansInputAdapter(
-				new RemindDueLoansUseCaseImpl(new FakeRepositories.Loans(), notices::add)).execute(null));
+		assertThrows(BookHiveException.class, () -> realAdapter.execute(null));
 	}
 
 	private static LoanEntity loan(final UUID id, final UUID user, final UUID book) {

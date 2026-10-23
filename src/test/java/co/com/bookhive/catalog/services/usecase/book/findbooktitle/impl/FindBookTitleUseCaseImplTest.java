@@ -1,7 +1,6 @@
 package co.com.bookhive.catalog.services.usecase.book.findbooktitle.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.UUID;
 
@@ -35,7 +34,7 @@ class FindBookTitleUseCaseImplTest {
 
 		assertEquals("", useCase.execute(null).title());
 		assertEquals(new FindBookTitleDomain(missing, ""), useCase.execute(new FindBookTitleDomain(missing, "")));
-		assertTrue(books.searches().size() == 1);
+		assertEquals(1, books.searches().size());
 	}
 
 	@Test

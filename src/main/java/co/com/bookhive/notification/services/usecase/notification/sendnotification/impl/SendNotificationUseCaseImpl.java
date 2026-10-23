@@ -53,7 +53,7 @@ public final class SendNotificationUseCaseImpl implements SendNotificationUseCas
 
 		final RecipientEntity recipient = recipients.find(notice.user());
 		if (!recipient.hasEmail()) {
-			record(notice, NotificationOutcomeDomain.WITHOUT_EMAIL, "");
+			registerOutcome(notice, NotificationOutcomeDomain.WITHOUT_EMAIL, "");
 			return new NotificationOutcomeDomain(NotificationOutcomeDomain.WITHOUT_EMAIL);
 		}
 
@@ -64,11 +64,11 @@ public final class SendNotificationUseCaseImpl implements SendNotificationUseCas
 				notice.fill(templates.textOf(notice.subjectKey()), recipient.name(), title),
 				notice.fill(templates.textOf(notice.bodyKey()), recipient.name(), title)));
 
-		record(notice, NotificationOutcomeDomain.SENT, providerMessageId);
+		registerOutcome(notice, NotificationOutcomeDomain.SENT, providerMessageId);
 		return new NotificationOutcomeDomain(NotificationOutcomeDomain.SENT);
 	}
 
-	private void record(final SendNotificationDomain notice, final String status, final String providerMessageId) {
+	private void registerOutcome(final SendNotificationDomain notice, final String status, final String providerMessageId) {
 		notificationRepository.create(new NotificationEntity(
 				UUIDHelper.generateNew(),
 				notice.idempotencyKey(),

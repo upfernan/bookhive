@@ -24,7 +24,6 @@ import tools.jackson.databind.node.ObjectNode;
 public class BrevoEmailAdapter implements EmailPort {
 
 	static final String API_KEY_HEADER = "api-key";
-	static final String SEND_PATH = "/v3/smtp/email";
 
 	private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(3);
 	private static final Duration READ_TIMEOUT = Duration.ofSeconds(10);
@@ -39,7 +38,7 @@ public class BrevoEmailAdapter implements EmailPort {
 	private final JsonMapper json = JsonMapper.shared();
 
 	public BrevoEmailAdapter(
-			@Value("${bookhive.email.url:https://api.brevo.com}") final String url,
+			@Value("${bookhive.email.url:https://api.brevo.com/v3/smtp/email}") final String url,
 			@Value("${bookhive.email.api-key:}") final String apiKey,
 			@Value("${bookhive.email.sender-email:}") final String senderEmail,
 			@Value("${bookhive.email.sender-name:BookHive}") final String senderName) {
@@ -73,7 +72,7 @@ public class BrevoEmailAdapter implements EmailPort {
 
 		try {
 			final BrevoResponse response = client.post()
-					.uri(url + SEND_PATH)
+					.uri(url)
 					.header(API_KEY_HEADER, apiKey)
 					.accept(MediaType.APPLICATION_JSON)
 					.contentType(JSON_BODY)

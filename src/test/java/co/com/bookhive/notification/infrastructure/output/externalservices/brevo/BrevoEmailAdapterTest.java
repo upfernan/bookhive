@@ -19,6 +19,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 class BrevoEmailAdapterTest {
 
+	private static final String SEND = "/v3/smtp/email";
 	private static final EmailEntity EMAIL =
 			new EmailEntity("ana@uco.edu.co", "Ana Pérez", "Quedó registrado tu préstamo", "Hola Ana:\n\nDevuélvelo el 06/11/2026.");
 
@@ -26,9 +27,9 @@ class BrevoEmailAdapterTest {
 	@DisplayName("envía el correo a Brevo con la llave, el remitente, el destinatario y el texto, y devuelve su número")
 	void sendsEmail() throws IOException {
 		try (FakeHttpServer server = new FakeHttpServer()) {
-			server.answer("POST", BrevoEmailAdapter.SEND_PATH, 201, "{\"messageId\":\"<202610221900.1@smtp-relay>\"}");
+			server.answer("POST", SEND, 201, "{\"messageId\":\"<202610221900.1@smtp-relay>\"}");
 			final BrevoEmailAdapter adapter =
-					new BrevoEmailAdapter(server.url(), "llave-de-prueba", "bookhive870@gmail.com", "BookHive");
+					new BrevoEmailAdapter(server.url() + SEND, "llave-de-prueba", "bookhive870@gmail.com", "BookHive");
 
 			final String messageId = adapter.send(EMAIL);
 
@@ -50,8 +51,8 @@ class BrevoEmailAdapterTest {
 	@DisplayName("sin nombre del destinatario no manda el campo vacío, y una respuesta sin número no falla")
 	void omitsEmptyName() throws IOException {
 		try (FakeHttpServer server = new FakeHttpServer()) {
-			server.answer("POST", BrevoEmailAdapter.SEND_PATH, 201, "aceptado");
-			final BrevoEmailAdapter adapter = new BrevoEmailAdapter(server.url(), "llave", "bookhive870@gmail.com", "BookHive");
+			server.answer("POST", SEND, 201, "aceptado");
+			final BrevoEmailAdapter adapter = new BrevoEmailAdapter(server.url() + SEND, "llave", "bookhive870@gmail.com", "BookHive");
 
 			assertEquals("", adapter.send(new EmailEntity("ana@uco.edu.co", "", "Asunto", "Texto")));
 			assertFalse(server.requests().get(0).body().contains("\"name\":\"\""));
@@ -62,12 +63,12 @@ class BrevoEmailAdapterTest {
 	@DisplayName("si Brevo rechaza, no responde o no hay llave, avisa que el correo no está disponible")
 	void reportsFailures() throws IOException {
 		try (FakeHttpServer server = new FakeHttpServer()) {
-			server.answer("POST", BrevoEmailAdapter.SEND_PATH, 401, "{\"code\":\"unauthorized\",\"message\":\"Key not found\"}");
-			final BrevoEmailAdapter rejected = new BrevoEmailAdapter(server.url(), "mala", "bookhive870@gmail.com", "BookHive");
+			server.answer("POST", SEND, 401, "{\"code\":\"unauthorized\",\"message\":\"Key not found\"}");
+			final BrevoEmailAdapter rejected = new BrevoEmailAdapter(server.url() + SEND, "mala", "bookhive870@gmail.com", "BookHive");
 			final BrevoEmailAdapter unreachable =
 					new BrevoEmailAdapter("http://127.0.0.1:1", "llave", "bookhive870@gmail.com", "BookHive");
-			final BrevoEmailAdapter withoutKey = new BrevoEmailAdapter(server.url(), "", "bookhive870@gmail.com", "BookHive");
-			final BrevoEmailAdapter withoutSender = new BrevoEmailAdapter(server.url(), "llave", "", "BookHive");
+			final BrevoEmailAdapter withoutKey = new BrevoEmailAdapter(server.url() + SEND, "", "bookhive870@gmail.com", "BookHive");
+			final BrevoEmailAdapter withoutSender = new BrevoEmailAdapter(server.url() + SEND, "llave", "", "BookHive");
 
 			final BookHiveException unauthorized = assertThrows(BookHiveException.class, () -> rejected.send(EMAIL));
 			assertTrue(unauthorized.getTechnicalMessage().contains("401"));

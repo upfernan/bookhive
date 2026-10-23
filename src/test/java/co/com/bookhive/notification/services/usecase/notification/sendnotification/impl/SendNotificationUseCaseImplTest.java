@@ -72,11 +72,11 @@ class SendNotificationUseCaseImplTest {
 		assertEquals(NotificationOutcomeDomain.SENT, outcome.status());
 		assertEquals(List.of(new EmailEntity("ana@uco.edu.co", "Ana Pérez", "Préstamo de «Clean Code»",
 				"Hola Ana Pérez, devuélvelo el 06/11/2026.")), sent);
-		final NotificationEntity record = history.get(0);
-		assertEquals(notice().idempotencyKey(), record.idempotencyKey());
-		assertEquals(NotificationEntity.CHANNEL_EMAIL, record.channel());
-		assertEquals("<id-brevo@smtp-relay>", record.providerMessageId());
-		assertEquals(USER, record.user());
+		final NotificationEntity saved = history.get(0);
+		assertEquals(notice().idempotencyKey(), saved.idempotencyKey());
+		assertEquals(NotificationEntity.CHANNEL_EMAIL, saved.channel());
+		assertEquals("<id-brevo@smtp-relay>", saved.providerMessageId());
+		assertEquals(USER, saved.user());
 	}
 
 	@Test

@@ -41,8 +41,9 @@ public class NotificationMessagesController {
 	@PostMapping("/correo")
 	public ResponseEntity<Void> receive(@RequestBody final PubSubPushMessage push) {
 		final String institution = push.attribute("institucion");
+		final String messageId = push.messageId();
 		if (!INSTITUTION.matcher(institution).matches()) {
-			logger.warn("Se descartó el aviso {}: no trae una institución válida.", push.messageId());
+			logger.warn("Se descartó el aviso {}: no trae una institución válida.", messageId);
 			return ResponseEntity.noContent().build();
 		}
 
@@ -55,7 +56,7 @@ public class NotificationMessagesController {
 			if (!BookHiveException.Kind.MISSING_DATA.equals(exception.getKind())) {
 				throw exception;
 			}
-			logger.warn("Se descartó el aviso {}: {}", push.messageId(), exception.getTechnicalMessage());
+			logger.warn("Se descartó el aviso {}: {}", messageId, exception.getTechnicalMessage());
 		} finally {
 			TenantContext.clear();
 		}
