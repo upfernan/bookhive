@@ -3,10 +3,12 @@ package co.com.bookhive.initializer.configuration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import co.com.bookhive.catalog.services.input.adapters.FindBookTitleInputAdapter;
 import co.com.bookhive.catalog.services.input.adapters.SearchBooksInputAdapter;
 import co.com.bookhive.catalog.services.input.adapters.SyncAllCatalogsInputAdapter;
 import co.com.bookhive.catalog.services.input.adapters.SyncCatalogInputAdapter;
 import co.com.bookhive.catalog.services.input.adapters.mapper.SearchBooksMapperImpl;
+import co.com.bookhive.catalog.services.input.ports.FindBookTitleInputPort;
 import co.com.bookhive.catalog.services.input.ports.SearchBooksInputPort;
 import co.com.bookhive.catalog.services.input.ports.SyncAllCatalogsInputPort;
 import co.com.bookhive.catalog.services.input.ports.SyncCatalogInputPort;
@@ -16,6 +18,8 @@ import co.com.bookhive.catalog.services.output.ports.TenantScopePort;
 import co.com.bookhive.catalog.services.output.ports.repositories.BookIndexRepository;
 import co.com.bookhive.catalog.services.output.ports.repositories.BookRepository;
 import co.com.bookhive.catalog.services.output.ports.repositories.CatalogChangeRepository;
+import co.com.bookhive.catalog.services.usecase.book.findbooktitle.FindBookTitleUseCase;
+import co.com.bookhive.catalog.services.usecase.book.findbooktitle.impl.FindBookTitleUseCaseImpl;
 import co.com.bookhive.catalog.services.usecase.book.searchbooks.SearchBooksUseCase;
 import co.com.bookhive.catalog.services.usecase.book.searchbooks.impl.SearchBooksUseCaseImpl;
 import co.com.bookhive.catalog.services.usecase.catalog.syncallcatalogs.SyncAllCatalogsUseCase;
@@ -64,4 +68,13 @@ public class CatalogConfiguration {
 		return new SyncAllCatalogsInputAdapter(syncAllCatalogsUseCase);
 	}
 
+	@Bean
+	FindBookTitleUseCase findBookTitleUseCase(final BookRepository bookRepository) {
+		return new FindBookTitleUseCaseImpl(bookRepository);
+	}
+
+	@Bean
+	FindBookTitleInputPort findBookTitleInputPort(final FindBookTitleUseCase findBookTitleUseCase) {
+		return new FindBookTitleInputAdapter(findBookTitleUseCase);
+	}
 }

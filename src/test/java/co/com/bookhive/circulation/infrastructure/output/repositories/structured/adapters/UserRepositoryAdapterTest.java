@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +17,7 @@ import co.com.bookhive.circulation.services.output.ports.repositories.entities.U
 import co.com.bookhive.circulation.testdata.FakeEntityMapper;
 import co.com.bookhive.circulation.testdata.FakeJpaRepository;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
+import co.com.bookhive.shared.services.output.ports.repositories.criteria.PageCriteria;
 
 class UserRepositoryAdapterTest {
 
@@ -42,6 +44,25 @@ class UserRepositoryAdapterTest {
 		assertTrue(adapter(repository).findByCriteria(UserCriteria.byEmail("   ")).isEmpty());
 		assertTrue(adapter(repository).findByCriteria(null).isEmpty());
 		assertTrue(repository.filters().isEmpty());
+	}
+
+	@Test
+	@DisplayName("busca el usuario por su identificador y sin identificador no consulta")
+	void findsUserById() {
+		final UserRepositoryAdapter adapter = adapter(FakeJpaRepository.storing(jpaUser()));
+
+		assertEquals(Optional.of(USER), adapter.findById(USER).map(UserEntity::getId));
+		assertTrue(adapter.findById(null).isEmpty());
+	}
+
+	@Test
+	@DisplayName("consulta la página pedida")
+	void findsRequestedPage() {
+		final FakeJpaRepository<UserJpaEntity> repository = FakeJpaRepository.storing(jpaUser());
+
+		assertEquals(1, adapter(repository).findAll(PageCriteria.of(2, 10)).size());
+		assertEquals(2, repository.pages().get(0).getPageNumber());
+		assertEquals(1, adapter(repository).findAll(null).size());
 	}
 
 	private static UserRepositoryAdapter adapter(final FakeJpaRepository<UserJpaEntity> repository) {

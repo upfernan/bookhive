@@ -23,6 +23,8 @@ import co.com.bookhive.shared.services.output.ports.repositories.criteria.PageCr
 
 public final class LendBookDomain {
 
+	public static final String NOTICE_KIND = "PRESTAMO_REGISTRADO";
+
 	private UUID id;
 	private UUID bookCopy;
 	private UUID user;

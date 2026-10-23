@@ -89,6 +89,9 @@ public class LoanRepositoryAdapter implements LoanRepository {
 			if (criteria.filtersByStatus()) {
 				predicates.add(builder.equal(root.get("status"), criteria.getStatus()));
 			}
+			if (criteria.filtersByDueDate()) {
+				predicates.add(builder.equal(root.get("dueDate"), criteria.getDueDate()));
+			}
 
 			return builder.and(predicates.toArray(new Predicate[0]));
 		};

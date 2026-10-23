@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import co.com.bookhive.circulation.domain.loan.lendbook.LendBookDomain;
 import co.com.bookhive.circulation.services.output.ports.SessionContextPort;
+import co.com.bookhive.circulation.services.output.ports.entities.NotificationRequestEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanEntity;
 import co.com.bookhive.circulation.services.usecase.loan.lendbook.impl.mapper.LoanDomainMapperImpl;
@@ -38,6 +39,7 @@ class LendBookUseCaseImplTest {
 	private FakeRepositories.Loans loans;
 	private FakeRepositories.Parameters parameters;
 	private List<String> audited;
+	private List<NotificationRequestEntity> notices;
 
 	@BeforeEach
 	void prepare() {
@@ -47,6 +49,7 @@ class LendBookUseCaseImplTest {
 		loans = new FakeRepositories.Loans();
 		parameters = new FakeRepositories.Parameters().with(LOAN_DAYS, 3);
 		audited = new ArrayList<>();
+		notices = new ArrayList<>();
 	}
 
 	@Test
@@ -109,6 +112,32 @@ class LendBookUseCaseImplTest {
 	}
 
 	@Test
+	@DisplayName("pide el correo de préstamo registrado con el usuario, el libro y la fecha de entrega")
+	void requestsLoanRegisteredNotice() {
+		final UUID book = UUIDHelper.generateNew();
+		final BookCopyEntity copy = FakeRepositories.bookCopy(BOOK_COPY, BookCopyEntity.STATUS_AVAILABLE, true);
+		copy.setBook(book);
+		bookCopies = new FakeRepositories.BookCopies().with(copy);
+
+		final LendBookDomain registered = useCase().execute(request());
+
+		assertEquals(List.of(new NotificationRequestEntity(
+				LendBookDomain.NOTICE_KIND, USER, book, registered.getId(), registered.getDueDate())), notices);
+	}
+
+	@Test
+	@DisplayName("no pide el aviso si el préstamo se rechaza")
+	void doesNotRequestNoticeWhenRejected() {
+		fines.withPendingFine();
+		final LendBookUseCaseImpl useCase = useCase();
+		final LendBookDomain request = request();
+
+		assertThrows(BookHiveException.class, () -> useCase.execute(request));
+
+		assertEquals(List.of(), notices);
+	}
+
+	@Test
 	@DisplayName("rechaza el préstamo si no llegan datos")
 	void rejectsNullDomain() {
 		final LendBookUseCaseImpl useCase = useCase();
@@ -125,7 +154,7 @@ class LendBookUseCaseImplTest {
 		final AuditPort audit = this::audit;
 
 		final BookHiveException exception = assertThrows(BookHiveException.class,
-				() -> new LendBookUseCaseImpl(parameters, bookCopies, fines, loans, null, session, audit));
+				() -> new LendBookUseCaseImpl(parameters, bookCopies, fines, loans, null, session, audit, notices::add));
 
 		assertEquals(BookHiveException.Kind.UNEXPECTED, exception.getKind());
 		assertEquals(MessageKey.LOAN_UNEXPECTED, exception.getUserMessageKey());
@@ -133,7 +162,7 @@ class LendBookUseCaseImplTest {
 
 	private LendBookUseCaseImpl useCase() {
 		return new LendBookUseCaseImpl(parameters, bookCopies, fines, loans, new LoanDomainMapperImpl(),
-				new FakeSession(), this::audit);
+				new FakeSession(), this::audit, notices::add);
 	}
 
 	private void audit(final String action, final UUID institution, final UUID person, final String detail) {

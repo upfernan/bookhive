@@ -3,7 +3,9 @@ package co.com.bookhive.circulation.services.usecase.loan.lendbook.impl;
 import java.time.LocalDate;
 
 import co.com.bookhive.circulation.domain.loan.lendbook.LendBookDomain;
+import co.com.bookhive.circulation.services.output.ports.NotificationRequestPort;
 import co.com.bookhive.circulation.services.output.ports.SessionContextPort;
+import co.com.bookhive.circulation.services.output.ports.entities.NotificationRequestEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.FineRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionParametersRepository;
@@ -26,7 +28,9 @@ public final class LendBookUseCaseImpl implements LendBookUseCase {
 	private final LoanDomainMapper loanDomainMapper;
 	private final SessionContextPort sessionContext;
 	private final AuditPort audit;
+	private final NotificationRequestPort notificationRequests;
 
+	@SuppressWarnings("java:S107")
 	public LendBookUseCaseImpl(
 			final InstitutionParametersRepository institutionParametersRepository,
 			final BookCopyRepository bookCopyRepository,
@@ -34,7 +38,8 @@ public final class LendBookUseCaseImpl implements LendBookUseCase {
 			final LoanRepository loanRepository,
 			final LoanDomainMapper loanDomainMapper,
 			final SessionContextPort sessionContext,
-			final AuditPort audit) {
+			final AuditPort audit,
+			final NotificationRequestPort notificationRequests) {
 
 		super();
 		this.institutionParametersRepository = requireDependency(
@@ -45,6 +50,7 @@ public final class LendBookUseCaseImpl implements LendBookUseCase {
 		this.loanDomainMapper = requireDependency(loanDomainMapper, "el mapeador del préstamo");
 		this.sessionContext = requireDependency(sessionContext, "el contexto de la sesión");
 		this.audit = requireDependency(audit, "la auditoría");
+		this.notificationRequests = requireDependency(notificationRequests, "la cola de avisos");
 	}
 
 	@Override
@@ -71,13 +77,20 @@ public final class LendBookUseCaseImpl implements LendBookUseCase {
 
 		loanRepository.create(loanDomainMapper.toEntity(registeredLoan));
 
-		markBookCopyAsLent(registeredLoan);
+		final BookCopyEntity lentCopy = markBookCopyAsLent(registeredLoan);
 
 		audit.record(
 				AuditPort.LOAN_REGISTERED,
 				registeredLoan.getInstitution(),
 				registeredLoan.getLibrarian(),
 				String.valueOf(registeredLoan.getId()));
+
+		notificationRequests.request(new NotificationRequestEntity(
+				LendBookDomain.NOTICE_KIND,
+				registeredLoan.getUser(),
+				lentCopy.getBook(),
+				registeredLoan.getId(),
+				registeredLoan.getDueDate()));
 
 		return registeredLoan;
 	}
@@ -94,13 +107,14 @@ public final class LendBookUseCaseImpl implements LendBookUseCase {
 				domain.getDueDate());
 	}
 
-	private void markBookCopyAsLent(final LendBookDomain loan) {
+	private BookCopyEntity markBookCopyAsLent(final LendBookDomain loan) {
 
 		final BookCopyEntity bookCopy = bookCopyRepository.findById(loan.getBookCopy())
 				.orElseGet(BookCopyEntity::new);
 
 		bookCopy.setStatus(BookCopyEntity.STATUS_LENT);
 		bookCopyRepository.update(bookCopy);
+		return bookCopy;
 	}
 
 	private static LendBookDomain requireLoanData(final LendBookDomain domain) {

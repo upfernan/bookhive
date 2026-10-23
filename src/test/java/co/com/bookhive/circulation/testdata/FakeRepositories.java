@@ -60,6 +60,16 @@ public final class FakeRepositories {
 		}
 
 		@Override
+		public Optional<UserEntity> findById(final UUID id) {
+			return stored.stream().filter(user -> user.getId().equals(id)).findFirst();
+		}
+
+		@Override
+		public List<UserEntity> findAll(final PageCriteria page) {
+			return List.copyOf(stored);
+		}
+
+		@Override
 		public List<UserEntity> findByCriteria(final UserCriteria criteria) {
 			return stored.stream()
 					.filter(user -> user.getEmail().toLowerCase(Locale.ROOT).equals(criteria.getEmail()))
@@ -128,6 +138,17 @@ public final class FakeRepositories {
 		private final List<LoanEntity> active = new ArrayList<>();
 		private final List<LoanEntity> created = new ArrayList<>();
 
+		private final List<LoanCriteria> searches = new ArrayList<>();
+
+		public Loans withActive(final LoanEntity loan) {
+			active.add(loan);
+			return this;
+		}
+
+		public List<LoanCriteria> searches() {
+			return searches;
+		}
+
 		public Loans withActiveLoans(final int amount) {
 			for (int i = 0; i < amount; i++) {
 				active.add(new LoanEntity());
@@ -156,6 +177,7 @@ public final class FakeRepositories {
 
 		@Override
 		public List<LoanEntity> findByCriteria(final LoanCriteria criteria) {
+			searches.add(criteria);
 			return List.copyOf(active);
 		}
 
