@@ -35,6 +35,13 @@ public final class MessageKey {
 	public static final String SEARCH_TEXT_TOO_LONG = "search.text.too-long";
 	public static final String SEARCH_PAGE_INVALID = "search.page.invalid";
 	public static final String SEARCH_UNAVAILABLE = "search.unavailable";
+	public static final String MESSAGING_UNAVAILABLE = "messaging.unavailable";
+	public static final String EMAIL_UNAVAILABLE = "email.unavailable";
+	public static final String NOTIFICATION_DATA_INVALID = "notification.data.invalid";
+	public static final String EMAIL_LOAN_REGISTERED_SUBJECT = "email.loan-registered.subject";
+	public static final String EMAIL_LOAN_REGISTERED_BODY = "email.loan-registered.body";
+	public static final String EMAIL_LOAN_DUE_SOON_SUBJECT = "email.loan-due-soon.subject";
+	public static final String EMAIL_LOAN_DUE_SOON_BODY = "email.loan-due-soon.body";
 	public static final String REQUEST_UNEXPECTED = "request.unexpected";
 	public static final String REQUEST_INVALID_DATA = "request.invalid-data";
 	public static final String REQUEST_UNHANDLED = "request.unhandled";

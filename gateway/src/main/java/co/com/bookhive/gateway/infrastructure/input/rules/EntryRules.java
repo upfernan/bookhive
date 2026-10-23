@@ -21,6 +21,7 @@ public class EntryRules {
 	private final List<Route> publicRoutes;
 	private final List<NamedRoute> sensitiveActions;
 	private final List<PathPattern> administrativePaths;
+	private final List<PathPattern> internalPaths;
 
 	public EntryRules(final EntryRulesProperties properties) {
 		super();
@@ -28,9 +29,8 @@ public class EntryRules {
 		this.sensitiveActions = properties.sensitiveActions().entrySet().stream()
 				.map(EntryRules::namedRoute)
 				.toList();
-		this.administrativePaths = properties.administrativePaths().stream()
-				.map(path -> PathPatternParser.defaultInstance.parse(TextHelper.getDefaultValue(path)))
-				.toList();
+		this.administrativePaths = patternsOf(properties.administrativePaths());
+		this.internalPaths = patternsOf(properties.internalPaths());
 	}
 
 	public boolean isPublic(final ServerHttpRequest request) {
@@ -46,8 +46,22 @@ public class EntryRules {
 	}
 
 	public boolean isAdministrative(final ServerHttpRequest request) {
+		return matchesAny(administrativePaths, request);
+	}
+
+	public boolean isInternal(final ServerHttpRequest request) {
+		return matchesAny(internalPaths, request);
+	}
+
+	private static boolean matchesAny(final List<PathPattern> patterns, final ServerHttpRequest request) {
 		final PathContainer path = request.getPath().pathWithinApplication();
-		return administrativePaths.stream().anyMatch(pattern -> pattern.matches(path));
+		return patterns.stream().anyMatch(pattern -> pattern.matches(path));
+	}
+
+	private static List<PathPattern> patternsOf(final List<String> paths) {
+		return paths.stream()
+				.map(path -> PathPatternParser.defaultInstance.parse(TextHelper.getDefaultValue(path)))
+				.toList();
 	}
 
 	private static NamedRoute namedRoute(final Map.Entry<String, String> entry) {
