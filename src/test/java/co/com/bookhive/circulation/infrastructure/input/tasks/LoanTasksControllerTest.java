@@ -3,7 +3,6 @@ package co.com.bookhive.circulation.infrastructure.input.tasks;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +16,6 @@ import co.com.bookhive.circulation.services.input.dto.request.RemindDueLoansRequ
 import co.com.bookhive.circulation.services.input.dto.response.RemindDueLoansResponseDTO;
 import co.com.bookhive.circulation.services.input.dto.response.ScheduledTaskResponseDTO;
 import co.com.bookhive.circulation.services.input.ports.RemindDueLoansInputPort;
-import co.com.bookhive.crosscutting.helper.DateHelper;
 import co.com.bookhive.crosscutting.tenancy.TenantContext;
 import co.com.bookhive.shared.infrastructure.input.messaging.PubSubPushMessage;
 
@@ -26,7 +24,7 @@ class LoanTasksControllerTest {
 	private final List<String> calls = new ArrayList<>();
 
 	private final RemindDueLoansInputPort remind = request -> {
-		calls.add(TenantContext.get() + " " + request.dueOn());
+		calls.add(TenantContext.get() + " " + request.daysBefore());
 		return new RemindDueLoansResponseDTO(2);
 	};
 
@@ -45,15 +43,14 @@ class LoanTasksControllerTest {
 	}
 
 	@Test
-	@DisplayName("la tarea de una institución recuerda los préstamos que vencen en dos días, dentro de su esquema")
+	@DisplayName("la tarea de una institución pide los recordatorios a dos días, dentro de su esquema")
 	void runsReminderInsideInstitution() {
 		final LoanTasksController controller = new LoanTasksController(() -> new ScheduledTaskResponseDTO(List.of()), remind, 2);
 
 		final var response = controller.runInstitutionTask(push("recordar-vencimientos", "uco"));
 
 		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-		final LocalDate expected = DateHelper.todayInUtc().plusDays(2);
-		assertEquals(List.of("uco " + expected), calls);
+		assertEquals(List.of("uco 2"), calls);
 		assertEquals(TenantContext.SCHEMA_WITHOUT_TENANT, TenantContext.get());
 	}
 

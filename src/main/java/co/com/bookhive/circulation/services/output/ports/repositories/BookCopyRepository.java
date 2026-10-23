@@ -13,4 +13,6 @@ public interface BookCopyRepository
 		FindByCriteriaRepository<BookCopyEntity, BookCopyCriteria>,
 		UpdateRepository<BookCopyEntity> {
 
+	boolean changeStatus(UUID bookCopy, String expectedStatus, String newStatus);
+
 }

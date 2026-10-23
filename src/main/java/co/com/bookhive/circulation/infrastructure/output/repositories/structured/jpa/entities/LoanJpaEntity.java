@@ -27,23 +27,23 @@ public class LoanJpaEntity {
 	private UUID id;
 
 	@ManyToOne
-	@JoinColumn(name = "book_copy_id")
+	@JoinColumn(name = "book_copy_id", updatable = false)
 	private BookCopyJpaEntity bookCopy;
 
 	@ManyToOne
-	@JoinColumn(name = "user_id")
+	@JoinColumn(name = "user_id", updatable = false)
 	private UserJpaEntity user;
 
-	@Column(name = "librarian_id")
+	@Column(name = "librarian_id", updatable = false)
 	private UUID librarian;
 
-	@Column(name = "loan_date")
+	@Column(name = "loan_date", updatable = false)
 	private LocalDate loanDate;
 
-	@Column(name = "due_date")
+	@Column(name = "due_date", updatable = false)
 	private LocalDate dueDate;
 
-	@Column(name = "status")
+	@Column(name = "status", updatable = false)
 	private String status;
 
 	@Column(name = "created_at", insertable = false, updatable = false)

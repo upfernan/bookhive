@@ -31,6 +31,11 @@ public class FineRepositoryAdapter implements FineRepository {
 	}
 
 	@Override
+	public void create(final FineEntity entity) {
+		repository.saveAndFlush(mapper.toJpaEntity(entity));
+	}
+
+	@Override
 	public List<FineEntity> findByCriteria(final FineCriteria criteria) {
 		return repository.findAll(specificationOf(criteria))
 				.stream().map(mapper::toEntity).toList();
@@ -48,6 +53,10 @@ public class FineRepositoryAdapter implements FineRepository {
 
 			if (criteria.filtersByStatus()) {
 				predicates.add(builder.equal(root.get("status"), criteria.getStatus()));
+			}
+
+			if (criteria.filtersByLoan()) {
+				predicates.add(builder.equal(root.get("loan").get("id"), criteria.getLoan()));
 			}
 
 			return builder.and(predicates.toArray(new Predicate[0]));

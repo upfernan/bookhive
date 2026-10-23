@@ -18,8 +18,9 @@ public final class RemindDueLoansInputAdapter implements RemindDueLoansInputPort
 
 	@Override
 	public RemindDueLoansResponseDTO execute(final RemindDueLoansRequestDTO request) {
-		final RemindDueLoansRequestDTO safeRequest = ObjectHelper.getDefaultValue(request, new RemindDueLoansRequestDTO(null));
-		return new RemindDueLoansResponseDTO(useCase.execute(new RemindDueLoansDomain(safeRequest.dueOn(), 0)).reminded());
+		final RemindDueLoansRequestDTO safeRequest = ObjectHelper.getDefaultValue(request, new RemindDueLoansRequestDTO(0));
+		return new RemindDueLoansResponseDTO(
+				useCase.execute(new RemindDueLoansDomain(safeRequest.daysBefore(), null, 0)).reminded());
 	}
 
 }

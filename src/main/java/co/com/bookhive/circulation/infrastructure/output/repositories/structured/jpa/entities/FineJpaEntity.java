@@ -46,7 +46,7 @@ public class FineJpaEntity {
 	@Column(name = "total_amount", updatable = false)
 	private BigDecimal totalAmount;
 
-	@Column(name = "status")
+	@Column(name = "status", updatable = false)
 	private String status;
 
 	@Column(name = "created_at", insertable = false, updatable = false)

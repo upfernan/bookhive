@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import co.com.bookhive.circulation.domain.institution.CurrentInstitution;
 import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.FineRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionParametersRepository;
@@ -19,7 +20,6 @@ import co.com.bookhive.crosscutting.helper.DateHelper;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;
-import co.com.bookhive.shared.services.output.ports.repositories.criteria.PageCriteria;
 
 public final class LendBookDomain {
 
@@ -175,7 +175,7 @@ public final class LendBookDomain {
 					"La fecha del préstamo llegó vacía en LendBookDomain; la fija el servidor.");
 		}
 
-		if (loanDate.isAfter(DateHelper.todayInUtc())) {
+		if (loanDate.isAfter(CurrentInstitution.today(findInstitutionParameters()))) {
 			throw BookHiveException.create(
 					MessageKey.LOAN_DATE_IN_THE_FUTURE,
 					"La fecha del préstamo es posterior a la fecha actual.");
@@ -261,9 +261,7 @@ public final class LendBookDomain {
 	}
 
 	private InstitutionParametersEntity findInstitutionParameters() {
-		return institutionParametersRepository.findAll(PageCriteria.of(0, 1)).stream()
-				.findFirst()
-				.orElseGet(InstitutionParametersEntity::new);
+		return CurrentInstitution.parameters(institutionParametersRepository);
 	}
 
 	private void requireRepositories() {

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.InstitutionParametersEntity;
 import co.com.bookhive.circulation.testdata.FakeRepositories;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.DateHelper;
@@ -167,7 +169,7 @@ class LendBookDomainTest {
 	}
 
 	private static LocalDate today() {
-		return DateHelper.todayInUtc();
+		return DateHelper.todayIn(ZoneId.of(InstitutionParametersEntity.DEFAULT_TIME_ZONE));
 	}
 
 	private static void assertRejected(final String messageKey, final Executable action) {

@@ -11,6 +11,9 @@ public final class MessageKey {
 	public static final String LOAN_DATE_IN_THE_FUTURE = "loan.date.in-the-future";
 	public static final String LOAN_NOT_CONFIRMED = "loan.not-confirmed";
 	public static final String LOAN_UNEXPECTED = "loan.unexpected";
+	public static final String LOAN_RETURN_BOOK_COPY_REQUIRED = "loan.return.book-copy.required";
+	public static final String LOAN_RETURN_NOT_OPEN = "loan.return.not-open";
+	public static final String LOAN_RETURN_NOT_CONFIRMED = "loan.return.not-confirmed";
 
 	public static final String BOOK_COPY_NOT_FOUND = "book-copy.not-found";
 	public static final String BOOK_COPY_NOT_AVAILABLE = "book-copy.not-available";
@@ -42,6 +45,8 @@ public final class MessageKey {
 	public static final String EMAIL_LOAN_REGISTERED_BODY = "email.loan-registered.body";
 	public static final String EMAIL_LOAN_DUE_SOON_SUBJECT = "email.loan-due-soon.subject";
 	public static final String EMAIL_LOAN_DUE_SOON_BODY = "email.loan-due-soon.body";
+	public static final String EMAIL_FINE_GENERATED_SUBJECT = "email.fine-generated.subject";
+	public static final String EMAIL_FINE_GENERATED_BODY = "email.fine-generated.body";
 	public static final String REQUEST_UNEXPECTED = "request.unexpected";
 	public static final String REQUEST_INVALID_DATA = "request.invalid-data";
 	public static final String REQUEST_UNHANDLED = "request.unhandled";

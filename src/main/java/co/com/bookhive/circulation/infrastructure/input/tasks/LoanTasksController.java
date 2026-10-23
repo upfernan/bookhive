@@ -16,7 +16,6 @@ import co.com.bookhive.circulation.services.input.dto.response.RemindDueLoansRes
 import co.com.bookhive.circulation.services.input.dto.response.ScheduledTaskResponseDTO;
 import co.com.bookhive.circulation.services.input.ports.RemindDueLoansInputPort;
 import co.com.bookhive.circulation.services.input.ports.ScheduleDueRemindersInputPort;
-import co.com.bookhive.crosscutting.helper.DateHelper;
 import co.com.bookhive.crosscutting.tenancy.TenantContext;
 import co.com.bookhive.shared.infrastructure.input.messaging.PubSubPushMessage;
 
@@ -64,8 +63,7 @@ public class LoanTasksController {
 
 		TenantContext.set(institution);
 		try {
-			final RemindDueLoansResponseDTO response = remindDueLoans.execute(
-					new RemindDueLoansRequestDTO(DateHelper.todayInUtc().plusDays(daysBefore)));
+			final RemindDueLoansResponseDTO response = remindDueLoans.execute(new RemindDueLoansRequestDTO(daysBefore));
 			logger.info("Recordatorios pedidos en {}: {}.", institution, response.reminded());
 		} finally {
 			TenantContext.clear();

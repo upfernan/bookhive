@@ -45,7 +45,7 @@ class LendBookInputAdapterTest {
 
 		assertEquals(bookCopy, useCase.received.getBookCopy());
 		assertEquals(user, useCase.received.getUser());
-		assertEquals(DateHelper.todayInUtc(), useCase.received.getLoanDate());
+		assertEquals(DateHelper.getDefaultValue(), useCase.received.getLoanDate());
 	}
 
 	@Test

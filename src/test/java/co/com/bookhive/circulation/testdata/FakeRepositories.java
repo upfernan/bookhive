@@ -1,24 +1,29 @@
 package co.com.bookhive.circulation.testdata;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.FineRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionParametersRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.LoanRepository;
+import co.com.bookhive.circulation.services.output.ports.repositories.LoanReturnRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.UserRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.BookCopyCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.FineCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.LoanCriteria;
+import co.com.bookhive.circulation.services.output.ports.repositories.criteria.LoanReturnCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.UserCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.FineEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.InstitutionParametersEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanReturnEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.UserEntity;
 import co.com.bookhive.shared.services.output.ports.repositories.criteria.PageCriteria;
 
@@ -82,14 +87,25 @@ public final class FakeRepositories {
 
 		private final List<BookCopyEntity> stored = new ArrayList<>();
 		private final List<BookCopyEntity> updated = new ArrayList<>();
+		private final List<String> statusChanges = new ArrayList<>();
+		private boolean changedByOther;
 
 		public BookCopies with(final BookCopyEntity bookCopy) {
 			stored.add(bookCopy);
 			return this;
 		}
 
+		public BookCopies changedByOtherRequest() {
+			changedByOther = true;
+			return this;
+		}
+
 		public List<BookCopyEntity> updated() {
 			return updated;
+		}
+
+		public List<String> statusChanges() {
+			return statusChanges;
 		}
 
 		@Override
@@ -117,19 +133,51 @@ public final class FakeRepositories {
 			updated.add(entity);
 		}
 
+		@Override
+		public boolean changeStatus(final UUID bookCopy, final String expectedStatus, final String newStatus) {
+			if (changedByOther) {
+				return false;
+			}
+			final Optional<BookCopyEntity> found = findById(bookCopy)
+					.filter(copy -> copy.getStatus().equals(expectedStatus));
+			found.ifPresent(copy -> {
+				copy.setStatus(newStatus);
+				statusChanges.add(bookCopy + ":" + expectedStatus + "->" + newStatus);
+			});
+			return found.isPresent();
+		}
+
 	}
 
 	public static final class Fines implements FineRepository {
 
 		private final List<FineEntity> pending = new ArrayList<>();
+		private final List<FineEntity> created = new ArrayList<>();
 
 		public Fines withPendingFine() {
 			pending.add(new FineEntity());
 			return this;
 		}
 
+		public Fines withFine(final FineEntity fine) {
+			pending.add(fine);
+			return this;
+		}
+
+		public List<FineEntity> created() {
+			return created;
+		}
+
+		@Override
+		public void create(final FineEntity entity) {
+			created.add(entity);
+		}
+
 		@Override
 		public List<FineEntity> findByCriteria(final FineCriteria criteria) {
+			if (criteria.filtersByLoan()) {
+				return pending.stream().filter(fine -> fine.getLoan().getId().equals(criteria.getLoan())).toList();
+			}
 			return List.copyOf(pending);
 		}
 
@@ -139,6 +187,7 @@ public final class FakeRepositories {
 
 		private final List<LoanEntity> active = new ArrayList<>();
 		private final List<LoanEntity> created = new ArrayList<>();
+		private final List<LoanEntity> stored = new ArrayList<>();
 
 		private final List<LoanCriteria> searches = new ArrayList<>();
 
@@ -167,9 +216,17 @@ public final class FakeRepositories {
 			created.add(entity);
 		}
 
+		public Loans withReturned(final LoanEntity loan) {
+			stored.add(loan);
+			return this;
+		}
+
 		@Override
 		public Optional<LoanEntity> findById(final UUID id) {
-			return created.stream().filter(loan -> loan.getId().equals(id)).findFirst();
+			return Stream.of(created, active, stored)
+					.flatMap(List::stream)
+					.filter(loan -> loan.getId().equals(id))
+					.findFirst();
 		}
 
 		@Override
@@ -190,9 +247,23 @@ public final class FakeRepositories {
 		private final List<InstitutionParametersEntity> stored = new ArrayList<>();
 
 		public Parameters with(final int loanDays, final int maxConcurrentLoans) {
+			return with(loanDays, maxConcurrentLoans, BigDecimal.ZERO);
+		}
+
+		public Parameters with(final int loanDays, final int maxConcurrentLoans, final BigDecimal dailyFineRate) {
+			return with(loanDays, maxConcurrentLoans, dailyFineRate, InstitutionParametersEntity.DEFAULT_TIME_ZONE);
+		}
+
+		public Parameters with(
+				final int loanDays,
+				final int maxConcurrentLoans,
+				final BigDecimal dailyFineRate,
+				final String timeZone) {
 			final InstitutionParametersEntity parameters = new InstitutionParametersEntity();
 			parameters.setLoanDays(loanDays);
 			parameters.setMaxConcurrentLoans(maxConcurrentLoans);
+			parameters.setDailyFineRate(dailyFineRate);
+			parameters.setTimeZone(timeZone);
 			stored.add(parameters);
 			return this;
 		}
@@ -205,6 +276,34 @@ public final class FakeRepositories {
 		@Override
 		public List<InstitutionParametersEntity> findAll(final PageCriteria page) {
 			return List.copyOf(stored);
+		}
+
+	}
+
+	public static final class LoanReturns implements LoanReturnRepository {
+
+		private final List<LoanReturnEntity> created = new ArrayList<>();
+		private final List<LoanReturnEntity> stored = new ArrayList<>();
+
+		public LoanReturns with(final LoanReturnEntity loanReturn) {
+			stored.add(loanReturn);
+			return this;
+		}
+
+		public List<LoanReturnEntity> created() {
+			return created;
+		}
+
+		@Override
+		public void create(final LoanReturnEntity entity) {
+			created.add(entity);
+		}
+
+		@Override
+		public List<LoanReturnEntity> findByCriteria(final LoanReturnCriteria criteria) {
+			return stored.stream()
+					.filter(loanReturn -> loanReturn.getReturnDate().equals(criteria.getReturnDate()))
+					.toList();
 		}
 
 	}

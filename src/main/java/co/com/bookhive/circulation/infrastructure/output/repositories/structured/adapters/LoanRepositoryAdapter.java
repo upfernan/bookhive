@@ -1,36 +1,30 @@
 package co.com.bookhive.circulation.infrastructure.output.repositories.structured.adapters;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Locale;
 import java.util.UUID;
 
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.LoanJpaRepository;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.LoanJpaEntity;
+import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.LoanReturnJpaEntity;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.mapper.EntityMapper;
 import co.com.bookhive.circulation.services.output.ports.repositories.LoanRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.LoanCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanEntity;
-import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
-import co.com.bookhive.crosscutting.helper.TextHelper;
-import co.com.bookhive.crosscutting.messages.MessageKey;
 import co.com.bookhive.shared.services.output.ports.repositories.criteria.PageCriteria;
 
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 
 @Component
 public class LoanRepositoryAdapter implements LoanRepository {
-
-	private static final String ACTIVE_LOAN_INDEX = "uq_loan_book_copy_active";
-	private static final String UNIQUE_VIOLATION = "23505";
 
 	private final LoanJpaRepository repository;
 	private final EntityMapper<LoanEntity, LoanJpaEntity> mapper;
@@ -46,16 +40,7 @@ public class LoanRepositoryAdapter implements LoanRepository {
 
 	@Override
 	public void create(final LoanEntity entity) {
-		try {
-			repository.saveAndFlush(mapper.toJpaEntity(entity));
-		} catch (final RuntimeException exception) {
-			if (isActiveLoanCollision(exception)) {
-				throw BookHiveException.createConflict(
-						MessageKey.BOOK_COPY_NOT_AVAILABLE,
-						"Dos préstamos simultáneos del mismo ejemplar: la base de datos rechazó el segundo (RT-01).");
-			}
-			throw exception;
-		}
+		repository.saveAndFlush(mapper.toJpaEntity(entity));
 	}
 
 	@Override
@@ -86,42 +71,24 @@ public class LoanRepositoryAdapter implements LoanRepository {
 				predicates.add(builder.equal(root.get("user").get("id"), criteria.getUser()));
 			}
 
-			if (criteria.filtersByStatus()) {
-				predicates.add(builder.equal(root.get("status"), criteria.getStatus()));
-			}
 			if (criteria.filtersByDueDate()) {
 				predicates.add(builder.equal(root.get("dueDate"), criteria.getDueDate()));
 			}
 
+			if (criteria.filtersByBookCopy()) {
+				predicates.add(builder.equal(root.get("bookCopy").get("id"), criteria.getBookCopy()));
+			}
+
+			if (criteria.onlyOpen()) {
+				final Subquery<UUID> returned = query.subquery(UUID.class);
+				final Root<LoanReturnJpaEntity> loanReturn = returned.from(LoanReturnJpaEntity.class);
+				returned.select(loanReturn.get("loan"))
+						.where(builder.equal(loanReturn.get("loan"), root.get("id")));
+				predicates.add(builder.not(builder.exists(returned)));
+			}
+
 			return builder.and(predicates.toArray(new Predicate[0]));
 		};
-	}
-
-	private static boolean isActiveLoanCollision(final Throwable exception) {
-
-		Throwable current = exception;
-
-		while (!ObjectHelper.isNull(current)) {
-
-			if (current instanceof ConstraintViolationException violation
-					&& mentionsActiveLoanIndex(violation.getConstraintName())) {
-				return true;
-			}
-
-			if (current instanceof SQLException sql
-					&& UNIQUE_VIOLATION.equals(sql.getSQLState())
-					&& mentionsActiveLoanIndex(sql.getMessage())) {
-				return true;
-			}
-
-			current = current.getCause();
-		}
-
-		return false;
-	}
-
-	private static boolean mentionsActiveLoanIndex(final String text) {
-		return TextHelper.getDefaultValue(text).toLowerCase(Locale.ROOT).contains(ACTIVE_LOAN_INDEX);
 	}
 
 }

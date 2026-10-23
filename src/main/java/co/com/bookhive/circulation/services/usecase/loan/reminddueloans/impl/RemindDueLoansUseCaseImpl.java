@@ -2,9 +2,11 @@ package co.com.bookhive.circulation.services.usecase.loan.reminddueloans.impl;
 
 import java.util.List;
 
+import co.com.bookhive.circulation.domain.institution.CurrentInstitution;
 import co.com.bookhive.circulation.domain.loan.reminddueloans.RemindDueLoansDomain;
 import co.com.bookhive.circulation.services.output.ports.NotificationRequestPort;
 import co.com.bookhive.circulation.services.output.ports.entities.NotificationRequestEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionParametersRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.LoanRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.LoanCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanEntity;
@@ -16,21 +18,26 @@ import co.com.bookhive.crosscutting.messages.MessageKey;
 
 public final class RemindDueLoansUseCaseImpl implements RemindDueLoansUseCase {
 
+	private final InstitutionParametersRepository institutionParametersRepository;
 	private final LoanRepository loanRepository;
 	private final NotificationRequestPort notificationRequests;
 
 	public RemindDueLoansUseCaseImpl(
+			final InstitutionParametersRepository institutionParametersRepository,
 			final LoanRepository loanRepository,
 			final NotificationRequestPort notificationRequests) {
 
 		super();
+		this.institutionParametersRepository = requireDependency(
+				institutionParametersRepository, "el repositorio de parámetros de la institución");
 		this.loanRepository = requireDependency(loanRepository, "el repositorio de préstamos");
 		this.notificationRequests = requireDependency(notificationRequests, "la cola de avisos");
 	}
 
 	@Override
 	public RemindDueLoansDomain execute(final RemindDueLoansDomain domain) {
-		final RemindDueLoansDomain reminder = ObjectHelper.getDefaultValue(domain, new RemindDueLoansDomain(null, 0));
+		final RemindDueLoansDomain reminder = ObjectHelper.getDefaultValue(domain, new RemindDueLoansDomain(0, null, 0))
+				.from(CurrentInstitution.today(CurrentInstitution.parameters(institutionParametersRepository)));
 		reminder.validate();
 
 		final List<LoanEntity> loans = loanRepository.findByCriteria(LoanCriteria.activeDueOn(reminder.dueOn())).stream()

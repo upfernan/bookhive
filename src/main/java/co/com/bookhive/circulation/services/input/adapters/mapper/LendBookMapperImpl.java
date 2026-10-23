@@ -26,7 +26,7 @@ public final class LendBookMapperImpl implements LendBookMapper {
 				request.getUser(),
 				UUIDHelper.getDefaultValue(),
 				UUIDHelper.getDefaultValue(),
-				DateHelper.todayInUtc(),
+				DateHelper.getDefaultValue(),
 				DateHelper.getDefaultValue());
 	}
 

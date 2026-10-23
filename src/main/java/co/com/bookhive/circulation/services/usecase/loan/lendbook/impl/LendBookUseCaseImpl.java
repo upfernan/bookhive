@@ -2,6 +2,7 @@ package co.com.bookhive.circulation.services.usecase.loan.lendbook.impl;
 
 import java.time.LocalDate;
 
+import co.com.bookhive.circulation.domain.institution.CurrentInstitution;
 import co.com.bookhive.circulation.domain.loan.lendbook.LendBookDomain;
 import co.com.bookhive.circulation.services.output.ports.NotificationRequestPort;
 import co.com.bookhive.circulation.services.output.ports.SessionContextPort;
@@ -56,13 +57,24 @@ public final class LendBookUseCaseImpl implements LendBookUseCase {
 	@Override
 	public LendBookDomain execute(final LendBookDomain domain) {
 
-		final LendBookDomain loan = withSession(requireLoanData(domain)).withRepositories(
+		final LendBookDomain loan = withSession(requireLoanData(domain), today()).withRepositories(
 				bookCopyRepository,
 				fineRepository,
 				loanRepository,
 				institutionParametersRepository);
 
 		loan.validate();
+
+		final BookCopyEntity lentCopy = bookCopyRepository.findById(loan.getBookCopy())
+				.orElseGet(BookCopyEntity::new);
+
+		if (!bookCopyRepository.changeStatus(
+				loan.getBookCopy(), BookCopyEntity.STATUS_AVAILABLE, BookCopyEntity.STATUS_LENT)) {
+			throw BookHiveException.createConflict(
+					MessageKey.BOOK_COPY_NOT_AVAILABLE,
+					"Otro préstamo del ejemplar " + loan.getBookCopy()
+							+ " se registró al mismo tiempo; el ejemplar ya no estaba DISPONIBLE (RT-01).");
+		}
 
 		final LocalDate dueDate = loan.calculateDueDate();
 
@@ -76,8 +88,6 @@ public final class LendBookUseCaseImpl implements LendBookUseCase {
 				dueDate);
 
 		loanRepository.create(loanDomainMapper.toEntity(registeredLoan));
-
-		final BookCopyEntity lentCopy = markBookCopyAsLent(registeredLoan);
 
 		audit.record(
 				AuditPort.LOAN_REGISTERED,
@@ -95,7 +105,7 @@ public final class LendBookUseCaseImpl implements LendBookUseCase {
 		return registeredLoan;
 	}
 
-	private LendBookDomain withSession(final LendBookDomain domain) {
+	private LendBookDomain withSession(final LendBookDomain domain, final LocalDate today) {
 
 		return new LendBookDomain(
 				domain.getId(),
@@ -103,18 +113,12 @@ public final class LendBookUseCaseImpl implements LendBookUseCase {
 				domain.getUser(),
 				sessionContext.getInstitution(),
 				sessionContext.getLibrarian(),
-				domain.getLoanDate(),
+				today,
 				domain.getDueDate());
 	}
 
-	private BookCopyEntity markBookCopyAsLent(final LendBookDomain loan) {
-
-		final BookCopyEntity bookCopy = bookCopyRepository.findById(loan.getBookCopy())
-				.orElseGet(BookCopyEntity::new);
-
-		bookCopy.setStatus(BookCopyEntity.STATUS_LENT);
-		bookCopyRepository.update(bookCopy);
-		return bookCopy;
+	private LocalDate today() {
+		return CurrentInstitution.today(CurrentInstitution.parameters(institutionParametersRepository));
 	}
 
 	private static LendBookDomain requireLoanData(final LendBookDomain domain) {
