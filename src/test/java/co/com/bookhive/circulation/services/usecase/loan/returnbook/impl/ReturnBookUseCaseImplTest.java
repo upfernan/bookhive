@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -21,6 +22,7 @@ import co.com.bookhive.circulation.services.output.ports.SessionContextPort;
 import co.com.bookhive.circulation.services.output.ports.entities.NotificationRequestEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.FineEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.InstitutionParametersEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanReturnEntity;
 import co.com.bookhive.circulation.testdata.FakeRepositories;
@@ -37,7 +39,7 @@ class ReturnBookUseCaseImplTest {
 	private static final UUID LOAN = UUID.randomUUID();
 	private static final UUID INSTITUTION = UUID.randomUUID();
 	private static final UUID LIBRARIAN = UUID.randomUUID();
-	private static final LocalDate TODAY = DateHelper.todayInUtc();
+	private static final LocalDate TODAY = DateHelper.todayIn(ZoneId.of(InstitutionParametersEntity.DEFAULT_TIME_ZONE));
 
 	private FakeRepositories.BookCopies bookCopies;
 	private FakeRepositories.Loans loans;
@@ -71,8 +73,11 @@ class ReturnBookUseCaseImplTest {
 		assertEquals(0, returned.overdueDays());
 		assertFalse(returned.hasFine());
 		assertEquals(BigDecimal.ZERO, returned.fineAmount());
-		assertEquals(LoanEntity.STATUS_RETURNED, loans.updated().get(0).getStatus());
-		assertEquals(BookCopyEntity.STATUS_AVAILABLE, bookCopies.updated().get(0).getStatus());
+		assertEquals(TODAY, returned.returnDate());
+		assertEquals(BOOK_COPY, returned.bookCopy());
+		assertEquals(LOAN, loanReturns.created().get(0).getLoan());
+		assertEquals(List.of(BOOK_COPY + ":PRESTADO->DISPONIBLE"), bookCopies.statusChanges());
+		assertTrue(bookCopies.updated().isEmpty());
 		assertTrue(fines.created().isEmpty());
 		assertTrue(notices.isEmpty());
 		assertEquals(List.of(AuditPort.LOAN_RETURNED + " " + INSTITUTION + " " + LIBRARIAN + " " + LOAN), audited);
@@ -120,8 +125,64 @@ class ReturnBookUseCaseImplTest {
 
 		assertEquals(MessageKey.LOAN_RETURN_NOT_OPEN, exception.getUserMessageKey());
 		assertTrue(loanReturns.created().isEmpty());
-		assertTrue(loans.updated().isEmpty());
+		assertTrue(bookCopies.statusChanges().isEmpty());
 		assertTrue(audited.isEmpty());
+	}
+
+	@Test
+	@DisplayName("si el mismo ejemplar se devuelve otra vez el mismo día, responde lo ya registrado sin repetir nada")
+	void repeatedReturnAnswersTheSame() {
+		final LoanEntity loan = loan(LoanEntity.STATUS_ACTIVE, TODAY.minusDays(3));
+		loans.withReturned(loan);
+		loanReturns.with(loanReturn(TODAY, 3));
+		fines.withFine(fineOf(loan));
+
+		final ReturnedLoanDomain returned = useCase().execute(request());
+
+		assertEquals(LOAN, returned.loan());
+		assertEquals(3, returned.overdueDays());
+		assertEquals(new BigDecimal("3000.00"), returned.fineAmount());
+		assertEquals(new BigDecimal("1000.00"), returned.dailyRate());
+		assertTrue(returned.hasFine());
+		assertTrue(loanReturns.created().isEmpty());
+		assertTrue(fines.created().isEmpty());
+		assertTrue(bookCopies.statusChanges().isEmpty());
+		assertTrue(audited.isEmpty());
+		assertTrue(notices.isEmpty());
+	}
+
+	@Test
+	@DisplayName("si otra petición ya devolvió el ejemplar, responde esa devolución; si no la hay, se rechaza")
+	void concurrentReturnAnswersTheOtherOne() {
+		final LoanEntity loan = loan(LoanEntity.STATUS_ACTIVE, TODAY.plusDays(1));
+		loans.withActive(loan);
+		bookCopies.changedByOtherRequest();
+		final ReturnBookUseCaseImpl withoutOther = useCase();
+		final ReturnBookDomain request = request();
+
+		assertEquals(MessageKey.LOAN_RETURN_NOT_OPEN,
+				assertThrows(BookHiveException.class, () -> withoutOther.execute(request)).getUserMessageKey());
+
+		loanReturns.with(loanReturn(TODAY, 0));
+		final ReturnedLoanDomain returned = useCase().execute(request());
+
+		assertEquals(LOAN, returned.loan());
+		assertFalse(returned.hasFine());
+		assertEquals(BigDecimal.ZERO, returned.fineAmount());
+		assertTrue(loanReturns.created().isEmpty());
+		assertTrue(audited.isEmpty());
+	}
+
+	@Test
+	@DisplayName("una devolución de otro día no cuenta como repetida")
+	void oldReturnIsNotARepeat() {
+		loans.withReturned(loan(LoanEntity.STATUS_ACTIVE, TODAY.minusDays(10)));
+		loanReturns.with(loanReturn(TODAY.minusDays(1), 9));
+		final ReturnBookUseCaseImpl useCase = useCase();
+		final ReturnBookDomain request = request();
+
+		assertEquals(MessageKey.LOAN_RETURN_NOT_OPEN,
+				assertThrows(BookHiveException.class, () -> useCase.execute(request)).getUserMessageKey());
 	}
 
 	@Test
@@ -142,7 +203,27 @@ class ReturnBookUseCaseImplTest {
 	}
 
 	private static ReturnBookDomain request() {
-		return new ReturnBookDomain(BOOK_COPY, null, null, TODAY);
+		return new ReturnBookDomain(BOOK_COPY, null, null, null);
+	}
+
+	private static LoanReturnEntity loanReturn(final LocalDate returnDate, final int overdueDays) {
+		final LoanReturnEntity loanReturn = new LoanReturnEntity();
+		loanReturn.setId(UUID.randomUUID());
+		loanReturn.setLoan(LOAN);
+		loanReturn.setReturnDate(returnDate);
+		loanReturn.setOverdueDays(overdueDays);
+		loanReturn.setLibrarian(LIBRARIAN);
+		return loanReturn;
+	}
+
+	private static FineEntity fineOf(final LoanEntity loan) {
+		final FineEntity fine = new FineEntity();
+		fine.setId(UUID.randomUUID());
+		fine.setLoan(loan);
+		fine.setOverdueDays(3);
+		fine.setDailyRate(new BigDecimal("1000.00"));
+		fine.setTotalAmount(new BigDecimal("3000.00"));
+		return fine;
 	}
 
 	private static LoanEntity loan(final String status, final LocalDate dueDate) {

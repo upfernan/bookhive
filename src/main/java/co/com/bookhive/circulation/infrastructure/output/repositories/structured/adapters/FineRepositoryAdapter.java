@@ -55,6 +55,10 @@ public class FineRepositoryAdapter implements FineRepository {
 				predicates.add(builder.equal(root.get("status"), criteria.getStatus()));
 			}
 
+			if (criteria.filtersByLoan()) {
+				predicates.add(builder.equal(root.get("loan").get("id"), criteria.getLoan()));
+			}
+
 			return builder.and(predicates.toArray(new Predicate[0]));
 		};
 	}

@@ -1,9 +1,11 @@
 package co.com.bookhive.circulation.domain.loan.returnbook;
 
-import java.util.Arrays;
+import java.time.LocalDate;
 
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanEntity;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
+import co.com.bookhive.crosscutting.helper.DateHelper;
+import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;
 
 public enum LoanState {
@@ -27,29 +29,32 @@ public enum LoanState {
 		public LoanState returnBook() {
 			throw BookHiveException.createConflict(
 					MessageKey.LOAN_RETURN_NOT_OPEN,
-					"El préstamo ya está en estado " + status() + " y no puede devolverse otra vez.");
+					"El préstamo ya tiene su devolución registrada y no puede devolverse otra vez.");
 		}
 	};
 
-	private final String status;
+	private final String label;
 
-	LoanState(final String status) {
-		this.status = status;
+	LoanState(final String label) {
+		this.label = label;
 	}
 
 	public abstract LoanState returnBook();
 
-	public String status() {
-		return status;
+	public String label() {
+		return label;
 	}
 
-	public static LoanState of(final String status) {
-		return Arrays.stream(values())
-				.filter(state -> state.status.equals(status))
-				.findFirst()
-				.orElseThrow(() -> BookHiveException.createUnexpected(
-						MessageKey.LOAN_UNEXPECTED,
-						"El préstamo tiene un estado desconocido: " + status + "."));
+	public static LoanState of(final LoanEntity loan, final boolean returned, final LocalDate today) {
+		if (returned) {
+			return RETURNED;
+		}
+		if (ObjectHelper.isNull(loan) || DateHelper.isDefaultValue(today)) {
+			throw BookHiveException.createUnexpected(
+					MessageKey.LOAN_UNEXPECTED,
+					"Se pidió el estado de un préstamo sin el préstamo o sin la fecha de hoy.");
+		}
+		return loan.getDueDate().isBefore(today) ? OVERDUE : ACTIVE;
 	}
 
 }

@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import co.com.bookhive.crosscutting.helper.DateHelper;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
+import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,6 +30,9 @@ public class InstitutionParametersJpaEntity {
 	@Column(name = "daily_fine_rate")
 	private BigDecimal dailyFineRate;
 
+	@Column(name = "time_zone")
+	private String timeZone;
+
 	@Column(name = "created_at", insertable = false, updatable = false)
 	private Instant createdAt;
 
@@ -38,6 +42,7 @@ public class InstitutionParametersJpaEntity {
 		setLoanDays(0);
 		setMaxConcurrentLoans(0);
 		setDailyFineRate(BigDecimal.ZERO);
+		setTimeZone("");
 		setCreatedAt(DateHelper.getDefaultTimestamp());
 	}
 
@@ -71,6 +76,14 @@ public class InstitutionParametersJpaEntity {
 
 	public void setDailyFineRate(final BigDecimal dailyFineRate) {
 		this.dailyFineRate = ObjectHelper.getDefaultValue(dailyFineRate, BigDecimal.ZERO);
+	}
+
+	public String getTimeZone() {
+		return timeZone;
+	}
+
+	public void setTimeZone(final String timeZone) {
+		this.timeZone = TextHelper.getDefaultValue(timeZone);
 	}
 
 	public Instant getCreatedAt() {

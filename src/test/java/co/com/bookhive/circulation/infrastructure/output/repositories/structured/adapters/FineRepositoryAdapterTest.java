@@ -55,6 +55,17 @@ class FineRepositoryAdapterTest {
 		assertEquals(List.of("status=" + FineEntity.STATUS_PENDING), repository.filters());
 	}
 
+	@Test
+	@DisplayName("busca la multa de un préstamo")
+	void findsFineOfLoan() {
+		final FakeJpaRepository<FineJpaEntity> repository = FakeJpaRepository.storing();
+		final UUID loan = UUID.randomUUID();
+
+		adapter(repository).findByCriteria(FineCriteria.ofLoan(loan));
+
+		assertEquals(List.of("loan.id=" + loan), repository.filters());
+	}
+
 	private static FineRepositoryAdapter adapter(final FakeJpaRepository<FineJpaEntity> repository) {
 		return new FineRepositoryAdapter(repository.as(FineJpaRepository.class),
 				new FakeEntityMapper<>(FineRepositoryAdapterTest::toEntity, FineRepositoryAdapterTest::toJpaEntity));

@@ -16,6 +16,8 @@ import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRe
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.BookCopyCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
+import co.com.bookhive.crosscutting.helper.TextHelper;
+import co.com.bookhive.crosscutting.helper.UUIDHelper;
 import co.com.bookhive.shared.services.output.ports.repositories.criteria.PageCriteria;
 
 import jakarta.persistence.criteria.Predicate;
@@ -59,6 +61,16 @@ public class BookCopyRepositoryAdapter implements BookCopyRepository {
 	@Override
 	public void update(final BookCopyEntity entity) {
 		repository.save(mapper.toJpaEntity(entity));
+	}
+
+	@Override
+	public boolean changeStatus(final UUID bookCopy, final String expectedStatus, final String newStatus) {
+		if (UUIDHelper.isDefaultValue(bookCopy)
+				|| TextHelper.isDefaultValue(expectedStatus)
+				|| TextHelper.isDefaultValue(newStatus)) {
+			return false;
+		}
+		return repository.changeStatus(bookCopy, expectedStatus.trim(), newStatus.trim()) == 1;
 	}
 
 	private static Specification<BookCopyJpaEntity> specificationOf(final BookCopyCriteria criteria) {

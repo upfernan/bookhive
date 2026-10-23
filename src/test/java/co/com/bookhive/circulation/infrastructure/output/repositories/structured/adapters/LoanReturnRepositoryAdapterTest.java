@@ -3,9 +3,12 @@ package co.com.bookhive.circulation.infrastructure.output.repositories.structure
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Proxy;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.exception.ConstraintViolationException;
@@ -15,6 +18,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.LoanReturnJpaRepository;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.LoanReturnJpaEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.criteria.LoanReturnCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanReturnEntity;
 import co.com.bookhive.circulation.testdata.FakeEntityMapper;
 import co.com.bookhive.circulation.testdata.FakeJpaRepository;
@@ -68,6 +72,37 @@ class LoanReturnRepositoryAdapterTest {
 
 		assertSame(otherConstraint, assertThrows(DataIntegrityViolationException.class, () -> first.create(loanReturn)));
 		assertSame(driverFailure, assertThrows(IllegalStateException.class, () -> second.create(loanReturn)));
+	}
+
+	@Test
+	@DisplayName("busca la devolución de hoy de un ejemplar entre los préstamos de ese ejemplar")
+	void findsReturnOfBookCopyOnDate() {
+		final LoanReturnJpaEntity stored = new LoanReturnJpaEntity();
+		stored.setLoan(LOAN);
+		final FakeJpaRepository<LoanReturnJpaEntity> repository = FakeJpaRepository.storing(stored);
+		final UUID bookCopy = UUID.randomUUID();
+		final LocalDate today = LocalDate.of(2026, 10, 23);
+
+		final List<LoanReturnEntity> found = adapter(repository.as(LoanReturnJpaRepository.class))
+				.findByCriteria(LoanReturnCriteria.ofBookCopyOn(bookCopy, today));
+
+		assertEquals(LOAN, found.get(0).getLoan());
+		assertEquals(3, repository.filters().size());
+		assertEquals("bookCopy.id=" + bookCopy, repository.filters().get(0));
+		assertTrue(repository.filters().get(1).startsWith("loan en "));
+		assertEquals("returnDate=" + today, repository.filters().get(2));
+	}
+
+	@Test
+	@DisplayName("sin ejemplar o sin fecha no consulta")
+	void skipsIncompleteSearch() {
+		final FakeJpaRepository<LoanReturnJpaEntity> repository = FakeJpaRepository.storing(new LoanReturnJpaEntity());
+		final LoanReturnRepositoryAdapter adapter = adapter(repository.as(LoanReturnJpaRepository.class));
+
+		assertTrue(adapter.findByCriteria(LoanReturnCriteria.ofBookCopyOn(null, LocalDate.of(2026, 10, 23))).isEmpty());
+		assertTrue(adapter.findByCriteria(LoanReturnCriteria.ofBookCopyOn(UUID.randomUUID(), null)).isEmpty());
+		assertTrue(adapter.findByCriteria(null).isEmpty());
+		assertTrue(repository.filters().isEmpty());
 	}
 
 	private static LoanReturnRepositoryAdapter failingOnSave(final RuntimeException failure) {

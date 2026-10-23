@@ -132,10 +132,11 @@ public class CirculationConfiguration {
 
 	@Bean
 	RemindDueLoansUseCase remindDueLoansUseCase(
+			final InstitutionParametersRepository institutionParametersRepository,
 			final LoanRepository loanRepository,
 			final NotificationRequestPort notificationRequests) {
 
-		return new RemindDueLoansUseCaseImpl(loanRepository, notificationRequests);
+		return new RemindDueLoansUseCaseImpl(institutionParametersRepository, loanRepository, notificationRequests);
 	}
 
 	@Bean

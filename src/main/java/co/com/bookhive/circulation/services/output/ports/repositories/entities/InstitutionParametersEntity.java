@@ -2,18 +2,22 @@ package co.com.bookhive.circulation.services.output.ports.repositories.entities;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 import co.com.bookhive.crosscutting.helper.DateHelper;
-import co.com.bookhive.crosscutting.helper.ObjectHelper;
+import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
 
 public class InstitutionParametersEntity {
+
+	public static final String DEFAULT_TIME_ZONE = "America/Bogota";
 
 	private UUID id;
 	private int loanDays;
 	private int maxConcurrentLoans;
 	private BigDecimal dailyFineRate;
+	private String timeZone;
 
 	private Instant createdAt;
 
@@ -23,6 +27,7 @@ public class InstitutionParametersEntity {
 		setLoanDays(0);
 		setMaxConcurrentLoans(0);
 		setDailyFineRate(BigDecimal.ZERO);
+		setTimeZone(DEFAULT_TIME_ZONE);
 		setCreatedAt(DateHelper.getDefaultTimestamp());
 	}
 
@@ -55,8 +60,15 @@ public class InstitutionParametersEntity {
 	}
 
 	public void setDailyFineRate(final BigDecimal dailyFineRate) {
-		final BigDecimal rate = ObjectHelper.getDefaultValue(dailyFineRate, BigDecimal.ZERO);
-		this.dailyFineRate = rate.signum() < 0 ? BigDecimal.ZERO : rate;
+		this.dailyFineRate = Optional.ofNullable(dailyFineRate).map(BigDecimal.ZERO::max).orElse(BigDecimal.ZERO);
+	}
+
+	public String getTimeZone() {
+		return timeZone;
+	}
+
+	public void setTimeZone(final String timeZone) {
+		this.timeZone = TextHelper.isDefaultValue(timeZone) ? DEFAULT_TIME_ZONE : timeZone.trim();
 	}
 
 	public Instant getCreatedAt() {

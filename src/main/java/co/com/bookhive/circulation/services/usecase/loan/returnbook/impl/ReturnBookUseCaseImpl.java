@@ -1,6 +1,8 @@
 package co.com.bookhive.circulation.services.usecase.loan.returnbook.impl;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
 
 import co.com.bookhive.circulation.domain.loan.returnbook.FinePolicy;
@@ -15,6 +17,8 @@ import co.com.bookhive.circulation.services.output.ports.repositories.FineReposi
 import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionParametersRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.LoanRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.LoanReturnRepository;
+import co.com.bookhive.circulation.services.output.ports.repositories.criteria.FineCriteria;
+import co.com.bookhive.circulation.services.output.ports.repositories.criteria.LoanReturnCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.FineEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanEntity;
@@ -63,26 +67,34 @@ public final class ReturnBookUseCaseImpl implements ReturnBookUseCase {
 	@Override
 	public ReturnedLoanDomain execute(final ReturnBookDomain domain) {
 
-		final ReturnBookDomain returning = requireReturnData(domain)
+		final ReturnBookDomain withPorts = requireReturnData(domain)
 				.withSession(sessionContext.getInstitution(), sessionContext.getLibrarian())
 				.withRepositories(bookCopyRepository, loanRepository, institutionParametersRepository);
+		final ReturnBookDomain returning = withPorts.withReturnDate(withPorts.today());
 
 		returning.validate();
 
-		final LoanEntity loan = returning.openLoan();
-		final LoanState returned = LoanState.of(loan.getStatus()).returnBook();
-		final int overdueDays = returning.overdueDaysFor(loan.getDueDate());
+		final Optional<LoanEntity> openLoan = returning.findOpenLoan();
+		if (openLoan.isEmpty()) {
+			return alreadyReturnedToday(returning).orElseThrow(returning::notOpen);
+		}
 
+		final LoanEntity loan = openLoan.get();
+		LoanState.of(loan, false, returning.getReturnDate()).returnBook();
+
+		final BookCopyEntity bookCopy = bookCopyRepository.findById(returning.getBookCopy())
+				.orElseGet(BookCopyEntity::new);
+
+		if (!bookCopyRepository.changeStatus(
+				returning.getBookCopy(), BookCopyEntity.STATUS_LENT, BookCopyEntity.STATUS_AVAILABLE)) {
+			return alreadyReturnedToday(returning).orElseThrow(returning::notOpen);
+		}
+
+		final int overdueDays = returning.overdueDaysFor(loan.getDueDate());
 		loanReturnRepository.create(loanReturnOf(loan, returning, overdueDays));
 
-		loan.setStatus(returned.status());
-		loanRepository.update(loan);
-
-		final BookCopyEntity bookCopy = markBookCopyAsAvailable(returning);
-
-		final FinePolicy finePolicy = returning.finePolicy();
 		final FineEntity fine = overdueDays > 0
-				? registerFine(loan, returning, overdueDays, finePolicy)
+				? registerFine(loan, returning, overdueDays, returning.finePolicy())
 				: new FineEntity();
 
 		audit.record(
@@ -100,15 +112,46 @@ public final class ReturnBookUseCaseImpl implements ReturnBookUseCase {
 					loan.getDueDate()));
 		}
 
+		return resultOf(loan, returning.getBookCopy(), returning.getReturnDate(), overdueDays, fine);
+	}
+
+	private Optional<ReturnedLoanDomain> alreadyReturnedToday(final ReturnBookDomain returning) {
+		return loanReturnRepository.findByCriteria(
+				LoanReturnCriteria.ofBookCopyOn(returning.getBookCopy(), returning.getReturnDate()))
+				.stream()
+				.findFirst()
+				.flatMap(loanReturn -> resultOf(loanReturn, returning.getBookCopy()));
+	}
+
+	private Optional<ReturnedLoanDomain> resultOf(final LoanReturnEntity loanReturn, final UUID bookCopy) {
+		return loanRepository.findById(loanReturn.getLoan())
+				.map(loan -> resultOf(
+						loan,
+						bookCopy,
+						loanReturn.getReturnDate(),
+						loanReturn.getOverdueDays(),
+						fineRepository.findByCriteria(FineCriteria.ofLoan(loan.getId())).stream()
+								.findFirst()
+								.orElseGet(FineEntity::new)));
+	}
+
+	private static ReturnedLoanDomain resultOf(
+			final LoanEntity loan,
+			final UUID bookCopy,
+			final LocalDate returnDate,
+			final int overdueDays,
+			final FineEntity fine) {
+
+		final boolean fined = !UUIDHelper.isDefaultValue(fine.getId());
 		return new ReturnedLoanDomain(
 				loan.getId(),
-				returning.getBookCopy(),
+				bookCopy,
 				loan.getDueDate(),
-				returning.getReturnDate(),
+				returnDate,
 				overdueDays,
 				fine.getId(),
-				overdueDays > 0 ? fine.getDailyRate() : BigDecimal.ZERO,
-				fine.getTotalAmount());
+				fined ? fine.getDailyRate() : BigDecimal.ZERO,
+				fined ? fine.getTotalAmount() : BigDecimal.ZERO);
 	}
 
 	private static LoanReturnEntity loanReturnOf(
@@ -121,14 +164,6 @@ public final class ReturnBookUseCaseImpl implements ReturnBookUseCase {
 		loanReturn.setOverdueDays(overdueDays);
 		loanReturn.setLibrarian(returning.getLibrarian());
 		return loanReturn;
-	}
-
-	private BookCopyEntity markBookCopyAsAvailable(final ReturnBookDomain returning) {
-		final BookCopyEntity bookCopy = bookCopyRepository.findById(returning.getBookCopy())
-				.orElseGet(BookCopyEntity::new);
-		bookCopy.setStatus(BookCopyEntity.STATUS_AVAILABLE);
-		bookCopyRepository.update(bookCopy);
-		return bookCopy;
 	}
 
 	private FineEntity registerFine(

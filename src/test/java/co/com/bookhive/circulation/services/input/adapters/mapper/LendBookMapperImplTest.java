@@ -33,7 +33,7 @@ class LendBookMapperImplTest {
 		assertEquals(user, domain.getUser());
 		assertEquals(UUIDHelper.getDefaultValue(), domain.getInstitution());
 		assertEquals(UUIDHelper.getDefaultValue(), domain.getLibrarian());
-		assertEquals(DateHelper.todayInUtc(), domain.getLoanDate());
+		assertEquals(DateHelper.getDefaultValue(), domain.getLoanDate());
 		assertEquals(UUIDHelper.getDefaultValue(), domain.getId());
 	}
 

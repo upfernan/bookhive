@@ -2,8 +2,7 @@ package co.com.bookhive.circulation.domain.loan.returnbook;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-
-import co.com.bookhive.crosscutting.helper.ObjectHelper;
+import java.util.Optional;
 
 public final class DailyRateFinePolicy implements FinePolicy {
 
@@ -13,8 +12,10 @@ public final class DailyRateFinePolicy implements FinePolicy {
 
 	public DailyRateFinePolicy(final BigDecimal rate) {
 		super();
-		final BigDecimal safeRate = ObjectHelper.getDefaultValue(rate, BigDecimal.ZERO);
-		this.rate = (safeRate.signum() < 0 ? BigDecimal.ZERO : safeRate).setScale(MONEY_SCALE, RoundingMode.HALF_UP);
+		this.rate = Optional.ofNullable(rate)
+				.map(BigDecimal.ZERO::max)
+				.orElse(BigDecimal.ZERO)
+				.setScale(MONEY_SCALE, RoundingMode.HALF_UP);
 	}
 
 	@Override

@@ -22,6 +22,7 @@ public final class FakeJpaRepository<T> implements InvocationHandler {
 	private final List<T> saved = new ArrayList<>();
 	private final List<String> filters = new ArrayList<>();
 	private final List<Pageable> pages = new ArrayList<>();
+	private int changedRows = 1;
 
 	private FakeJpaRepository(final List<T> stored) {
 		this.stored = stored;
@@ -35,6 +36,11 @@ public final class FakeJpaRepository<T> implements InvocationHandler {
 	public <R> R as(final Class<R> repositoryType) {
 		return repositoryType.cast(Proxy.newProxyInstance(
 				repositoryType.getClassLoader(), new Class<?>[] { repositoryType }, this));
+	}
+
+	public FakeJpaRepository<T> changingRows(final int rows) {
+		changedRows = rows;
+		return this;
 	}
 
 	public List<T> saved() {
@@ -56,6 +62,7 @@ public final class FakeJpaRepository<T> implements InvocationHandler {
 			case "save", "saveAndFlush" -> save((T) arguments[0]);
 			case "findById" -> stored.stream().findFirst();
 			case "findAll" -> findAll(arguments[0]);
+			case "changeStatus" -> changeStatus(arguments);
 			case "hashCode" -> System.identityHashCode(repository);
 			case "equals" -> repository == arguments[0];
 			default -> "FakeJpaRepository";
@@ -65,6 +72,11 @@ public final class FakeJpaRepository<T> implements InvocationHandler {
 	private T save(final T entity) {
 		saved.add(entity);
 		return entity;
+	}
+
+	private int changeStatus(final Object[] arguments) {
+		filters.add(arguments[0] + ":" + arguments[1] + "->" + arguments[2]);
+		return changedRows;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -102,6 +114,12 @@ public final class FakeJpaRepository<T> implements InvocationHandler {
 		}
 		if ("in".equals(name)) {
 			filters.add(path + " en " + arguments[0]);
+		}
+		if ("exists".equals(name)) {
+			filters.add("existe la subconsulta");
+		}
+		if ("not".equals(name)) {
+			filters.add("negada");
 		}
 		if ("lower".equals(name)) {
 			return criteria(Expression.class, "lower(" + arguments[0] + ")");

@@ -1,6 +1,7 @@
 package co.com.bookhive.circulation.infrastructure.output.repositories.structured.adapters;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -106,6 +107,29 @@ class BookCopyRepositoryAdapterTest {
 		adapter(repository).update(bookCopy);
 
 		assertEquals(BOOK_COPY, repository.saved().get(0).getId());
+	}
+
+	@Test
+	@DisplayName("cambia el estado solo si el ejemplar sigue en el estado esperado, en una sola instrucción")
+	void changesStatusOnlyFromTheExpectedOne() {
+		final FakeJpaRepository<BookCopyJpaEntity> changed = FakeJpaRepository.storing();
+		final FakeJpaRepository<BookCopyJpaEntity> unchanged = FakeJpaRepository.<BookCopyJpaEntity>storing().changingRows(0);
+
+		assertTrue(adapter(changed).changeStatus(BOOK_COPY, " DISPONIBLE ", "PRESTADO"));
+		assertEquals(List.of(BOOK_COPY + ":DISPONIBLE->PRESTADO"), changed.filters());
+		assertFalse(adapter(unchanged).changeStatus(BOOK_COPY, "DISPONIBLE", "PRESTADO"));
+	}
+
+	@Test
+	@DisplayName("sin ejemplar o sin estados no toca la base")
+	void skipsIncompleteStatusChange() {
+		final FakeJpaRepository<BookCopyJpaEntity> repository = FakeJpaRepository.storing();
+		final BookCopyRepositoryAdapter adapter = adapter(repository);
+
+		assertFalse(adapter.changeStatus(null, "DISPONIBLE", "PRESTADO"));
+		assertFalse(adapter.changeStatus(BOOK_COPY, " ", "PRESTADO"));
+		assertFalse(adapter.changeStatus(BOOK_COPY, "DISPONIBLE", null));
+		assertTrue(repository.filters().isEmpty());
 	}
 
 	private static BookCopyRepositoryAdapter adapter(final FakeJpaRepository<BookCopyJpaEntity> repository) {

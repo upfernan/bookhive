@@ -3,6 +3,7 @@ package co.com.bookhive.crosscutting.helper;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 
 public final class DateHelper {
@@ -29,6 +30,16 @@ public final class DateHelper {
 		return LocalDate.ofInstant(
 				ObjectHelper.getDefaultValue(clock, UTC_CLOCK).instant(),
 				ZoneOffset.UTC);
+	}
+
+	public static LocalDate todayIn(final ZoneId zone) {
+		return todayIn(zone, UTC_CLOCK);
+	}
+
+	public static LocalDate todayIn(final ZoneId zone, final Clock clock) {
+		return LocalDate.ofInstant(
+				ObjectHelper.getDefaultValue(clock, UTC_CLOCK).instant(),
+				ObjectHelper.getDefaultValue(zone, ZoneOffset.UTC));
 	}
 
 	public static LocalDate getDefaultValue(final LocalDate value) {

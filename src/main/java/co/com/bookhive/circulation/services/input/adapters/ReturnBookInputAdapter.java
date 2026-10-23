@@ -33,7 +33,7 @@ public final class ReturnBookInputAdapter implements ReturnBookInputPort {
 				request.bookCopy(),
 				UUIDHelper.getDefaultValue(),
 				UUIDHelper.getDefaultValue(),
-				DateHelper.todayInUtc()));
+				DateHelper.getDefaultValue()));
 
 		if (ObjectHelper.isNull(returned)) {
 			throw BookHiveException.create(

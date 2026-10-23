@@ -25,10 +25,10 @@ class ReturnBookInputAdapterTest {
 	private static final UUID LOAN = UUID.randomUUID();
 	private static final UUID BOOK_COPY = UUID.randomUUID();
 	private static final UUID FINE = UUID.randomUUID();
-	private static final LocalDate TODAY = DateHelper.todayInUtc();
+	private static final LocalDate TODAY = LocalDate.of(2026, 10, 23);
 
 	@Test
-	@DisplayName("pasa el ejemplar con la fecha de hoy y devuelve el detalle de la multa")
+	@DisplayName("pasa el ejemplar sin fecha, porque la fija el caso de uso con la zona de la institución, y devuelve el detalle de la multa")
 	void mapsRequestAndResponse() {
 		final List<ReturnBookDomain> received = new ArrayList<>();
 		final ReturnBookInputAdapter adapter = new ReturnBookInputAdapter(domain -> {
@@ -40,7 +40,7 @@ class ReturnBookInputAdapterTest {
 		final ReturnBookResponseDTO response = adapter.execute(new ReturnBookRequestDTO(BOOK_COPY));
 
 		assertEquals(BOOK_COPY, received.get(0).getBookCopy());
-		assertEquals(TODAY, received.get(0).getReturnDate());
+		assertEquals(DateHelper.getDefaultValue(), received.get(0).getReturnDate());
 		assertEquals(new ReturnBookResponseDTO(LOAN, BOOK_COPY, TODAY.minusDays(2), TODAY, 2, true, FINE,
 				new BigDecimal("1000.00"), new BigDecimal("2000.00")), response);
 	}

@@ -6,15 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Proxy;
-import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.dao.DataIntegrityViolationException;
 
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.LoanJpaRepository;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.LoanJpaEntity;
@@ -22,9 +20,7 @@ import co.com.bookhive.circulation.services.output.ports.repositories.criteria.L
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanEntity;
 import co.com.bookhive.circulation.testdata.FakeEntityMapper;
 import co.com.bookhive.circulation.testdata.FakeJpaRepository;
-import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
-import co.com.bookhive.crosscutting.messages.MessageKey;
 import co.com.bookhive.shared.services.output.ports.repositories.criteria.PageCriteria;
 
 class LoanRepositoryAdapterTest {
@@ -85,95 +81,53 @@ class LoanRepositoryAdapterTest {
 	}
 
 	@Test
-	@DisplayName("filtra los préstamos activos del usuario")
+	@DisplayName("los préstamos activos del usuario son los que no tienen devolución registrada")
 	void findsActiveLoansOfUser() {
 		final FakeJpaRepository<LoanJpaEntity> repository = FakeJpaRepository.storing(jpaLoan());
 
 		final List<LoanEntity> loans = adapter(repository).findByCriteria(LoanCriteria.activeByUser(USER));
 
 		assertEquals(1, loans.size());
-		assertEquals(List.of("user.id=" + USER, "status=" + LoanEntity.STATUS_ACTIVE), repository.filters());
+		assertEquals(List.of("user.id=" + USER, "loan=id", "existe la subconsulta", "negada"), repository.filters());
 	}
 
 	@Test
-	@DisplayName("busca el préstamo activo o vencido del ejemplar que se devuelve")
+	@DisplayName("busca el préstamo sin devolución del ejemplar que se devuelve")
 	void findsOpenLoanOfBookCopy() {
 		final FakeJpaRepository<LoanJpaEntity> repository = FakeJpaRepository.storing(jpaLoan());
 		final UUID bookCopy = UUID.randomUUID();
 
 		adapter(repository).findByCriteria(LoanCriteria.openForBookCopy(bookCopy));
 
-		assertEquals(List.of("bookCopy.id=" + bookCopy, "status en [ACTIVO, VENCIDO]"), repository.filters());
+		assertEquals(List.of("bookCopy.id=" + bookCopy, "loan=id", "existe la subconsulta", "negada"),
+				repository.filters());
 	}
 
 	@Test
-	@DisplayName("actualiza el préstamo al devolverlo")
-	void updatesLoan() {
+	@DisplayName("busca los préstamos sin devolución que vencen en una fecha")
+	void findsOpenLoansDueOn() {
 		final FakeJpaRepository<LoanJpaEntity> repository = FakeJpaRepository.storing();
-		final LoanEntity loan = new LoanEntity();
-		loan.setId(LOAN);
+		final LocalDate dueDate = LocalDate.of(2026, 10, 25);
 
-		adapter(repository).update(loan);
+		adapter(repository).findByCriteria(LoanCriteria.activeDueOn(dueDate));
 
-		assertEquals(LOAN, repository.saved().get(0).getId());
+		assertEquals(List.of("dueDate=" + dueDate, "loan=id", "existe la subconsulta", "negada"), repository.filters());
 	}
 
 	@Test
-	@DisplayName("sin usuario solo filtra por estado")
-	void filtersOnlyByStatusWithoutUser() {
+	@DisplayName("sin usuario solo deja los préstamos sin devolución")
+	void filtersOnlyOpenLoansWithoutUser() {
 		final FakeJpaRepository<LoanJpaEntity> repository = FakeJpaRepository.storing();
 
 		adapter(repository).findByCriteria(LoanCriteria.activeByUser(null));
 
-		assertEquals(List.of("status=" + LoanEntity.STATUS_ACTIVE), repository.filters());
+		assertEquals(List.of("loan=id", "existe la subconsulta", "negada"), repository.filters());
 	}
 
 	@Test
-	@DisplayName("si dos préstamos del mismo ejemplar llegan al tiempo el segundo se rechaza como ejemplar no disponible")
-	void simultaneousLoanIsConflict() {
-		final LoanRepositoryAdapter adapter = failingOnSave(new DataIntegrityViolationException(
-				"No se pudo guardar.",
-				new ConstraintViolationException("Duplicado.", new SQLException("Duplicado.", "23505"),
-						"uq_loan_book_copy_active")));
-		final LoanEntity loan = new LoanEntity();
-
-		final BookHiveException exception = assertThrows(BookHiveException.class, () -> adapter.create(loan));
-
-		assertEquals(BookHiveException.Kind.STATE_DOES_NOT_ALLOW_IT, exception.getKind());
-		assertEquals(MessageKey.BOOK_COPY_NOT_AVAILABLE, exception.getUserMessageKey());
-	}
-
-	@Test
-	@DisplayName("el choque también se reconoce cuando solo llega el error del driver")
-	void simultaneousLoanFromDriverIsConflict() {
-		final LoanRepositoryAdapter adapter = failingOnSave(new DataIntegrityViolationException(
-				"No se pudo guardar.",
-				new SQLException("duplicate key value violates unique constraint \"uq_loan_book_copy_active\"",
-						"23505")));
-		final LoanEntity loan = new LoanEntity();
-
-		final BookHiveException exception = assertThrows(BookHiveException.class, () -> adapter.create(loan));
-
-		assertEquals(MessageKey.BOOK_COPY_NOT_AVAILABLE, exception.getUserMessageKey());
-	}
-
-	@Test
-	@DisplayName("otra restricción de la base de datos sigue como error inesperado")
-	void otherConstraintIsRethrown() {
-		final DataIntegrityViolationException failure = new DataIntegrityViolationException(
-				"No se pudo guardar.",
-				new ConstraintViolationException("Otra.", new SQLException("Otra.", "23505"), "uq_book_copy_barcode"));
-		final LoanRepositoryAdapter adapter = failingOnSave(failure);
-		final LoanEntity loan = new LoanEntity();
-
-		assertSame(failure, assertThrows(DataIntegrityViolationException.class, () -> adapter.create(loan)));
-	}
-
-	@Test
-	@DisplayName("un error del driver que no es de duplicado sigue como error inesperado")
-	void otherDriverErrorIsRethrown() {
-		final IllegalStateException failure =
-				new IllegalStateException("Falló.", new SQLException("uq_loan_book_copy_active", "08006"));
+	@DisplayName("un error al guardar el préstamo se propaga tal cual: el candado está en el ejemplar")
+	void saveErrorIsRethrown() {
+		final IllegalStateException failure = new IllegalStateException("Falló.");
 		final LoanRepositoryAdapter adapter = failingOnSave(failure);
 		final LoanEntity loan = new LoanEntity();
 

@@ -2,9 +2,10 @@ package co.com.bookhive.circulation.domain.loan.returnbook;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
+import co.com.bookhive.circulation.domain.institution.CurrentInstitution;
 import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionParametersRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.LoanRepository;
@@ -16,7 +17,6 @@ import co.com.bookhive.crosscutting.helper.DateHelper;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;
-import co.com.bookhive.shared.services.output.ports.repositories.criteria.PageCriteria;
 
 public final class ReturnBookDomain {
 
@@ -45,11 +45,11 @@ public final class ReturnBookDomain {
 	}
 
 	public ReturnBookDomain withSession(final UUID sessionInstitution, final UUID sessionLibrarian) {
-		final ReturnBookDomain withSession = new ReturnBookDomain(bookCopy, sessionInstitution, sessionLibrarian, returnDate);
-		withSession.bookCopyRepository = bookCopyRepository;
-		withSession.loanRepository = loanRepository;
-		withSession.institutionParametersRepository = institutionParametersRepository;
-		return withSession;
+		return copyWith(sessionInstitution, sessionLibrarian, returnDate);
+	}
+
+	public ReturnBookDomain withReturnDate(final LocalDate date) {
+		return copyWith(institution, librarian, date);
 	}
 
 	public ReturnBookDomain withRepositories(
@@ -72,18 +72,17 @@ public final class ReturnBookDomain {
 		validateReturnDate();
 		validateInstitutionParameters();
 		validateBookCopyExists();
-		openLoan();
 	}
 
-	public LoanEntity openLoan() {
+	public Optional<LoanEntity> findOpenLoan() {
 		requireRepositories();
-		final List<LoanEntity> open = loanRepository.findByCriteria(LoanCriteria.openForBookCopy(bookCopy));
-		if (open.isEmpty()) {
-			throw BookHiveException.createConflict(
-					MessageKey.LOAN_RETURN_NOT_OPEN,
-					"El ejemplar " + bookCopy + " no tiene un préstamo activo o vencido en la institución en curso.");
-		}
-		return open.get(0);
+		return loanRepository.findByCriteria(LoanCriteria.openForBookCopy(bookCopy)).stream().findFirst();
+	}
+
+	public BookHiveException notOpen() {
+		return BookHiveException.createConflict(
+				MessageKey.LOAN_RETURN_NOT_OPEN,
+				"El ejemplar " + bookCopy + " no tiene un préstamo sin devolución en la institución en curso.");
 	}
 
 	public int overdueDaysFor(final LocalDate dueDate) {
@@ -96,6 +95,11 @@ public final class ReturnBookDomain {
 	public FinePolicy finePolicy() {
 		requireRepositories();
 		return new DailyRateFinePolicy(findInstitutionParameters().getDailyFineRate());
+	}
+
+	public LocalDate today() {
+		requireRepositories();
+		return CurrentInstitution.today(findInstitutionParameters());
 	}
 
 	public UUID getBookCopy() {
@@ -144,7 +148,7 @@ public final class ReturnBookDomain {
 					MessageKey.LOAN_DATE_REQUIRED,
 					"La fecha de devolución llegó vacía en ReturnBookDomain; la fija el servidor.");
 		}
-		if (returnDate.isAfter(DateHelper.todayInUtc())) {
+		if (returnDate.isAfter(today())) {
 			throw BookHiveException.create(
 					MessageKey.LOAN_DATE_IN_THE_FUTURE,
 					"La fecha de devolución es posterior a la fecha actual.");
@@ -170,9 +174,15 @@ public final class ReturnBookDomain {
 	}
 
 	private InstitutionParametersEntity findInstitutionParameters() {
-		return institutionParametersRepository.findAll(PageCriteria.of(0, 1)).stream()
-				.findFirst()
-				.orElseGet(InstitutionParametersEntity::new);
+		return CurrentInstitution.parameters(institutionParametersRepository);
+	}
+
+	private ReturnBookDomain copyWith(final UUID newInstitution, final UUID newLibrarian, final LocalDate newReturnDate) {
+		final ReturnBookDomain copy = new ReturnBookDomain(bookCopy, newInstitution, newLibrarian, newReturnDate);
+		copy.bookCopyRepository = bookCopyRepository;
+		copy.loanRepository = loanRepository;
+		copy.institutionParametersRepository = institutionParametersRepository;
+		return copy;
 	}
 
 	private void requireRepositories() {

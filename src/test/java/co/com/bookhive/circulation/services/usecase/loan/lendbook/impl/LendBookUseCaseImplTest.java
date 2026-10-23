@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -17,6 +19,7 @@ import co.com.bookhive.circulation.domain.loan.lendbook.LendBookDomain;
 import co.com.bookhive.circulation.services.output.ports.SessionContextPort;
 import co.com.bookhive.circulation.services.output.ports.entities.NotificationRequestEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.InstitutionParametersEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanEntity;
 import co.com.bookhive.circulation.services.usecase.loan.lendbook.impl.mapper.LoanDomainMapperImpl;
 import co.com.bookhive.circulation.testdata.FakeRepositories;
@@ -27,6 +30,8 @@ import co.com.bookhive.crosscutting.messages.MessageKey;
 import co.com.bookhive.shared.services.output.ports.AuditPort;
 
 class LendBookUseCaseImplTest {
+
+	private static final LocalDate TODAY = DateHelper.todayIn(ZoneId.of(InstitutionParametersEntity.DEFAULT_TIME_ZONE));
 
 	private static final UUID BOOK_COPY = UUIDHelper.generateNew();
 	private static final UUID USER = UUIDHelper.generateNew();
@@ -77,7 +82,8 @@ class LendBookUseCaseImplTest {
 
 		assertFalse(UUIDHelper.isDefaultValue(registered.getId()));
 		assertEquals(7, registered.getId().version());
-		assertEquals(DateHelper.todayInUtc().plusDays(LOAN_DAYS), registered.getDueDate());
+		assertEquals(TODAY, registered.getLoanDate());
+		assertEquals(TODAY.plusDays(LOAN_DAYS), registered.getDueDate());
 
 		assertEquals(1, loans.created().size());
 		final LoanEntity saved = loans.created().get(0);
@@ -88,12 +94,28 @@ class LendBookUseCaseImplTest {
 	}
 
 	@Test
-	@DisplayName("marca el ejemplar como prestado")
+	@DisplayName("marca el ejemplar como prestado solo si sigue disponible, en una sola instrucción")
 	void marksBookCopyAsLent() {
 		useCase().execute(request());
 
-		assertEquals(1, bookCopies.updated().size());
-		assertEquals(BookCopyEntity.STATUS_LENT, bookCopies.updated().get(0).getStatus());
+		assertEquals(List.of(BOOK_COPY + ":DISPONIBLE->PRESTADO"), bookCopies.statusChanges());
+		assertTrue(bookCopies.updated().isEmpty());
+	}
+
+	@Test
+	@DisplayName("si otro préstamo del mismo ejemplar ganó al mismo tiempo, se rechaza sin guardar nada")
+	void simultaneousLoanIsRejected() {
+		bookCopies.changedByOtherRequest();
+		final LendBookUseCaseImpl useCase = useCase();
+		final LendBookDomain request = request();
+
+		final BookHiveException exception = assertThrows(BookHiveException.class, () -> useCase.execute(request));
+
+		assertEquals(MessageKey.BOOK_COPY_NOT_AVAILABLE, exception.getUserMessageKey());
+		assertEquals(BookHiveException.Kind.STATE_DOES_NOT_ALLOW_IT, exception.getKind());
+		assertTrue(loans.created().isEmpty());
+		assertTrue(audited.isEmpty());
+		assertTrue(notices.isEmpty());
 	}
 
 	@Test
@@ -107,7 +129,7 @@ class LendBookUseCaseImplTest {
 
 		assertEquals(MessageKey.USER_WITH_PENDING_FINES, exception.getUserMessageKey());
 		assertTrue(loans.created().isEmpty());
-		assertTrue(bookCopies.updated().isEmpty());
+		assertTrue(bookCopies.statusChanges().isEmpty());
 		assertTrue(audited.isEmpty());
 	}
 
@@ -170,7 +192,7 @@ class LendBookUseCaseImplTest {
 	}
 
 	private static LendBookDomain request() {
-		return new LendBookDomain(null, BOOK_COPY, USER, null, null, DateHelper.todayInUtc(), null);
+		return new LendBookDomain(null, BOOK_COPY, USER, null, null, null, null);
 	}
 
 	private static final class FakeSession implements SessionContextPort {

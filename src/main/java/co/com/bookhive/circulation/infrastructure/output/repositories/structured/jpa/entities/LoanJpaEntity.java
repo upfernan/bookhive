@@ -43,7 +43,7 @@ public class LoanJpaEntity {
 	@Column(name = "due_date", updatable = false)
 	private LocalDate dueDate;
 
-	@Column(name = "status")
+	@Column(name = "status", updatable = false)
 	private String status;
 
 	@Column(name = "created_at", insertable = false, updatable = false)
