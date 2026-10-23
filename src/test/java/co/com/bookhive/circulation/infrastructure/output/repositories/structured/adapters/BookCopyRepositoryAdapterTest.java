@@ -76,6 +76,27 @@ class BookCopyRepositoryAdapterTest {
 	}
 
 	@Test
+	@DisplayName("busca el ejemplar por su código de barras, sin filtrar por libro ni por estado")
+	void findsBookCopyByBarcode() {
+		final FakeJpaRepository<BookCopyJpaEntity> repository = FakeJpaRepository.storing(jpaBookCopy());
+
+		final List<BookCopyEntity> bookCopies =
+				adapter(repository).findByCriteria(BookCopyCriteria.byBarcode("UCO-0001"));
+
+		assertEquals(1, bookCopies.size());
+		assertEquals(List.of("barcode=UCO-0001"), repository.filters());
+	}
+
+	@Test
+	@DisplayName("con un código vacío no consulta ejemplares")
+	void skipsSearchWithoutBarcode() {
+		final FakeJpaRepository<BookCopyJpaEntity> repository = FakeJpaRepository.storing(jpaBookCopy());
+
+		assertTrue(adapter(repository).findByCriteria(BookCopyCriteria.byBarcode("  ")).isEmpty());
+		assertTrue(repository.filters().isEmpty());
+	}
+
+	@Test
 	@DisplayName("guarda el ejemplar actualizado")
 	void updatesBookCopy() {
 		final FakeJpaRepository<BookCopyJpaEntity> repository = FakeJpaRepository.storing();

@@ -49,7 +49,7 @@ public class BookCopyRepositoryAdapter implements BookCopyRepository {
 
 	@Override
 	public List<BookCopyEntity> findByCriteria(final BookCopyCriteria criteria) {
-		if (ObjectHelper.isNull(criteria) || !criteria.filtersByBooks()) {
+		if (ObjectHelper.isNull(criteria) || (!criteria.filtersByBooks() && !criteria.filtersByBarcode())) {
 			return List.of();
 		}
 		return repository.findAll(specificationOf(criteria))
@@ -64,7 +64,12 @@ public class BookCopyRepositoryAdapter implements BookCopyRepository {
 	private static Specification<BookCopyJpaEntity> specificationOf(final BookCopyCriteria criteria) {
 		return (root, query, builder) -> {
 			final List<Predicate> predicates = new ArrayList<>();
-			predicates.add(root.get("book").in(criteria.getBooks()));
+			if (criteria.filtersByBooks()) {
+				predicates.add(root.get("book").in(criteria.getBooks()));
+			}
+			if (criteria.filtersByBarcode()) {
+				predicates.add(builder.equal(root.get("barcode"), criteria.getBarcode()));
+			}
 			if (criteria.excludesStatus()) {
 				predicates.add(builder.notEqual(root.get("status"), criteria.getExcludedStatus()));
 			}

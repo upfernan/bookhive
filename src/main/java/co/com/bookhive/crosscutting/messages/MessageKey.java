@@ -15,6 +15,7 @@ public final class MessageKey {
 	public static final String BOOK_COPY_NOT_FOUND = "book-copy.not-found";
 	public static final String BOOK_COPY_NOT_AVAILABLE = "book-copy.not-available";
 	public static final String BOOK_COPY_REFERENCE_ONLY = "book-copy.reference-only";
+	public static final String BOOK_COPY_BARCODE_REQUIRED = "book-copy.barcode.required";
 
 	public static final String USER_WITH_PENDING_FINES = "user.with-pending-fines";
 	public static final String USER_AT_LOAN_LIMIT = "user.at-loan-limit";
