@@ -25,6 +25,19 @@ class BookCopyCriteriaTest {
 		assertTrue(criteria.excludesStatus());
 		assertEquals(BookCopyEntity.STATUS_WITHDRAWN, criteria.getExcludedStatus());
 		assertFalse(BookCopyCriteria.inService(null).filtersByBooks());
+		assertFalse(criteria.filtersByBarcode());
+	}
+
+	@Test
+	@DisplayName("por código busca el ejemplar exacto sin espacios y sin dejar por fuera ningún estado")
+	void byBarcodeFiltersOnlyByBarcode() {
+		final BookCopyCriteria criteria = BookCopyCriteria.byBarcode("  UCO-0001 ");
+
+		assertEquals("UCO-0001", criteria.getBarcode());
+		assertTrue(criteria.filtersByBarcode());
+		assertFalse(criteria.filtersByBooks());
+		assertFalse(criteria.excludesStatus());
+		assertFalse(BookCopyCriteria.byBarcode(null).filtersByBarcode());
 	}
 
 }
