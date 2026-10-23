@@ -1,0 +1,142 @@
+.home {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.home__intro {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.home__profile {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--bh-wood-text);
+}
+
+.home__title {
+  margin: 0;
+  font-family: var(--bh-display-font);
+  font-size: 46px;
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--bh-walnut-dark);
+}
+
+.home__lead {
+  margin: 0;
+  font-size: 18px;
+  color: var(--bh-wood-text);
+}
+
+.tasks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.task {
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid var(--bh-line);
+  background: var(--bh-paper);
+  color: var(--bh-walnut-dark);
+  text-decoration: none;
+  transition: border-color 120ms ease, transform 120ms ease;
+}
+
+.task:hover {
+  border-color: var(--bh-walnut);
+}
+
+.task:focus-visible {
+  outline: 3px solid var(--bh-honey);
+  outline-offset: 2px;
+}
+
+.task__icon {
+  width: 56px;
+  height: 56px;
+  flex: none;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: var(--bh-walnut);
+  color: var(--bh-honey);
+}
+
+.task__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.task__title {
+  font-family: var(--bh-display-font);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.task__text {
+  color: var(--bh-wood-text);
+}
+
+.task__arrow {
+  flex: none;
+  align-self: center;
+  color: var(--bh-wood);
+  transition: transform 120ms ease;
+}
+
+.task:hover .task__arrow {
+  transform: translateX(3px);
+}
+
+.home__empty {
+  margin: 0;
+  max-width: 640px;
+  padding: 18px 22px;
+  border-radius: 12px;
+  border: 1px solid var(--bh-line);
+  background: var(--bh-paper);
+}
+
+@media (max-width: 760px) {
+  .home__title {
+    font-size: 38px;
+  }
+
+  .task {
+    padding: 20px;
+    gap: 14px;
+  }
+
+  .task__icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .task__title {
+    font-size: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .task,
+  .task__arrow {
+    transition: none;
+  }
+}

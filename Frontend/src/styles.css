@@ -1,0 +1,41 @@
+:root {
+  --bh-walnut: #4a2f24;
+  --bh-walnut-dark: #2e1d16;
+  --bh-wood: #8a5a3c;
+  --bh-honey: #d4a24c;
+  --bh-parchment: #f5eee3;
+  --bh-paper: #fffbf5;
+  --bh-brick: #a3362a;
+  --bh-walnut-light: #5e3d2f;
+  --bh-wood-light: #a98468;
+  --bh-wood-text: #6b4a36;
+  --bh-sand: #e9dcc8;
+  --bh-line: #e4d6c3;
+  --bh-honey-tint: #f6ead2;
+  --bh-honey-line: #e3c98f;
+  --bh-line-soft: #ede2d2;
+  --bh-sand-tint: #f1e6d6;
+  --bh-brick-text: #8e2d23;
+  --bh-brick-tint: #f6e3df;
+  --bh-brick-line: #d9a39a;
+  --bh-success: #2f5a2a;
+  --bh-success-tint: #e7efdf;
+  --bh-success-line: #9dba8e;
+  --bh-display-font: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --bh-body-font: 'Source Sans 3', system-ui, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+
+.grecaptcha-badge {
+  visibility: hidden;
+}

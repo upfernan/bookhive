@@ -1,0 +1,102 @@
+<header class="topbar">
+  <div class="topbar__inner">
+    <a class="brand" routerLink="/inicio" [attr.aria-label]="messages.shell.homeLink" (click)="closeMenu()">
+      <img class="brand__logo" src="/logo.svg" alt="" width="38" height="38" />
+      <span class="brand__wordmark"
+        >{{ messages.brand.wordmarkStart
+        }}<span class="brand__accent">{{ messages.brand.wordmarkEnd }}</span></span
+      >
+    </a>
+
+    <button
+      class="menu-toggle"
+      type="button"
+      aria-controls="main-navigation"
+      [attr.aria-expanded]="menuOpen()"
+      (click)="toggleMenu()"
+    >
+      <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="4" y1="7" x2="20" y2="7" />
+        <line x1="4" y1="12" x2="20" y2="12" />
+        <line x1="4" y1="17" x2="20" y2="17" />
+      </svg>
+      <span>{{ messages.shell.menu }}</span>
+    </button>
+
+    <nav id="main-navigation" class="nav" [class.nav--open]="menuOpen()" [attr.aria-label]="messages.shell.navigation">
+      <a
+        class="nav__link"
+        routerLink="/inicio"
+        routerLinkActive="nav__link--active"
+        ariaCurrentWhenActive="page"
+        (click)="closeMenu()"
+        >{{ messages.shell.home }}</a
+      >
+      @for (section of sections(); track section.path) {
+        <a
+          class="nav__link"
+          [routerLink]="section.path"
+          routerLinkActive="nav__link--active"
+          ariaCurrentWhenActive="page"
+          (click)="closeMenu()"
+          >{{ section.label }}</a
+        >
+      }
+    </nav>
+
+    <button class="account" type="button" [matMenuTriggerFor]="accountMenu" [attr.aria-label]="messages.shell.account">
+      <span class="account__avatar" aria-hidden="true">
+        @if (currentSession.initial()) {
+          {{ currentSession.initial() }}
+        } @else {
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 21a8 8 0 0 1 16 0" />
+          </svg>
+        }
+      </span>
+      <span class="account__summary">
+        <span class="account__role">{{ currentSession.role() || messages.shell.account }}</span>
+        @if (currentSession.institution()) {
+          <span class="account__institution">{{ currentSession.institution() }}</span>
+        }
+      </span>
+      <svg class="account__chevron" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 12 15 18 9" />
+      </svg>
+    </button>
+
+    <mat-menu #accountMenu="matMenu" xPosition="before" class="account-menu">
+      @if (currentSession.email() || profile()) {
+        <div class="account-menu__header">
+          @if (currentSession.email()) {
+            <span class="account-menu__email">{{ currentSession.email() }}</span>
+          }
+          @if (profile()) {
+            <span class="account-menu__profile">{{ profile() }}</span>
+          }
+        </div>
+      }
+      <button mat-menu-item type="button" [disabled]="closing()" (click)="closeSession()">
+        {{ closing() ? messages.session.closing : messages.session.close }}
+      </button>
+    </mat-menu>
+  </div>
+</header>
+
+@if (currentSession.status() === 'unavailable') {
+  <div class="notice" role="status">
+    <p class="notice__text">{{ messages.shell.optionsUnavailable }}</p>
+    <button class="notice__retry" type="button" [disabled]="retrying()" (click)="retry()">
+      {{ messages.shell.retry }}
+    </button>
+  </div>
+}
+
+@if (errorMessage()) {
+  <p class="error" role="alert">{{ errorMessage() }}</p>
+}
+
+<main class="content">
+  <router-outlet />
+</main>

@@ -1,0 +1,55 @@
+<section class="home" aria-labelledby="home-title">
+  <div class="home__intro">
+    @if (profile()) {
+      <p class="home__profile">{{ profile() }}</p>
+    }
+    <h1 id="home-title" class="home__title">{{ messages.home.welcome }}</h1>
+    <p class="home__lead">{{ messages.home.lead }}</p>
+  </div>
+
+  @if (tasks().length > 0) {
+    <ul class="tasks">
+      @for (task of tasks(); track task.path) {
+        <li>
+          <a class="task" [routerLink]="task.path">
+            <span class="task__icon" aria-hidden="true">
+              @switch (task.icon) {
+                @case ('lend') {
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2" />
+                    <path d="M19 17H6a2 2 0 0 0-2 2.5" />
+                    <polyline points="9 10 11.5 12.5 15.5 8" />
+                  </svg>
+                }
+                @case ('search') {
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="6.5" />
+                    <line x1="16" y1="16" x2="20.5" y2="20.5" />
+                  </svg>
+                }
+                @case ('sync') {
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 11a8 8 0 0 0-14.3-4.9L4 8" />
+                    <polyline points="4 3 4 8 9 8" />
+                    <path d="M4 13a8 8 0 0 0 14.3 4.9L20 16" />
+                    <polyline points="20 21 20 16 15 16" />
+                  </svg>
+                }
+              }
+            </span>
+            <span class="task__body">
+              <span class="task__title">{{ task.title }}</span>
+              <span class="task__text">{{ task.description }}</span>
+            </span>
+            <svg class="task__arrow" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <polyline points="13 6 19 12 13 18" />
+            </svg>
+          </a>
+        </li>
+      }
+    </ul>
+  } @else if (currentSession.status() === 'signed-in') {
+    <p class="home__empty">{{ messages.home.noTasks }}</p>
+  }
+</section>

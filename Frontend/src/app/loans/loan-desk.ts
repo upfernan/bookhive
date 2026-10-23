@@ -1,0 +1,60 @@
+import { HttpClient, HttpParams, HttpXsrfTokenExtractor } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
+
+const CSRF_TOKEN_SOURCE_PATH = '/actuator/health';
+const USERS_PATH = '/api/v1/usuarios';
+const BOOK_COPIES_PATH = '/api/v1/ejemplares';
+const LOANS_PATH = '/api/v1/prestamos';
+
+export interface Borrower {
+  readonly id: string;
+  readonly name: string;
+  readonly email: string;
+  readonly activeLoans: number;
+  readonly maxLoans: number;
+  readonly pendingFines: number;
+  readonly blocks: readonly string[];
+}
+
+export interface BookCopy {
+  readonly id: string;
+  readonly barcode: string;
+  readonly title: string;
+  readonly authors: string;
+  readonly branch: string;
+  readonly available: boolean;
+  readonly lendable: boolean;
+  readonly blocks: readonly string[];
+}
+
+export interface RegisteredLoan {
+  readonly loan: string;
+  readonly dueDate: string;
+}
+
+@Injectable({ providedIn: 'root' })
+export class LoanDesk {
+  private readonly http = inject(HttpClient);
+  private readonly csrfToken = inject(HttpXsrfTokenExtractor);
+
+  findBorrower(email: string): Promise<Borrower> {
+    const params = new HttpParams().set('correo', email.trim());
+    return firstValueFrom(this.http.get<Borrower>(USERS_PATH, { params }));
+  }
+
+  findBookCopy(barcode: string): Promise<BookCopy> {
+    const params = new HttpParams().set('codigo', barcode.trim());
+    return firstValueFrom(this.http.get<BookCopy>(BOOK_COPIES_PATH, { params }));
+  }
+
+  async lend(borrower: Borrower, bookCopy: BookCopy): Promise<RegisteredLoan> {
+    if (this.csrfToken.getToken() === null) {
+      await firstValueFrom(this.http.get(CSRF_TOKEN_SOURCE_PATH));
+    }
+
+    return firstValueFrom(
+      this.http.post<RegisteredLoan>(LOANS_PATH, { user: borrower.id, bookCopy: bookCopy.id }),
+    );
+  }
+}
