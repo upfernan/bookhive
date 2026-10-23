@@ -4,13 +4,22 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import co.com.bookhive.circulation.services.input.adapters.CountBookCopiesInputAdapter;
+import co.com.bookhive.circulation.services.input.adapters.FindUserContactInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.FindUserInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.LendBookInputAdapter;
+import co.com.bookhive.circulation.services.input.adapters.RemindDueLoansInputAdapter;
+import co.com.bookhive.circulation.services.input.adapters.ScheduleDueRemindersInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.mapper.FindUserMapperImpl;
 import co.com.bookhive.circulation.services.input.adapters.mapper.LendBookMapperImpl;
 import co.com.bookhive.circulation.services.input.ports.CountBookCopiesInputPort;
+import co.com.bookhive.circulation.services.input.ports.FindUserContactInputPort;
 import co.com.bookhive.circulation.services.input.ports.FindUserInputPort;
 import co.com.bookhive.circulation.services.input.ports.LendBookInputPort;
+import co.com.bookhive.circulation.services.input.ports.RemindDueLoansInputPort;
+import co.com.bookhive.circulation.services.input.ports.ScheduleDueRemindersInputPort;
+import co.com.bookhive.circulation.services.output.ports.InstitutionDirectoryPort;
+import co.com.bookhive.circulation.services.output.ports.InstitutionTaskPort;
+import co.com.bookhive.circulation.services.output.ports.NotificationRequestPort;
 import co.com.bookhive.circulation.services.output.ports.SessionContextPort;
 import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.FineRepository;
@@ -22,8 +31,14 @@ import co.com.bookhive.circulation.services.usecase.bookcopy.countbookcopies.imp
 import co.com.bookhive.circulation.services.usecase.loan.lendbook.LendBookUseCase;
 import co.com.bookhive.circulation.services.usecase.loan.lendbook.impl.LendBookUseCaseImpl;
 import co.com.bookhive.circulation.services.usecase.loan.lendbook.impl.mapper.LoanDomainMapperImpl;
+import co.com.bookhive.circulation.services.usecase.loan.reminddueloans.RemindDueLoansUseCase;
+import co.com.bookhive.circulation.services.usecase.loan.reminddueloans.impl.RemindDueLoansUseCaseImpl;
+import co.com.bookhive.circulation.services.usecase.loan.scheduleduereminders.ScheduleDueRemindersUseCase;
+import co.com.bookhive.circulation.services.usecase.loan.scheduleduereminders.impl.ScheduleDueRemindersUseCaseImpl;
 import co.com.bookhive.circulation.services.usecase.user.finduser.FindUserUseCase;
 import co.com.bookhive.circulation.services.usecase.user.finduser.impl.FindUserUseCaseImpl;
+import co.com.bookhive.circulation.services.usecase.user.findusercontact.FindUserContactUseCase;
+import co.com.bookhive.circulation.services.usecase.user.findusercontact.impl.FindUserContactUseCaseImpl;
 import co.com.bookhive.shared.services.output.ports.AuditPort;
 
 @Configuration
@@ -36,7 +51,8 @@ public class CirculationConfiguration {
 			final FineRepository fineRepository,
 			final LoanRepository loanRepository,
 			final SessionContextPort sessionContext,
-			final AuditPort audit) {
+			final AuditPort audit,
+			final NotificationRequestPort notificationRequests) {
 
 		return new LendBookUseCaseImpl(
 				institutionParametersRepository,
@@ -45,7 +61,8 @@ public class CirculationConfiguration {
 				loanRepository,
 				new LoanDomainMapperImpl(),
 				sessionContext,
-				audit);
+				audit,
+				notificationRequests);
 	}
 
 	@Bean
@@ -83,4 +100,41 @@ public class CirculationConfiguration {
 		return new FindUserInputAdapter(findUserUseCase, new FindUserMapperImpl());
 	}
 
+	@Bean
+	FindUserContactUseCase findUserContactUseCase(final UserRepository userRepository) {
+		return new FindUserContactUseCaseImpl(userRepository);
+	}
+
+	@Bean
+	FindUserContactInputPort findUserContactInputPort(final FindUserContactUseCase findUserContactUseCase) {
+		return new FindUserContactInputAdapter(findUserContactUseCase);
+	}
+
+	@Bean
+	RemindDueLoansUseCase remindDueLoansUseCase(
+			final LoanRepository loanRepository,
+			final NotificationRequestPort notificationRequests) {
+
+		return new RemindDueLoansUseCaseImpl(loanRepository, notificationRequests);
+	}
+
+	@Bean
+	RemindDueLoansInputPort remindDueLoansInputPort(final RemindDueLoansUseCase remindDueLoansUseCase) {
+		return new RemindDueLoansInputAdapter(remindDueLoansUseCase);
+	}
+
+	@Bean
+	ScheduleDueRemindersUseCase scheduleDueRemindersUseCase(
+			final InstitutionDirectoryPort institutionDirectory,
+			final InstitutionTaskPort institutionTasks) {
+
+		return new ScheduleDueRemindersUseCaseImpl(institutionDirectory, institutionTasks);
+	}
+
+	@Bean
+	ScheduleDueRemindersInputPort scheduleDueRemindersInputPort(
+			final ScheduleDueRemindersUseCase scheduleDueRemindersUseCase) {
+
+		return new ScheduleDueRemindersInputAdapter(scheduleDueRemindersUseCase);
+	}
 }
