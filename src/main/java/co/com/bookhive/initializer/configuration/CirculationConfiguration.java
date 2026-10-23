@@ -4,14 +4,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import co.com.bookhive.circulation.services.input.adapters.CountBookCopiesInputAdapter;
+import co.com.bookhive.circulation.services.input.adapters.FindBookCopyInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.FindUserContactInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.FindUserInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.LendBookInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.RemindDueLoansInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.ScheduleDueRemindersInputAdapter;
+import co.com.bookhive.circulation.services.input.adapters.mapper.FindBookCopyMapperImpl;
 import co.com.bookhive.circulation.services.input.adapters.mapper.FindUserMapperImpl;
 import co.com.bookhive.circulation.services.input.adapters.mapper.LendBookMapperImpl;
 import co.com.bookhive.circulation.services.input.ports.CountBookCopiesInputPort;
+import co.com.bookhive.circulation.services.input.ports.FindBookCopyInputPort;
 import co.com.bookhive.circulation.services.input.ports.FindUserContactInputPort;
 import co.com.bookhive.circulation.services.input.ports.FindUserInputPort;
 import co.com.bookhive.circulation.services.input.ports.LendBookInputPort;
@@ -28,6 +31,8 @@ import co.com.bookhive.circulation.services.output.ports.repositories.LoanReposi
 import co.com.bookhive.circulation.services.output.ports.repositories.UserRepository;
 import co.com.bookhive.circulation.services.usecase.bookcopy.countbookcopies.CountBookCopiesUseCase;
 import co.com.bookhive.circulation.services.usecase.bookcopy.countbookcopies.impl.CountBookCopiesUseCaseImpl;
+import co.com.bookhive.circulation.services.usecase.bookcopy.findbookcopy.FindBookCopyUseCase;
+import co.com.bookhive.circulation.services.usecase.bookcopy.findbookcopy.impl.FindBookCopyUseCaseImpl;
 import co.com.bookhive.circulation.services.usecase.loan.lendbook.LendBookUseCase;
 import co.com.bookhive.circulation.services.usecase.loan.lendbook.impl.LendBookUseCaseImpl;
 import co.com.bookhive.circulation.services.usecase.loan.lendbook.impl.mapper.LoanDomainMapperImpl;
@@ -101,6 +106,16 @@ public class CirculationConfiguration {
 	}
 
 	@Bean
+	FindBookCopyUseCase findBookCopyUseCase(final BookCopyRepository bookCopyRepository) {
+		return new FindBookCopyUseCaseImpl(bookCopyRepository);
+	}
+
+	@Bean
+	FindBookCopyInputPort findBookCopyInputPort(final FindBookCopyUseCase findBookCopyUseCase) {
+		return new FindBookCopyInputAdapter(findBookCopyUseCase, new FindBookCopyMapperImpl());
+	}
+
+	@Bean
 	FindUserContactUseCase findUserContactUseCase(final UserRepository userRepository) {
 		return new FindUserContactUseCaseImpl(userRepository);
 	}
@@ -137,4 +152,5 @@ public class CirculationConfiguration {
 
 		return new ScheduleDueRemindersInputAdapter(scheduleDueRemindersUseCase);
 	}
+
 }

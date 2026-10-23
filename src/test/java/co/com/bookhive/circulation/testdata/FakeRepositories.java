@@ -105,7 +105,9 @@ public final class FakeRepositories {
 		@Override
 		public List<BookCopyEntity> findByCriteria(final BookCopyCriteria criteria) {
 			return stored.stream()
-					.filter(bookCopy -> criteria.getBooks().contains(bookCopy.getBook()))
+					.filter(bookCopy -> criteria.filtersByBarcode()
+							? criteria.getBarcode().equals(bookCopy.getBarcode())
+							: criteria.getBooks().contains(bookCopy.getBook()))
 					.filter(bookCopy -> !bookCopy.getStatus().equals(criteria.getExcludedStatus()))
 					.toList();
 		}
