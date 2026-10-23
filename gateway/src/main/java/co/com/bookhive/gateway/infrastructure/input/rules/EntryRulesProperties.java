@@ -9,12 +9,14 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record EntryRulesProperties(
 		List<String> publicRoutes,
 		Map<String, String> sensitiveActions,
-		List<String> administrativePaths) {
+		List<String> administrativePaths,
+		List<String> internalPaths) {
 
 	public EntryRulesProperties {
 		publicRoutes = publicRoutes == null ? List.of() : List.copyOf(publicRoutes);
 		sensitiveActions = sensitiveActions == null ? Map.of() : Map.copyOf(sensitiveActions);
 		administrativePaths = administrativePaths == null ? List.of() : List.copyOf(administrativePaths);
+		internalPaths = internalPaths == null ? List.of() : List.copyOf(internalPaths);
 	}
 
 }

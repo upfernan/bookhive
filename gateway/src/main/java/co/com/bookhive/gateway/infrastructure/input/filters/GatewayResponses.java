@@ -31,6 +31,14 @@ public class GatewayResponses {
 		return write(exchange, HttpStatus.TOO_MANY_REQUESTS, messages.blocked());
 	}
 
+	public Mono<Void> notFound(final ServerWebExchange exchange) {
+		final ServerHttpResponse response = exchange.getResponse();
+		if (!response.isCommitted()) {
+			response.setStatusCode(HttpStatus.NOT_FOUND);
+		}
+		return response.setComplete();
+	}
+
 	public Mono<Void> unavailable(final ServerWebExchange exchange) {
 		return write(exchange, HttpStatus.SERVICE_UNAVAILABLE, messages.unavailable());
 	}

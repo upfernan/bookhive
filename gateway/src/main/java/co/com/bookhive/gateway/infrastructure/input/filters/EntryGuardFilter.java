@@ -48,6 +48,10 @@ public class EntryGuardFilter implements GlobalFilter, Ordered {
 	public Mono<Void> filter(final ServerWebExchange exchange, final GatewayFilterChain chain) {
 
 		final ServerHttpRequest request = exchange.getRequest();
+		if (rules.isInternal(request)) {
+			return responses.notFound(exchange);
+		}
+
 		final boolean publicRoute = rules.isPublic(request);
 		final Mono<String> account = publicRoute
 				? Mono.just(TextHelper.getDefaultValue())
