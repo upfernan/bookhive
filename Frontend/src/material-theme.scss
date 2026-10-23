@@ -1,0 +1,55 @@
+@use '@angular/material' as mat;
+@use './theme-colors' as theme-colors;
+
+html {
+  height: 100%;
+  color-scheme: light;
+
+  @include mat.theme(
+    (
+      color: (
+        primary: theme-colors.$primary-palette,
+        tertiary: theme-colors.$tertiary-palette,
+        theme-type: light,
+      ),
+      typography: '"Source Sans 3", system-ui, sans-serif',
+      density: 0,
+    )
+  );
+
+  @include mat.theme-overrides(
+    (
+      primary: #4a2f24,
+      on-primary: #fffbf5,
+      background: #f5eee3,
+      on-background: #2e1d16,
+      surface: #fffbf5,
+      on-surface: #2e1d16,
+      error: #a3362a,
+      on-error: #fffbf5,
+    )
+  );
+
+  @include mat.button-overrides(
+    (
+      filled-container-shape: 10px,
+      filled-container-height: 48px,
+      filled-label-text-weight: 600,
+    )
+  );
+
+  @include mat.form-field-overrides(
+    (
+      outlined-container-shape: 10px,
+    )
+  );
+}
+
+body {
+  background-color: var(--mat-sys-background);
+  color: var(--mat-sys-on-background);
+  font: var(--mat-sys-body-large);
+  margin: 0;
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+}

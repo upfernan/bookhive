@@ -1,0 +1,213 @@
+<div class="desk">
+  <div>
+    <h1 class="page__title">{{ messages.title }}</h1>
+    <p class="page__lead">{{ messages.lead }}</p>
+  </div>
+
+  @if (confirmation()) {
+    <div class="banner banner--success" role="status">
+      <svg class="banner__icon" aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9" />
+        <polyline points="8 12.5 11 15.5 16.5 9.5" />
+      </svg>
+      <div>
+        <p class="banner__title">{{ messages.registeredTitle }}</p>
+        <p class="banner__text">{{ confirmationText() }}</p>
+      </div>
+    </div>
+  }
+
+  @if (registerProblem(); as problem) {
+    <div class="banner banner--error" role="alert">
+      <svg class="banner__icon" aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9" />
+        <line x1="12" y1="7.5" x2="12" y2="13" />
+        <line x1="12" y1="16.5" x2="12" y2="16.6" />
+      </svg>
+      <div>
+        <p class="banner__title">{{ messages.rejectedTitle }}</p>
+        <p class="banner__text">{{ problem.message }}</p>
+        @if (traceText()) {
+          <p class="banner__trace">{{ traceText() }}</p>
+        }
+      </div>
+    </div>
+  }
+
+  <div class="steps">
+    <section class="step" aria-labelledby="step-borrower">
+      <div class="step__header">
+        <span class="step__number" aria-hidden="true">1</span>
+        <h2 id="step-borrower" class="step__title">{{ messages.borrowerStep }}</h2>
+      </div>
+
+      <form class="step__search" [formGroup]="borrowerForm" (ngSubmit)="searchBorrower()" novalidate>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ messages.borrowerLabel }}</mat-label>
+          <input #borrowerInput matInput type="email" formControlName="email" autocomplete="off" />
+          @if (borrowerForm.controls.email.hasError('required')) {
+            <mat-error>{{ messages.borrowerRequired }}</mat-error>
+          } @else if (borrowerForm.controls.email.hasError('email')) {
+            <mat-error>{{ messages.borrowerInvalid }}</mat-error>
+          }
+        </mat-form-field>
+        <button class="step__button" mat-stroked-button type="submit" [disabled]="searchingBorrower()">
+          {{ searchingBorrower() ? messages.searching : messages.search }}
+        </button>
+      </form>
+
+      @if (borrowerProblem()) {
+        <p class="step__problem" role="alert">{{ borrowerProblem() }}</p>
+      }
+
+      @if (borrower(); as person) {
+        <div class="details">
+          <div class="person">
+            <span class="person__avatar" aria-hidden="true">{{ initials() }}</span>
+            <div class="person__text">
+              <p class="person__name">{{ person.name }}</p>
+              <p class="person__email">{{ person.email }}</p>
+            </div>
+          </div>
+
+          @if (person.blocks.length === 0) {
+            <div class="chips">
+              <span class="chip chip--success">{{ messages.canBorrow }}</span>
+            </div>
+          } @else {
+            <ul class="blocks">
+              @for (block of person.blocks; track block) {
+                <li class="chip chip--error">{{ block }}</li>
+              }
+            </ul>
+          }
+
+          <dl class="stats">
+            <div class="stat">
+              <dt class="stat__label">{{ messages.activeLoans }}</dt>
+              <dd class="stat__value">{{ loansSummary() }}</dd>
+            </div>
+            <div class="stat">
+              <dt class="stat__label">{{ messages.pendingFines }}</dt>
+              <dd class="stat__value">{{ person.pendingFines === 0 ? messages.noFines : person.pendingFines }}</dd>
+            </div>
+          </dl>
+        </div>
+      }
+    </section>
+
+    <section class="step" aria-labelledby="step-copy">
+      <div class="step__header">
+        <span class="step__number" aria-hidden="true">2</span>
+        <h2 id="step-copy" class="step__title">{{ messages.copyStep }}</h2>
+      </div>
+
+      <form class="step__search" [formGroup]="copyForm" (ngSubmit)="searchBookCopy()" novalidate>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ messages.copyLabel }}</mat-label>
+          <input #copyInput matInput type="text" formControlName="barcode" autocomplete="off" />
+          @if (!borrower()) {
+            <mat-hint>{{ messages.copyNeedsBorrower }}</mat-hint>
+          }
+          @if (copyForm.controls.barcode.hasError('required')) {
+            <mat-error>{{ messages.copyRequired }}</mat-error>
+          }
+        </mat-form-field>
+        <button class="step__button" mat-stroked-button type="submit" [disabled]="!borrower() || searchingCopy()">
+          {{ searchingCopy() ? messages.searching : messages.add }}
+        </button>
+      </form>
+
+      @if (copyProblem()) {
+        <p class="step__problem" role="alert">{{ copyProblem() }}</p>
+      }
+
+      @if (bookCopy(); as copy) {
+        <div class="details details--copy">
+          <div class="cover" aria-hidden="true">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2" />
+              <path d="M19 17H6a2 2 0 0 0-2 2.5" />
+            </svg>
+          </div>
+          <div class="copy">
+            <div>
+              <p class="copy__title">{{ copy.title }}</p>
+              @if (copy.authors) {
+                <p class="copy__authors">{{ copy.authors }}</p>
+              }
+            </div>
+            <dl class="copy__facts">
+              <div><dt>{{ messages.barcode }}</dt><dd>{{ copy.barcode }}</dd></div>
+              @if (copy.branch) {
+                <div><dt>{{ messages.branch }}</dt><dd>{{ copy.branch }}</dd></div>
+              }
+            </dl>
+            <div class="chips">
+              @if (confirmation()) {
+                <span class="chip chip--neutral">{{ messages.lent }}</span>
+              } @else if (copy.available) {
+                <span class="chip chip--success">{{ messages.available }}</span>
+              } @else {
+                <span class="chip chip--error">{{ messages.unavailable }}</span>
+              }
+              <span class="chip chip--neutral">{{ copy.lendable ? messages.homeLoan : messages.roomOnly }}</span>
+            </div>
+            @if (copy.blocks.length > 0) {
+              <ul class="blocks">
+                @for (block of copy.blocks; track block) {
+                  <li class="chip chip--error">{{ block }}</li>
+                }
+              </ul>
+            }
+          </div>
+        </div>
+      }
+    </section>
+  </div>
+
+  <div class="actions">
+    <div class="due">
+      @if (confirmation(); as done) {
+        <p class="due__label">{{ messages.dueDateLabel }}</p>
+        <p class="due__date">{{ done.dueDate }}</p>
+      } @else {
+        <p class="due__hint">{{ messages.dueDateHint }}</p>
+      }
+      @if (actionHint()) {
+        <p class="actions__hint" role="alert">{{ actionHint() }}</p>
+      }
+    </div>
+    <div class="actions__buttons">
+      <button class="actions__secondary" mat-stroked-button type="button" (click)="endAttention()">
+        {{ messages.endAttention }}
+      </button>
+      @if (confirmation()) {
+        <button class="actions__primary" mat-flat-button type="button" (click)="lendAnother()">
+          {{ messages.lendAnother }}
+        </button>
+      } @else {
+        <button class="actions__primary" mat-flat-button type="button" [disabled]="registering()" (click)="register()">
+          {{ registering() ? messages.registering : messages.register }}
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (attention().length > 0) {
+    <section class="attention" aria-labelledby="attention-title">
+      <h2 id="attention-title" class="attention__title">{{ messages.attentionTitle }}</h2>
+      <ul class="attention__list">
+        @for (item of attention(); track item.loan) {
+          <li class="attention__item">
+            <div>
+              <p class="attention__book">{{ item.title }}</p>
+              <p class="attention__code">{{ messages.barcode }}: {{ item.barcode }}</p>
+            </div>
+            <p class="attention__due"><span>{{ messages.returns }}:</span> {{ item.dueDate }}</p>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+</div>

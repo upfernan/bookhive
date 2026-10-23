@@ -1,0 +1,18 @@
+<div class="layout">
+  <aside class="showcase">
+    <div class="brand">
+      <img class="brand-mark" src="logo.svg" alt="" width="48" height="48" />
+      <p class="wordmark">
+        {{ messages.wordmarkStart }}<span class="wordmark-accent">{{ messages.wordmarkEnd }}</span>
+      </p>
+    </div>
+    <p class="tagline">{{ messages.tagline }}</p>
+    <p class="description">{{ messages.description }}</p>
+  </aside>
+
+  <main class="content">
+    <div class="panel">
+      <ng-content />
+    </div>
+  </main>
+</div>

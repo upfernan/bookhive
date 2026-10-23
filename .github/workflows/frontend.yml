@@ -1,0 +1,64 @@
+name: Frontend
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Frontend/**'
+      - '.github/workflows/frontend.yml'
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'Frontend/**'
+      - '.github/workflows/frontend.yml'
+jobs:
+  frontend:
+    name: Compilar y publicar el frontend
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    defaults:
+      run:
+        working-directory: Frontend
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: Frontend/package-lock.json
+      - name: Comprobar que la clave no esté en el código
+        run: |
+          grep -q "apiKey: 'PEGA_AQUI_LA_API_KEY'" src/app/session/identity-provider.settings.ts || {
+            echo "::error::identity-provider.settings.ts debe tener el marcador PEGA_AQUI_LA_API_KEY; la clave vive en Secret Manager."
+            exit 1
+          }
+      - name: Instalar las dependencias
+        run: npm ci --ignore-scripts
+      - name: Entrar a Google Cloud
+        if: github.event_name == 'push'
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093
+        with:
+          workload_identity_provider: projects/164070755294/locations/global/workloadIdentityPools/github/providers/github-actions
+          service_account: github-deploy@bookhive-511618.iam.gserviceaccount.com
+      - name: Preparar gcloud
+        if: github.event_name == 'push'
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db
+      - name: Poner la clave de Identity Platform
+        if: github.event_name == 'push'
+        run: |
+          API_KEY=$(gcloud secrets versions access latest --secret=identity-api-key)
+          echo "::add-mask::${API_KEY}"
+          sed -i "s|PEGA_AQUI_LA_API_KEY|${API_KEY}|" src/app/session/identity-provider.settings.ts
+      - name: Compilar
+        run: npm run build
+      - name: Publicar en el bucket
+        if: github.event_name == 'push'
+        env:
+          BUCKET: bookhive-web-511618
+        run: |
+          gcloud storage rsync dist/bookhive-web/browser "gs://${BUCKET}" --recursive \
+            --exclude='^index\.html$' --cache-control='public, max-age=3600'
+          gcloud storage cp dist/bookhive-web/browser/index.html "gs://${BUCKET}/index.html" \
+            --cache-control='no-cache'

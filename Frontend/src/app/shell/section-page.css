@@ -1,0 +1,15 @@
+.page__title {
+  margin: 0;
+  font-family: var(--bh-display-font);
+  font-size: 46px;
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--bh-walnut-dark);
+}
+
+.page__lead {
+  margin: 10px 0 0;
+  max-width: 640px;
+  font-size: 17px;
+  color: var(--bh-wood-text);
+}

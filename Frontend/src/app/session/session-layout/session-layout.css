@@ -1,0 +1,153 @@
+:host {
+  display: block;
+}
+
+.layout {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(420px, 1fr);
+}
+
+.showcase {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 48px 56px 64px;
+  color: var(--bh-paper);
+  background-color: var(--bh-walnut-dark);
+  background-image:
+    linear-gradient(
+      180deg,
+      rgb(46 29 22 / 0.2) 0%,
+      rgb(46 29 22 / 0.1) 35%,
+      rgb(46 29 22 / 0.65) 68%,
+      rgb(46 29 22 / 0.94) 100%
+    ),
+    url('/fondo-biblioteca.webp');
+  background-size: cover;
+  background-position: center 62%;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.brand-mark {
+  display: block;
+  width: 48px;
+  height: 48px;
+  flex: none;
+}
+
+.wordmark {
+  margin: 0;
+  font-family: var(--bh-display-font);
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
+.wordmark-accent {
+  color: var(--bh-honey);
+}
+
+.tagline {
+  max-width: 14ch;
+  margin: 0;
+  font-family: var(--bh-display-font);
+  font-size: clamp(40px, 4.4vw, 64px);
+  font-weight: 600;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+.description {
+  max-width: 42ch;
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.55;
+  color: rgb(255 251 245 / 0.82);
+}
+
+.content {
+  display: grid;
+  place-items: center;
+  padding: 48px 32px;
+  background: var(--bh-paper);
+}
+
+.panel {
+  width: min(100%, 380px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .panel {
+    animation: rise 480ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 880px) {
+  .layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .showcase {
+    min-height: clamp(260px, 38svh, 420px);
+    padding: 24px 24px 28px;
+    background-image:
+      linear-gradient(
+        180deg,
+        rgb(46 29 22 / 0.82) 0%,
+        rgb(46 29 22 / 0.35) 28%,
+        rgb(46 29 22 / 0.3) 55%,
+        rgb(46 29 22 / 0.94) 100%
+      ),
+      url('/fondo-biblioteca.webp');
+    background-position: center 58%;
+  }
+
+  .brand {
+    margin-bottom: auto;
+  }
+
+  .brand-mark {
+    width: 40px;
+    height: 40px;
+  }
+
+  .wordmark {
+    font-size: 26px;
+  }
+
+  .tagline {
+    max-width: 16ch;
+    font-size: 34px;
+  }
+
+  .description {
+    display: none;
+  }
+
+  .content {
+    place-items: start center;
+    padding: 32px 20px 48px;
+  }
+}
