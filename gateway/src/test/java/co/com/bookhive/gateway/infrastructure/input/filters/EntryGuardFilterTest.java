@@ -74,6 +74,20 @@ class EntryGuardFilterTest {
 	}
 
 	@Test
+	@DisplayName("las rutas internas responden 404 aunque haya sesión, sin llegar al backend ni contar intentos")
+	void internalRoutesAreNeverForwarded() {
+		final MockServerWebExchange exchange = MockServerWebExchange.from(
+				MockServerHttpRequest.post("/api/v1/avisos/correo")
+						.cookie(new HttpCookie(SessionCookieVerifier.SESSION_COOKIE, SessionTokens.valid())));
+
+		filterAnswering(ADMIT).filter(exchange, backendAnswering(HttpStatus.NO_CONTENT)).block();
+
+		assertFalse(forwarded.get());
+		assertEquals(HttpStatus.NOT_FOUND, exchange.getResponse().getStatusCode());
+		assertTrue(guard.admitted.isEmpty());
+	}
+
+	@Test
 	@DisplayName("sin sesión válida en una ruta protegida responde 401 sin llegar al backend y lo cuenta")
 	void protectedRouteWithoutSessionIsRejected() {
 		final MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.post("/api/v1/prestamos")

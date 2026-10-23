@@ -43,11 +43,20 @@ class EntryRulesTest {
 	@Test
 	@DisplayName("sin configuración no hay rutas públicas, acciones ni administración")
 	void emptyPropertiesMeanNothingSpecial() {
-		final EntryRules empty = new EntryRules(new EntryRulesProperties(null, null, null));
+		final EntryRules empty = new EntryRules(new EntryRulesProperties(null, null, null, null));
 
 		assertFalse(empty.isPublic(MockServerHttpRequest.post("/api/v1/sesiones").build()));
 		assertEquals("", empty.actionOf(MockServerHttpRequest.post("/api/v1/prestamos").build()));
 		assertFalse(empty.isAdministrative(MockServerHttpRequest.get("/api/v1/admin").build()));
+		assertFalse(empty.isInternal(MockServerHttpRequest.post("/api/v1/tareas/prestamos").build()));
+	}
+
+	@Test
+	@DisplayName("las rutas internas de Google se reconocen sin importar el método")
+	void internalPathsMatchAnyMethod() {
+		assertTrue(rules.isInternal(MockServerHttpRequest.post("/api/v1/tareas/recordar-vencimientos").build()));
+		assertTrue(rules.isInternal(MockServerHttpRequest.get("/api/v1/avisos/correo").build()));
+		assertFalse(rules.isInternal(MockServerHttpRequest.post("/api/v1/prestamos").build()));
 	}
 
 }

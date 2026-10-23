@@ -1,5 +1,6 @@
 package co.com.bookhive.initializer.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -26,15 +27,21 @@ public class SecurityConfiguration {
 	@SuppressWarnings("java:S4502")
 	SecurityFilterChain internalCallsFilterChain(
 			final HttpSecurity http,
-			final ServiceCallerDecoder serviceCallerDecoder) {
+			final ServiceCallerDecoder serviceCallerDecoder,
+			@Value("${bookhive.tasks.trust-cloud-run-iam:false}") final boolean trustCloudRunIam) {
 
 		http.securityMatcher(InternalPaths.all())
 				.sessionManagement(session -> session
 						.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.authorizeHttpRequests(requests -> requests.anyRequest().authenticated())
-				.oauth2ResourceServer(resourceServer -> resourceServer
-						.jwt(jwt -> jwt.decoder(serviceCallerDecoder::decode)))
 				.csrf(csrf -> csrf.ignoringRequestMatchers(InternalPaths.all()));
+
+		if (trustCloudRunIam) {
+			http.authorizeHttpRequests(requests -> requests.anyRequest().access(new InternalCallerAuthorization()));
+		} else {
+			http.authorizeHttpRequests(requests -> requests.anyRequest().authenticated())
+					.oauth2ResourceServer(resourceServer -> resourceServer
+							.jwt(jwt -> jwt.decoder(serviceCallerDecoder::decode)));
+		}
 		return http.build();
 	}
 

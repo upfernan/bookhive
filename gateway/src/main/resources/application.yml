@@ -65,6 +65,9 @@ bookhive:
         prestar: POST /api/v1/prestamos
       administrative-paths:
         - /api/v1/admin/**
+      internal-paths:
+        - /api/v1/tareas/**
+        - /api/v1/avisos/**
     messages:
       without-session: Tu sesión no es válida o ya se cerró. Vuelve a iniciar sesión.
       blocked: Hiciste demasiados intentos seguidos. Espera unos minutos y vuelve a intentarlo.
