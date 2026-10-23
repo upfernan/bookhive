@@ -2,6 +2,7 @@ package co.com.bookhive.circulation.domain.bookcopy.findbookcopy;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.BookCopyCriteria;
@@ -109,7 +110,7 @@ public final class FindBookCopyDomain {
 	}
 
 	private void setBarcode(final String barcode) {
-		this.barcode = TextHelper.getDefaultValue(barcode);
+		this.barcode = Optional.ofNullable(barcode).map(String::trim).orElse(TextHelper.getDefaultValue());
 	}
 
 }

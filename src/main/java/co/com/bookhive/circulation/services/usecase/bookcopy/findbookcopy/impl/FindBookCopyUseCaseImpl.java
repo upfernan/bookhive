@@ -15,14 +15,7 @@ public final class FindBookCopyUseCaseImpl implements FindBookCopyUseCase {
 	public FindBookCopyUseCaseImpl(final BookCopyRepository bookCopyRepository) {
 
 		super();
-
-		if (ObjectHelper.isNull(bookCopyRepository)) {
-			throw BookHiveException.createUnexpected(
-					MessageKey.REQUEST_UNEXPECTED,
-					"El caso de uso FindBookCopy se creó sin el repositorio de ejemplares.");
-		}
-
-		this.bookCopyRepository = bookCopyRepository;
+		this.bookCopyRepository = requireDependency(bookCopyRepository, "el repositorio de ejemplares");
 	}
 
 	@Override
@@ -34,6 +27,17 @@ public final class FindBookCopyUseCaseImpl implements FindBookCopyUseCase {
 		search.validate();
 
 		return search.find();
+	}
+
+	private static <T> T requireDependency(final T dependency, final String name) {
+
+		if (ObjectHelper.isNull(dependency)) {
+			throw BookHiveException.createUnexpected(
+					MessageKey.REQUEST_UNEXPECTED,
+					"El caso de uso FindBookCopy se creó sin " + name + ".");
+		}
+
+		return dependency;
 	}
 
 }
