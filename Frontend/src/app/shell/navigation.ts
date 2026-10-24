@@ -1,7 +1,7 @@
 import { messages } from '../messages';
 import { PermissionCode } from '../session/permission-code';
 
-export type TaskIcon = 'lend' | 'search' | 'sync';
+export type TaskIcon = 'lend' | 'search';
 
 export interface Section {
   readonly path: string;
@@ -36,12 +36,5 @@ export const tasks: readonly Task[] = [
     description: messages.tasks.search.description,
     icon: 'search',
     permission: PermissionCode.searchCatalog,
-  },
-  {
-    path: '/catalogo/actualizar',
-    title: messages.tasks.sync.title,
-    description: messages.tasks.sync.description,
-    icon: 'sync',
-    permission: PermissionCode.syncCatalog,
   },
 ];

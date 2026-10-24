@@ -72,10 +72,6 @@ export const messages = {
       title: 'Buscar en el catálogo',
       description: 'Encuentre libros y vea cuántos ejemplares hay disponibles.',
     },
-    sync: {
-      title: 'Actualizar el buscador',
-      description: 'Lleve al buscador los últimos cambios del catálogo de su institución.',
-    },
   },
   loans: {
     title: 'Prestar un libro',
@@ -153,9 +149,5 @@ export const messages = {
     failedTitle: 'No se pudo hacer la búsqueda',
     searchFailed: 'No fue posible buscar en el catálogo. Vuelva a intentarlo.',
     traceId: 'Código de rastreo: {traceId}',
-  },
-  catalogSync: {
-    title: 'Actualizar el buscador',
-    lead: 'Aquí se podrá llevar al buscador lo último del catálogo. Esta sección se está construyendo.',
   },
 } as const;
