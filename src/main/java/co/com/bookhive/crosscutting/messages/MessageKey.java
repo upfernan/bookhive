@@ -5,6 +5,7 @@ public final class MessageKey {
 	public static final String LOAN_DATA_REQUIRED = "loan.data.required";
 	public static final String LOAN_BOOK_COPY_REQUIRED = "loan.book-copy.required";
 	public static final String LOAN_USER_REQUIRED = "loan.user.required";
+	public static final String LOAN_USER_NOT_FOUND = "loan.user.not-found";
 	public static final String LOAN_LIBRARIAN_REQUIRED = "loan.librarian.required";
 	public static final String LOAN_INSTITUTION_REQUIRED = "loan.institution.required";
 	public static final String LOAN_DATE_REQUIRED = "loan.date.required";
@@ -24,6 +25,8 @@ public final class MessageKey {
 	public static final String USER_AT_LOAN_LIMIT = "user.at-loan-limit";
 	public static final String USER_EMAIL_REQUIRED = "user.email.required";
 	public static final String USER_NOT_FOUND = "user.not-found";
+	public static final String USER_SUSPENDED = "user.suspended";
+	public static final String USER_RETIRED = "user.retired";
 
 	public static final String INSTITUTION_NOT_ACTIVE = "institution.not-active";
 	public static final String INSTITUTION_WITHOUT_PARAMETERS = "institution.without-parameters";

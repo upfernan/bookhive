@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.function.Executable;
 
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.InstitutionParametersEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.UserEntity;
 import co.com.bookhive.circulation.testdata.FakeRepositories;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.DateHelper;
@@ -30,6 +32,7 @@ class LendBookDomainTest {
 	private static final int LOAN_DAYS = 15;
 	private static final int MAX_LOANS = 3;
 
+	private FakeRepositories.Users users;
 	private FakeRepositories.BookCopies bookCopies;
 	private FakeRepositories.Fines fines;
 	private FakeRepositories.Loans loans;
@@ -37,6 +40,7 @@ class LendBookDomainTest {
 
 	@BeforeEach
 	void prepare() {
+		users = usersWith(UserEntity.STATUS_ACTIVE);
 		bookCopies = new FakeRepositories.BookCopies()
 				.with(FakeRepositories.bookCopy(BOOK_COPY, BookCopyEntity.STATUS_AVAILABLE, true));
 		fines = new FakeRepositories.Fines();
@@ -69,7 +73,7 @@ class LendBookDomainTest {
 	@DisplayName("rechaza el préstamo sin bibliotecario")
 	void rejectsMissingLibrarian() {
 		final LendBookDomain loan = new LendBookDomain(null, BOOK_COPY, USER, INSTITUTION, null, today(), null)
-				.withRepositories(bookCopies, fines, loans, parameters);
+				.withRepositories(users, bookCopies, fines, loans, parameters);
 
 		assertRejected(MessageKey.LOAN_LIBRARIAN_REQUIRED, loan::validate);
 	}
@@ -78,7 +82,7 @@ class LendBookDomainTest {
 	@DisplayName("rechaza el préstamo sin institución")
 	void rejectsMissingInstitution() {
 		final LendBookDomain loan = new LendBookDomain(null, BOOK_COPY, USER, null, LIBRARIAN, today(), null)
-				.withRepositories(bookCopies, fines, loans, parameters);
+				.withRepositories(users, bookCopies, fines, loans, parameters);
 
 		assertRejected(MessageKey.LOAN_INSTITUTION_REQUIRED, loan::validate);
 	}
@@ -128,6 +132,30 @@ class LendBookDomainTest {
 	}
 
 	@Test
+	@DisplayName("rechaza el préstamo si el usuario no existe en la institución")
+	void rejectsUnknownUser() {
+		users = new FakeRepositories.Users();
+
+		assertRejected(MessageKey.LOAN_USER_NOT_FOUND, loan(BOOK_COPY, USER, today())::validate);
+	}
+
+	@Test
+	@DisplayName("rechaza el préstamo si el usuario está suspendido")
+	void rejectsSuspendedUser() {
+		users = usersWith(UserEntity.STATUS_SUSPENDED);
+
+		assertRejected(MessageKey.USER_SUSPENDED, loan(BOOK_COPY, USER, today())::validate);
+	}
+
+	@Test
+	@DisplayName("rechaza el préstamo si la cuenta del usuario está dada de baja")
+	void rejectsRetiredUser() {
+		users = usersWith(UserEntity.STATUS_RETIRED);
+
+		assertRejected(MessageKey.USER_RETIRED, loan(BOOK_COPY, USER, today())::validate);
+	}
+
+	@Test
 	@DisplayName("rechaza el préstamo si el usuario tiene multas pendientes")
 	void rejectsUserWithPendingFines() {
 		fines = new FakeRepositories.Fines().withPendingFine();
@@ -154,6 +182,22 @@ class LendBookDomainTest {
 	}
 
 	@Test
+	@DisplayName("no deja validar si falta cualquiera de los repositorios")
+	void rejectsDomainWithAnyRepositoryMissing() {
+		final LendBookDomain request = new LendBookDomain(null, BOOK_COPY, USER, INSTITUTION, LIBRARIAN, today(), null);
+		final List<LendBookDomain> incomplete = List.of(
+				request.withRepositories(null, bookCopies, fines, loans, parameters),
+				request.withRepositories(users, null, fines, loans, parameters),
+				request.withRepositories(users, bookCopies, null, loans, parameters),
+				request.withRepositories(users, bookCopies, fines, null, parameters),
+				request.withRepositories(users, bookCopies, fines, loans, null));
+
+		incomplete.forEach(loan -> assertEquals(
+				BookHiveException.Kind.UNEXPECTED,
+				assertThrows(BookHiveException.class, loan::validate).getKind()));
+	}
+
+	@Test
 	@DisplayName("convierte los datos nulos en valores por defecto")
 	void replacesNullsWithDefaults() {
 		final LendBookDomain loan = new LendBookDomain(null, null, null, null, null, null, null);
@@ -165,7 +209,13 @@ class LendBookDomainTest {
 
 	private LendBookDomain loan(final UUID bookCopy, final UUID user, final LocalDate loanDate) {
 		return new LendBookDomain(null, bookCopy, user, INSTITUTION, LIBRARIAN, loanDate, null)
-				.withRepositories(bookCopies, fines, loans, parameters);
+				.withRepositories(users, bookCopies, fines, loans, parameters);
+	}
+
+	private static FakeRepositories.Users usersWith(final String status) {
+		final UserEntity user = FakeRepositories.user(USER, "Ana Gómez", "ana.gomez@uco.edu.co");
+		user.setStatus(status);
+		return new FakeRepositories.Users().with(user);
 	}
 
 	private static LocalDate today() {

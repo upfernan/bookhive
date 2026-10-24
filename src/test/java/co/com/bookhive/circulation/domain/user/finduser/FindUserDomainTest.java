@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import co.com.bookhive.circulation.domain.institution.CurrentInstitution;
 import co.com.bookhive.circulation.domain.loan.lendbook.LendBookDomain;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.UserEntity;
 import co.com.bookhive.circulation.testdata.FakeRepositories;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.DateHelper;
@@ -88,6 +89,50 @@ class FindUserDomainTest {
 		final FoundUserDomain found = search(EMAIL).find();
 
 		assertEquals(List.of(MessageKey.USER_WITH_PENDING_FINES, MessageKey.USER_AT_LOAN_LIMIT), found.blocks());
+	}
+
+	@Test
+	@DisplayName("un usuario suspendido queda bloqueado por la suspensión")
+	void blocksSuspendedUser() {
+		storeUserWithStatus(UserEntity.STATUS_SUSPENDED);
+
+		assertEquals(List.of(MessageKey.USER_SUSPENDED), search(EMAIL).find().blocks());
+	}
+
+	@Test
+	@DisplayName("un usuario dado de baja queda bloqueado por la baja")
+	void blocksRetiredUser() {
+		storeUserWithStatus(UserEntity.STATUS_RETIRED);
+
+		assertEquals(List.of(MessageKey.USER_RETIRED), search(EMAIL).find().blocks());
+	}
+
+	@Test
+	@DisplayName("un usuario suspendido, con multas y en el tope muestra la suspensión primero")
+	void listsStatusBlockFirst() {
+		storeUserWithStatus(UserEntity.STATUS_SUSPENDED);
+		fines.withPendingFine();
+		loans.withActiveLoans(MAX_LOANS);
+
+		assertEquals(
+				List.of(MessageKey.USER_SUSPENDED, MessageKey.USER_WITH_PENDING_FINES, MessageKey.USER_AT_LOAN_LIMIT),
+				search(EMAIL).find().blocks());
+	}
+
+	@Test
+	@DisplayName("bloquea por suspensión igual que lo rechaza el registro del préstamo")
+	void blocksSuspendedLikeLending() {
+		storeUserWithStatus(UserEntity.STATUS_SUSPENDED);
+
+		assertEquals(rejectionOfLending(), search(EMAIL).find().blocks().get(0));
+	}
+
+	@Test
+	@DisplayName("bloquea por baja igual que lo rechaza el registro del préstamo")
+	void blocksRetiredLikeLending() {
+		storeUserWithStatus(UserEntity.STATUS_RETIRED);
+
+		assertEquals(rejectionOfLending(), search(EMAIL).find().blocks().get(0));
 	}
 
 	@Test
@@ -205,9 +250,15 @@ class FindUserDomainTest {
 				UUIDHelper.generateNew(),
 				CurrentInstitution.today(CurrentInstitution.parameters(parameters)),
 				DateHelper.getDefaultValue())
-				.withRepositories(bookCopies, fines, loans, parameters);
+				.withRepositories(users, bookCopies, fines, loans, parameters);
 
 		return assertThrows(BookHiveException.class, loan::validate).getUserMessageKey();
+	}
+
+	private void storeUserWithStatus(final String status) {
+		final UserEntity user = FakeRepositories.user(USER, NAME, EMAIL);
+		user.setStatus(status);
+		users = new FakeRepositories.Users().with(user);
 	}
 
 }

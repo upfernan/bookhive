@@ -76,7 +76,7 @@ public final class FindUserDomain {
 				activeLoans,
 				maxLoans,
 				pendingFines,
-				blocksOf(activeLoans, maxLoans, pendingFines));
+				blocksOf(user.getStatus(), activeLoans, maxLoans, pendingFines));
 	}
 
 	public String getEmail() {
@@ -153,9 +153,19 @@ public final class FindUserDomain {
 						+ " y ninguno lo tiene escrito igual; no se elige uno al azar.");
 	}
 
-	private static List<String> blocksOf(final int activeLoans, final int maxLoans, final int pendingFines) {
+	private static List<String> blocksOf(
+			final String status,
+			final int activeLoans,
+			final int maxLoans,
+			final int pendingFines) {
 
 		final List<String> blocks = new ArrayList<>();
+
+		if (UserEntity.STATUS_RETIRED.equals(status)) {
+			blocks.add(MessageKey.USER_RETIRED);
+		} else if (!UserEntity.STATUS_ACTIVE.equals(status)) {
+			blocks.add(MessageKey.USER_SUSPENDED);
+		}
 
 		if (pendingFines > 0) {
 			blocks.add(MessageKey.USER_WITH_PENDING_FINES);

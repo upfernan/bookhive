@@ -39,6 +39,7 @@ class LendBookUseCaseImplTest {
 	private static final UUID LIBRARIAN = UUIDHelper.generateNew();
 	private static final int LOAN_DAYS = 15;
 
+	private FakeRepositories.Users users;
 	private FakeRepositories.BookCopies bookCopies;
 	private FakeRepositories.Fines fines;
 	private FakeRepositories.Loans loans;
@@ -48,6 +49,7 @@ class LendBookUseCaseImplTest {
 
 	@BeforeEach
 	void prepare() {
+		users = new FakeRepositories.Users().with(FakeRepositories.user(USER, "Ana Gómez", "ana.gomez@uco.edu.co"));
 		bookCopies = new FakeRepositories.BookCopies()
 				.with(FakeRepositories.bookCopy(BOOK_COPY, BookCopyEntity.STATUS_AVAILABLE, true));
 		fines = new FakeRepositories.Fines();
@@ -176,14 +178,14 @@ class LendBookUseCaseImplTest {
 		final AuditPort audit = this::audit;
 
 		final BookHiveException exception = assertThrows(BookHiveException.class,
-				() -> new LendBookUseCaseImpl(parameters, bookCopies, fines, loans, null, session, audit, notices::add));
+				() -> new LendBookUseCaseImpl(parameters, bookCopies, fines, loans, users, null, session, audit, notices::add));
 
 		assertEquals(BookHiveException.Kind.UNEXPECTED, exception.getKind());
 		assertEquals(MessageKey.LOAN_UNEXPECTED, exception.getUserMessageKey());
 	}
 
 	private LendBookUseCaseImpl useCase() {
-		return new LendBookUseCaseImpl(parameters, bookCopies, fines, loans, new LoanDomainMapperImpl(),
+		return new LendBookUseCaseImpl(parameters, bookCopies, fines, loans, users, new LoanDomainMapperImpl(),
 				new FakeSession(), this::audit, notices::add);
 	}
 
