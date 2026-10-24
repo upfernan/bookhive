@@ -1,7 +1,7 @@
 import { messages } from '../messages';
 import { PermissionCode } from '../session/permission-code';
 
-export type TaskIcon = 'lend' | 'search' | 'reserve';
+export type TaskIcon = 'lend' | 'return' | 'search' | 'reserve';
 
 export interface Section {
   readonly path: string;
@@ -19,6 +19,7 @@ export interface Task {
 
 export const sections: readonly Section[] = [
   { path: '/prestamos', label: messages.shell.loans, permission: PermissionCode.lendBook },
+  { path: '/devoluciones', label: messages.shell.returns, permission: PermissionCode.returnBook },
   { path: '/catalogo', label: messages.shell.catalog, permission: PermissionCode.searchCatalog },
   { path: '/reservas', label: messages.shell.reservations, permission: PermissionCode.reserveBook },
 ];
@@ -30,6 +31,13 @@ export const tasks: readonly Task[] = [
     description: messages.tasks.lend.description,
     icon: 'lend',
     permission: PermissionCode.lendBook,
+  },
+  {
+    path: '/devoluciones',
+    title: messages.tasks.returnBook.title,
+    description: messages.tasks.returnBook.description,
+    icon: 'return',
+    permission: PermissionCode.returnBook,
   },
   {
     path: '/catalogo',
