@@ -1,0 +1,177 @@
+.catalog {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+p,
+h2 {
+  margin: 0;
+}
+
+.search {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid var(--bh-line);
+  background: var(--bh-paper);
+}
+
+.search__main {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.search__main mat-form-field {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.search__button {
+  flex: none;
+  min-height: 56px;
+  padding-inline: 28px;
+}
+
+.search__filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.results__summary {
+  font-weight: 600;
+  color: var(--bh-wood-text);
+}
+
+.books {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.book {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 16px;
+  padding: 18px 20px;
+  border-radius: 14px;
+  border: 1px solid var(--bh-line);
+  background: var(--bh-paper);
+}
+
+.book__cover {
+  width: 52px;
+  height: 70px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  background: var(--bh-walnut);
+  color: var(--bh-honey);
+}
+
+.book__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.book__title {
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--bh-walnut-dark);
+}
+
+.book__authors {
+  color: var(--bh-wood-text);
+}
+
+.book__details {
+  font-size: 14px;
+  color: var(--bh-wood-text);
+}
+
+.book__availability {
+  white-space: nowrap;
+}
+
+.empty {
+  padding: 32px 24px;
+  border-radius: 14px;
+  border: 1px dashed var(--bh-line);
+  background: var(--bh-paper);
+  text-align: center;
+}
+
+.empty__title {
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--bh-walnut-dark);
+}
+
+.empty__hint {
+  margin-top: 4px;
+  color: var(--bh-wood-text);
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.pager__status {
+  color: var(--bh-wood-text);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 760px) {
+  .search {
+    padding: 20px;
+  }
+
+  .search__main {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search__filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .book {
+    grid-template-columns: 40px minmax(0, 1fr);
+    padding: 16px;
+  }
+
+  .book__cover {
+    width: 40px;
+    height: 54px;
+  }
+
+  .book__availability {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .pager {
+    justify-content: space-between;
+  }
+}
