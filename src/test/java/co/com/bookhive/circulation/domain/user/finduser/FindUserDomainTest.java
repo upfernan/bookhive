@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import co.com.bookhive.circulation.domain.institution.CurrentInstitution;
 import co.com.bookhive.circulation.domain.loan.lendbook.LendBookDomain;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
 import co.com.bookhive.circulation.testdata.FakeRepositories;
@@ -202,7 +203,7 @@ class FindUserDomainTest {
 				USER,
 				UUIDHelper.generateNew(),
 				UUIDHelper.generateNew(),
-				DateHelper.todayInUtc(),
+				CurrentInstitution.today(CurrentInstitution.parameters(parameters)),
 				DateHelper.getDefaultValue())
 				.withRepositories(bookCopies, fines, loans, parameters);
 

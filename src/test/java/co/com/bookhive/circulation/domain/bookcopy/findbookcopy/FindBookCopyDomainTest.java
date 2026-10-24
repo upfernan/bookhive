@@ -12,6 +12,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import co.com.bookhive.circulation.domain.institution.CurrentInstitution;
 import co.com.bookhive.circulation.domain.loan.lendbook.LendBookDomain;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
 import co.com.bookhive.circulation.testdata.FakeRepositories;
@@ -145,19 +146,20 @@ class FindBookCopyDomainTest {
 	}
 
 	private static String rejectionOfLending(final FakeRepositories.BookCopies bookCopies) {
+		final FakeRepositories.Parameters parameters = new FakeRepositories.Parameters().with(15, 3);
 		final LendBookDomain loan = new LendBookDomain(
 				UUIDHelper.getDefaultValue(),
 				BOOK_COPY,
 				UUIDHelper.generateNew(),
 				UUIDHelper.generateNew(),
 				UUIDHelper.generateNew(),
-				DateHelper.todayInUtc(),
+				CurrentInstitution.today(CurrentInstitution.parameters(parameters)),
 				DateHelper.getDefaultValue())
 				.withRepositories(
 						bookCopies,
 						new FakeRepositories.Fines(),
 						new FakeRepositories.Loans(),
-						new FakeRepositories.Parameters().with(15, 3));
+						parameters);
 
 		return assertThrows(BookHiveException.class, loan::validate).getUserMessageKey();
 	}
