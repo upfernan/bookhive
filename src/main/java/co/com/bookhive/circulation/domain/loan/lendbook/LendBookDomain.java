@@ -9,12 +9,14 @@ import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRe
 import co.com.bookhive.circulation.services.output.ports.repositories.FineRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionParametersRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.LoanRepository;
+import co.com.bookhive.circulation.services.output.ports.repositories.UserRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.FineCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.LoanCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.FineEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.InstitutionParametersEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.UserEntity;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.DateHelper;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
@@ -33,6 +35,7 @@ public final class LendBookDomain {
 	private LocalDate loanDate;
 	private LocalDate dueDate;
 
+	private UserRepository userRepository;
 	private BookCopyRepository bookCopyRepository;
 	private FineRepository fineRepository;
 	private LoanRepository loanRepository;
@@ -62,12 +65,14 @@ public final class LendBookDomain {
 	}
 
 	public LendBookDomain withRepositories(
+			final UserRepository userRepository,
 			final BookCopyRepository bookCopyRepository,
 			final FineRepository fineRepository,
 			final LoanRepository loanRepository,
 			final InstitutionParametersRepository institutionParametersRepository) {
 
 		final LendBookDomain withPorts = copy(dueDate);
+		withPorts.userRepository = userRepository;
 		withPorts.bookCopyRepository = bookCopyRepository;
 		withPorts.fineRepository = fineRepository;
 		withPorts.loanRepository = loanRepository;
@@ -90,6 +95,8 @@ public final class LendBookDomain {
 		validateBookCopyExists();
 		validateBookCopyIsAvailable();
 		validateBookCopyIsLendable();
+		validateUserExists();
+		validateUserIsActive();
 		validateUserWithoutPendingFines();
 		validateUserUnderLoanLimit();
 	}
@@ -228,6 +235,33 @@ public final class LendBookDomain {
 		}
 	}
 
+	private void validateUserExists() {
+
+		if (UUIDHelper.isDefaultValue(findUser().getId())) {
+			throw BookHiveException.createConflict(
+					MessageKey.LOAN_USER_NOT_FOUND,
+					"No se encontró el usuario " + user + " en la institución en curso.");
+		}
+	}
+
+	private void validateUserIsActive() {
+
+		final String status = findUser().getStatus();
+
+		if (UserEntity.STATUS_RETIRED.equals(status)) {
+			throw BookHiveException.createConflict(
+					MessageKey.USER_RETIRED,
+					"El usuario " + user + " está en estado " + UserEntity.STATUS_RETIRED + ".");
+		}
+
+		if (!UserEntity.STATUS_ACTIVE.equals(status)) {
+			throw BookHiveException.createConflict(
+					MessageKey.USER_SUSPENDED,
+					"El usuario " + user + " está en estado " + status
+							+ " y para llevar ejemplares debe estar " + UserEntity.STATUS_ACTIVE + ".");
+		}
+	}
+
 	private void validateUserWithoutPendingFines() {
 
 		final List<FineEntity> pendingFines = fineRepository.findByCriteria(
@@ -256,6 +290,10 @@ public final class LendBookDomain {
 		}
 	}
 
+	private UserEntity findUser() {
+		return userRepository.findById(user).orElseGet(UserEntity::new);
+	}
+
 	private BookCopyEntity findBookCopy() {
 		return bookCopyRepository.findById(bookCopy).orElseGet(BookCopyEntity::new);
 	}
@@ -266,7 +304,8 @@ public final class LendBookDomain {
 
 	private void requireRepositories() {
 
-		if (ObjectHelper.isNull(bookCopyRepository)
+		if (ObjectHelper.isNull(userRepository)
+				|| ObjectHelper.isNull(bookCopyRepository)
 				|| ObjectHelper.isNull(fineRepository)
 				|| ObjectHelper.isNull(loanRepository)
 				|| ObjectHelper.isNull(institutionParametersRepository)) {

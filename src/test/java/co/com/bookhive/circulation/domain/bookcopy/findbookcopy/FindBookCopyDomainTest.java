@@ -146,16 +146,18 @@ class FindBookCopyDomainTest {
 	}
 
 	private static String rejectionOfLending(final FakeRepositories.BookCopies bookCopies) {
+		final UUID user = UUIDHelper.generateNew();
 		final FakeRepositories.Parameters parameters = new FakeRepositories.Parameters().with(15, 3);
 		final LendBookDomain loan = new LendBookDomain(
 				UUIDHelper.getDefaultValue(),
 				BOOK_COPY,
-				UUIDHelper.generateNew(),
+				user,
 				UUIDHelper.generateNew(),
 				UUIDHelper.generateNew(),
 				CurrentInstitution.today(CurrentInstitution.parameters(parameters)),
 				DateHelper.getDefaultValue())
 				.withRepositories(
+						new FakeRepositories.Users().with(FakeRepositories.user(user, "Ana Gómez", "ana.gomez@uco.edu.co")),
 						bookCopies,
 						new FakeRepositories.Fines(),
 						new FakeRepositories.Loans(),

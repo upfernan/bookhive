@@ -11,6 +11,7 @@ import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRe
 import co.com.bookhive.circulation.services.output.ports.repositories.FineRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionParametersRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.LoanRepository;
+import co.com.bookhive.circulation.services.output.ports.repositories.UserRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
 import co.com.bookhive.circulation.services.usecase.loan.lendbook.LendBookUseCase;
 import co.com.bookhive.circulation.services.usecase.loan.lendbook.impl.mapper.LoanDomainMapper;
@@ -26,6 +27,7 @@ public final class LendBookUseCaseImpl implements LendBookUseCase {
 	private final BookCopyRepository bookCopyRepository;
 	private final FineRepository fineRepository;
 	private final LoanRepository loanRepository;
+	private final UserRepository userRepository;
 	private final LoanDomainMapper loanDomainMapper;
 	private final SessionContextPort sessionContext;
 	private final AuditPort audit;
@@ -37,6 +39,7 @@ public final class LendBookUseCaseImpl implements LendBookUseCase {
 			final BookCopyRepository bookCopyRepository,
 			final FineRepository fineRepository,
 			final LoanRepository loanRepository,
+			final UserRepository userRepository,
 			final LoanDomainMapper loanDomainMapper,
 			final SessionContextPort sessionContext,
 			final AuditPort audit,
@@ -48,6 +51,7 @@ public final class LendBookUseCaseImpl implements LendBookUseCase {
 		this.bookCopyRepository = requireDependency(bookCopyRepository, "el repositorio de ejemplares");
 		this.fineRepository = requireDependency(fineRepository, "el repositorio de multas");
 		this.loanRepository = requireDependency(loanRepository, "el repositorio de préstamos");
+		this.userRepository = requireDependency(userRepository, "el repositorio de usuarios");
 		this.loanDomainMapper = requireDependency(loanDomainMapper, "el mapeador del préstamo");
 		this.sessionContext = requireDependency(sessionContext, "el contexto de la sesión");
 		this.audit = requireDependency(audit, "la auditoría");
@@ -58,6 +62,7 @@ public final class LendBookUseCaseImpl implements LendBookUseCase {
 	public LendBookDomain execute(final LendBookDomain domain) {
 
 		final LendBookDomain loan = withSession(requireLoanData(domain), today()).withRepositories(
+				userRepository,
 				bookCopyRepository,
 				fineRepository,
 				loanRepository,

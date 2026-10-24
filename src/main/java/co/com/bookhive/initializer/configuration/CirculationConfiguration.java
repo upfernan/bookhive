@@ -60,6 +60,7 @@ public class CirculationConfiguration {
 			final BookCopyRepository bookCopyRepository,
 			final FineRepository fineRepository,
 			final LoanRepository loanRepository,
+			final UserRepository userRepository,
 			final SessionContextPort sessionContext,
 			final AuditPort audit,
 			final NotificationRequestPort notificationRequests) {
@@ -69,6 +70,7 @@ public class CirculationConfiguration {
 				bookCopyRepository,
 				fineRepository,
 				loanRepository,
+				userRepository,
 				new LoanDomainMapperImpl(),
 				sessionContext,
 				audit,
