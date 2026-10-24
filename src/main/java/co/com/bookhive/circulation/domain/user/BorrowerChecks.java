@@ -14,6 +14,8 @@ import co.com.bookhive.crosscutting.messages.MessageKey;
 
 public final class BorrowerChecks {
 
+	private static final String THE_USER = "El usuario ";
+
 	private BorrowerChecks() {
 		super();
 	}
@@ -31,13 +33,13 @@ public final class BorrowerChecks {
 		if (UserEntity.STATUS_RETIRED.equals(status)) {
 			throw BookHiveException.createConflict(
 					MessageKey.USER_RETIRED,
-					"El usuario " + user.getId() + " está en estado " + UserEntity.STATUS_RETIRED + ".");
+					THE_USER + user.getId() + " está en estado " + UserEntity.STATUS_RETIRED + ".");
 		}
 
 		if (!UserEntity.STATUS_ACTIVE.equals(status)) {
 			throw BookHiveException.createConflict(
 					MessageKey.USER_SUSPENDED,
-					"El usuario " + user.getId() + " está en estado " + status
+					THE_USER + user.getId() + " está en estado " + status
 							+ " y para llevar ejemplares debe estar " + UserEntity.STATUS_ACTIVE + ".");
 		}
 	}
@@ -48,7 +50,7 @@ public final class BorrowerChecks {
 		if (!pending.isEmpty()) {
 			throw BookHiveException.createConflict(
 					MessageKey.USER_WITH_PENDING_FINES,
-					"El usuario " + user + " tiene " + pending.size()
+					THE_USER + user + " tiene " + pending.size()
 							+ " multa(s) en estado " + FineEntity.STATUS_PENDING + ".");
 		}
 	}
