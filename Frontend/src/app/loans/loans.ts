@@ -14,6 +14,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { messages } from '../messages';
+import { fillTemplate } from '../shared/fill-template';
 import { RequestProblem, describeRequestProblem } from '../shared/request-errors';
 import { BookCopy, Borrower, LoanDesk } from './loan-desk';
 
@@ -41,7 +42,7 @@ const DUE_DATE_FORMAT = new Intl.DateTimeFormat('es-CO', {
   selector: 'app-loans',
   imports: [ReactiveFormsModule, MatButtonModule, MatFormFieldModule, MatInputModule],
   templateUrl: './loans.html',
-  styleUrls: ['../shell/section-page.css', './loans.css'],
+  styleUrls: ['../shell/section-page.css', '../shared/feedback.css', './loans.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Loans {
@@ -77,7 +78,7 @@ export class Loans {
   protected readonly loansSummary = computed(() => {
     const borrower = this.borrower();
     return borrower
-      ? fill(this.messages.activeLoansValue, {
+      ? fillTemplate(this.messages.activeLoansValue, {
           active: String(borrower.activeLoans),
           max: String(borrower.maxLoans),
         })
@@ -87,7 +88,7 @@ export class Loans {
   protected readonly confirmationText = computed(() => {
     const confirmation = this.confirmation();
     return confirmation
-      ? fill(this.messages.registeredText, {
+      ? fillTemplate(this.messages.registeredText, {
           title: confirmation.title,
           name: confirmation.name,
           date: confirmation.dueDate,
@@ -97,7 +98,7 @@ export class Loans {
 
   protected readonly traceText = computed(() => {
     const traceId = this.registerProblem()?.traceId ?? '';
-    return traceId === '' ? '' : fill(this.messages.traceId, { traceId });
+    return traceId === '' ? '' : fillTemplate(this.messages.traceId, { traceId });
   });
 
   constructor() {
@@ -239,10 +240,6 @@ export class Loans {
   private focus(input: Signal<ElementRef<HTMLInputElement> | undefined>): void {
     setTimeout(() => input()?.nativeElement.focus());
   }
-}
-
-function fill(template: string, values: Record<string, string>): string {
-  return template.replace(/\{(\w+)\}/g, (match, key: string) => values[key] ?? match);
 }
 
 function initialsOf(name: string): string {
