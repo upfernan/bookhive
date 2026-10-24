@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import co.com.bookhive.crosscutting.helper.DateHelper;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
+import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
 
 public record ReturnBookResponseDTO(
@@ -17,7 +18,9 @@ public record ReturnBookResponseDTO(
 		boolean fineGenerated,
 		UUID fine,
 		BigDecimal dailyRate,
-		BigDecimal fineAmount) {
+		BigDecimal fineAmount,
+		boolean reserved,
+		String reservedFor) {
 
 	public ReturnBookResponseDTO {
 		loan = UUIDHelper.getDefaultValue(loan);
@@ -28,6 +31,21 @@ public record ReturnBookResponseDTO(
 		fine = UUIDHelper.getDefaultValue(fine);
 		dailyRate = ObjectHelper.getDefaultValue(dailyRate, BigDecimal.ZERO);
 		fineAmount = ObjectHelper.getDefaultValue(fineAmount, BigDecimal.ZERO);
+		reservedFor = TextHelper.getDefaultValue(reservedFor);
+	}
+
+	public ReturnBookResponseDTO(
+			final UUID loan,
+			final UUID bookCopy,
+			final LocalDate dueDate,
+			final LocalDate returnDate,
+			final int overdueDays,
+			final boolean fineGenerated,
+			final UUID fine,
+			final BigDecimal dailyRate,
+			final BigDecimal fineAmount) {
+
+		this(loan, bookCopy, dueDate, returnDate, overdueDays, fineGenerated, fine, dailyRate, fineAmount, false, "");
 	}
 
 }

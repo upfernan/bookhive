@@ -1,5 +1,7 @@
 package co.com.bookhive.circulation.services.output.ports.repositories;
 
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.ReservationCriteria;
@@ -14,5 +16,7 @@ public interface ReservationRepository
 		FindByCriteriaRepository<ReservationEntity, ReservationCriteria> {
 
 	boolean changeStatus(UUID reservation, String expectedStatus, String newStatus);
+
+	boolean assign(UUID reservation, UUID bookCopy, Instant assignedAt, LocalDate pickupDeadline);
 
 }

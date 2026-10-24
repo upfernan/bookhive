@@ -15,7 +15,7 @@ public final class FindBookCopyMapperImpl implements FindBookCopyMapper {
 
 		final FindBookCopyRequestDTO safeRequest = ObjectHelper.getDefaultValue(request, new FindBookCopyRequestDTO(""));
 
-		return new FindBookCopyDomain(safeRequest.barcode());
+		return new FindBookCopyDomain(safeRequest.barcode(), safeRequest.user());
 	}
 
 	@Override

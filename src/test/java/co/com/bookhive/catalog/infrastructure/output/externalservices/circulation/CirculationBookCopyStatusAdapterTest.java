@@ -28,9 +28,12 @@ class CirculationBookCopyStatusAdapterTest {
 					List.of(MessageKey.BOOK_COPY_REFERENCE_ONLY));
 		});
 
-		final BookCopyStatusEntity status = adapter.findByBarcode("UCO-0001");
+		final UUID borrower = UUID.randomUUID();
+
+		final BookCopyStatusEntity status = adapter.findByBarcode("UCO-0001", borrower);
 
 		assertEquals("UCO-0001", requests.get(0).barcode());
+		assertEquals(borrower, requests.get(0).user());
 		assertEquals(new BookCopyStatusEntity(bookCopy, book, "UCO-0001", true, false,
 				List.of(MessageKey.BOOK_COPY_REFERENCE_ONLY)), status);
 	}

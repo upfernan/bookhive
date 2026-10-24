@@ -38,7 +38,7 @@ public final class FindBookCopyDetailsUseCaseImpl implements FindBookCopyDetails
 
 		search.validate();
 
-		final BookCopyStatusEntity bookCopy = bookCopyStatus.findByBarcode(search.barcode());
+		final BookCopyStatusEntity bookCopy = bookCopyStatus.findByBarcode(search.barcode(), search.user());
 		final BookEntity book = bookRepository.findByCriteria(BookCriteria.byIds(List.of(bookCopy.book()))).stream()
 				.findFirst()
 				.orElseGet(() -> new BookEntity(bookCopy.book(), "", "", 0, "", "", "", "", List.of()));

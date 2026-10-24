@@ -16,7 +16,7 @@ public final class FindBookCopyDetailsMapperImpl implements FindBookCopyDetailsM
 		final FindBookCopyDetailsRequestDTO safeRequest =
 				ObjectHelper.getDefaultValue(request, new FindBookCopyDetailsRequestDTO(""));
 
-		return new FindBookCopyDetailsDomain(safeRequest.barcode());
+		return new FindBookCopyDetailsDomain(safeRequest.barcode(), safeRequest.user());
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package co.com.bookhive.circulation.services.input.adapters;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -43,6 +44,20 @@ class ReturnBookInputAdapterTest {
 		assertEquals(DateHelper.getDefaultValue(), received.get(0).getReturnDate());
 		assertEquals(new ReturnBookResponseDTO(LOAN, BOOK_COPY, TODAY.minusDays(2), TODAY, 2, true, FINE,
 				new BigDecimal("1000.00"), new BigDecimal("2000.00")), response);
+	}
+
+	@Test
+	@DisplayName("si el ejemplar quedó apartado para una reserva, la respuesta dice para quién")
+	void mapsReservedFor() {
+		final ReturnBookInputAdapter adapter = new ReturnBookInputAdapter(domain -> new ReturnedLoanDomain(
+				LOAN, BOOK_COPY, TODAY, TODAY, 0, null, null, null).withReservedFor("Luis Mora"));
+
+		final ReturnBookResponseDTO response = adapter.execute(new ReturnBookRequestDTO(BOOK_COPY));
+
+		assertTrue(response.reserved());
+		assertEquals("Luis Mora", response.reservedFor());
+		assertEquals("", new ReturnBookResponseDTO(null, null, null, null, 0, false, null, null, null, false, null)
+				.reservedFor());
 	}
 
 	@Test

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -40,7 +41,7 @@ class BookCopyControllerTest {
 						List.of(MessageKey.BOOK_COPY_NOT_AVAILABLE, MessageKey.BOOK_COPY_REFERENCE_ONLY)),
 				MESSAGES);
 
-		final ResponseEntity<FindBookCopyDetailsResponseDTO> response = controller.find("UCO-0001");
+		final ResponseEntity<FindBookCopyDetailsResponseDTO> response = controller.find("UCO-0001", null);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		final FindBookCopyDetailsResponseDTO body = response.getBody();
@@ -63,10 +64,26 @@ class BookCopyControllerTest {
 						"Robert C. Martin", "", true, true, List.of()),
 				MESSAGES);
 
-		final FindBookCopyDetailsResponseDTO body = controller.find("UCO-0001").getBody();
+		final FindBookCopyDetailsResponseDTO body = controller.find("UCO-0001", null).getBody();
 
 		assertNotNull(body);
 		assertEquals(List.of(), body.blocks());
+	}
+
+	@Test
+	@DisplayName("pasa el usuario de la búsqueda para saber si el ejemplar apartado es suyo")
+	void passesTheBorrower() {
+		final UUID borrower = UUID.randomUUID();
+		final List<UUID> received = new ArrayList<>();
+		final BookCopyController controller = new BookCopyController(request -> {
+			received.add(request.user());
+			return new FindBookCopyDetailsResponseDTO(BOOK_COPY, request.barcode(), "Clean Architecture",
+					"Robert C. Martin", "", true, true, List.of());
+		}, MESSAGES);
+
+		controller.find("UCO-0001", borrower);
+
+		assertEquals(List.of(borrower), received);
 	}
 
 	@Test
@@ -76,7 +93,7 @@ class BookCopyControllerTest {
 			throw BookHiveException.createConflict(MessageKey.BOOK_COPY_NOT_FOUND, "No existe.");
 		}, MESSAGES);
 
-		final BookHiveException exception = assertThrows(BookHiveException.class, () -> controller.find("UCO-9999"));
+		final BookHiveException exception = assertThrows(BookHiveException.class, () -> controller.find("UCO-9999", null));
 
 		assertEquals(MessageKey.BOOK_COPY_NOT_FOUND, exception.getUserMessageKey());
 	}

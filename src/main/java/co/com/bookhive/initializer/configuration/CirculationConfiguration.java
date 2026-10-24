@@ -1,10 +1,12 @@
 package co.com.bookhive.initializer.configuration;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import co.com.bookhive.circulation.services.input.adapters.CancelReservationInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.CountBookCopiesInputAdapter;
+import co.com.bookhive.circulation.services.input.adapters.ExpireReservationsInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.FindBookCopyInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.FindUserContactInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.FindUserInputAdapter;
@@ -19,6 +21,7 @@ import co.com.bookhive.circulation.services.input.adapters.mapper.FindUserMapper
 import co.com.bookhive.circulation.services.input.adapters.mapper.LendBookMapperImpl;
 import co.com.bookhive.circulation.services.input.ports.CancelReservationInputPort;
 import co.com.bookhive.circulation.services.input.ports.CountBookCopiesInputPort;
+import co.com.bookhive.circulation.services.input.ports.ExpireReservationsInputPort;
 import co.com.bookhive.circulation.services.input.ports.FindBookCopyInputPort;
 import co.com.bookhive.circulation.services.input.ports.FindUserContactInputPort;
 import co.com.bookhive.circulation.services.input.ports.FindUserInputPort;
@@ -54,8 +57,12 @@ import co.com.bookhive.circulation.services.usecase.loan.scheduleduereminders.Sc
 import co.com.bookhive.circulation.services.usecase.loan.scheduleduereminders.impl.ScheduleDueRemindersUseCaseImpl;
 import co.com.bookhive.circulation.services.usecase.reservation.cancelreservation.CancelReservationUseCase;
 import co.com.bookhive.circulation.services.usecase.reservation.cancelreservation.impl.CancelReservationUseCaseImpl;
+import co.com.bookhive.circulation.services.usecase.reservation.expirereservations.ExpireReservationsUseCase;
+import co.com.bookhive.circulation.services.usecase.reservation.expirereservations.impl.ExpireReservationsUseCaseImpl;
 import co.com.bookhive.circulation.services.usecase.reservation.finduserreservations.FindUserReservationsUseCase;
 import co.com.bookhive.circulation.services.usecase.reservation.finduserreservations.impl.FindUserReservationsUseCaseImpl;
+import co.com.bookhive.circulation.services.usecase.reservation.handoverbookcopy.HandOverBookCopyUseCase;
+import co.com.bookhive.circulation.services.usecase.reservation.handoverbookcopy.impl.HandOverBookCopyUseCaseImpl;
 import co.com.bookhive.circulation.services.usecase.reservation.reservebook.ReserveBookUseCase;
 import co.com.bookhive.circulation.services.usecase.reservation.reservebook.impl.ReserveBookUseCaseImpl;
 import co.com.bookhive.circulation.services.usecase.user.finduser.FindUserUseCase;
@@ -68,6 +75,7 @@ import co.com.bookhive.shared.services.output.ports.AuditPort;
 public class CirculationConfiguration {
 
 	@Bean
+	@SuppressWarnings("java:S107")
 	LendBookUseCase lendBookUseCase(
 			final InstitutionParametersRepository institutionParametersRepository,
 			final BookCopyRepository bookCopyRepository,
@@ -76,7 +84,8 @@ public class CirculationConfiguration {
 			final UserRepository userRepository,
 			final SessionContextPort sessionContext,
 			final AuditPort audit,
-			final NotificationRequestPort notificationRequests) {
+			final NotificationRequestPort notificationRequests,
+			final ReservationRepository reservationRepository) {
 
 		return new LendBookUseCaseImpl(
 				institutionParametersRepository,
@@ -87,7 +96,8 @@ public class CirculationConfiguration {
 				new LoanDomainMapperImpl(),
 				sessionContext,
 				audit,
-				notificationRequests);
+				notificationRequests,
+				reservationRepository);
 	}
 
 	@Bean
@@ -126,8 +136,11 @@ public class CirculationConfiguration {
 	}
 
 	@Bean
-	FindBookCopyUseCase findBookCopyUseCase(final BookCopyRepository bookCopyRepository) {
-		return new FindBookCopyUseCaseImpl(bookCopyRepository);
+	FindBookCopyUseCase findBookCopyUseCase(
+			final BookCopyRepository bookCopyRepository,
+			final ReservationRepository reservationRepository) {
+
+		return new FindBookCopyUseCaseImpl(bookCopyRepository, reservationRepository);
 	}
 
 	@Bean
@@ -184,7 +197,8 @@ public class CirculationConfiguration {
 			final FineRepository fineRepository,
 			final SessionContextPort sessionContext,
 			final AuditPort audit,
-			final NotificationRequestPort notificationRequests) {
+			final NotificationRequestPort notificationRequests,
+			final HandOverBookCopyUseCase handOverBookCopyUseCase) {
 
 		return new ReturnBookUseCaseImpl(
 				institutionParametersRepository,
@@ -194,7 +208,45 @@ public class CirculationConfiguration {
 				fineRepository,
 				sessionContext,
 				audit,
-				notificationRequests);
+				notificationRequests,
+				handOverBookCopyUseCase);
+	}
+
+	@Bean
+	HandOverBookCopyUseCase handOverBookCopyUseCase(
+			final ReservationRepository reservationRepository,
+			final BookCopyRepository bookCopyRepository,
+			final UserRepository userRepository,
+			final InstitutionParametersRepository institutionParametersRepository,
+			final NotificationRequestPort notificationRequests,
+			@Value("${bookhive.reservations.pickup-days:2}") final int pickupDays) {
+
+		return new HandOverBookCopyUseCaseImpl(
+				reservationRepository,
+				bookCopyRepository,
+				userRepository,
+				institutionParametersRepository,
+				notificationRequests,
+				pickupDays);
+	}
+
+	@Bean
+	ExpireReservationsUseCase expireReservationsUseCase(
+			final ReservationRepository reservationRepository,
+			final BookCopyRepository bookCopyRepository,
+			final InstitutionParametersRepository institutionParametersRepository,
+			final HandOverBookCopyUseCase handOverBookCopyUseCase) {
+
+		return new ExpireReservationsUseCaseImpl(
+				reservationRepository,
+				bookCopyRepository,
+				institutionParametersRepository,
+				handOverBookCopyUseCase);
+	}
+
+	@Bean
+	ExpireReservationsInputPort expireReservationsInputPort(final ExpireReservationsUseCase expireReservationsUseCase) {
+		return new ExpireReservationsInputAdapter(expireReservationsUseCase);
 	}
 
 	@Bean

@@ -18,8 +18,8 @@ import co.com.bookhive.crosscutting.exception.BookHiveException;
 class ScheduleDueRemindersUseCaseImplTest {
 
 	@Test
-	@DisplayName("deja en la cola una tarea de recordatorios por cada institución activa")
-	void schedulesOneTaskPerInstitution() {
+	@DisplayName("deja en la cola los recordatorios y el vencimiento de reservas de cada institución activa")
+	void schedulesDailyTasksPerInstitution() {
 		final List<String> scheduled = new ArrayList<>();
 		final InstitutionTaskPort tasks = (task, institution) -> scheduled.add(task + "@" + institution);
 
@@ -27,7 +27,11 @@ class ScheduleDueRemindersUseCaseImplTest {
 				new ScheduleDueRemindersUseCaseImpl(() -> List.of("uco", "unal"), tasks).execute();
 
 		assertEquals(List.of("uco", "unal"), result.institutions());
-		assertEquals(List.of(ScheduleDueRemindersDomain.TASK + "@uco", ScheduleDueRemindersDomain.TASK + "@unal"),
+		assertEquals(List.of(
+				ScheduleDueRemindersDomain.TASK + "@uco",
+				ScheduleDueRemindersDomain.RESERVATIONS_TASK + "@uco",
+				ScheduleDueRemindersDomain.TASK + "@unal",
+				ScheduleDueRemindersDomain.RESERVATIONS_TASK + "@unal"),
 				scheduled);
 		assertEquals(List.of("uco"), new ScheduleDueRemindersInputAdapter(
 				() -> new ScheduleDueRemindersDomain(List.of("uco"))).execute().institutions());

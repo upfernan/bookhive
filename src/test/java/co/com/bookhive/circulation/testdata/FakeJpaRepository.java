@@ -63,6 +63,7 @@ public final class FakeJpaRepository<T> implements InvocationHandler {
 			case "findById" -> stored.stream().findFirst();
 			case "findAll" -> findAll(arguments[0]);
 			case "changeStatus" -> changeStatus(arguments);
+			case "assign" -> assign(arguments);
 			case "hashCode" -> System.identityHashCode(repository);
 			case "equals" -> repository == arguments[0];
 			default -> "FakeJpaRepository";
@@ -76,6 +77,12 @@ public final class FakeJpaRepository<T> implements InvocationHandler {
 
 	private int changeStatus(final Object[] arguments) {
 		filters.add(arguments[0] + ":" + arguments[1] + "->" + arguments[2]);
+		return changedRows;
+	}
+
+	private int assign(final Object[] arguments) {
+		filters.add(arguments[0] + ":" + arguments[4] + "->" + arguments[5]
+				+ " ejemplar " + arguments[1] + " hasta " + arguments[3]);
 		return changedRows;
 	}
 
@@ -111,6 +118,9 @@ public final class FakeJpaRepository<T> implements InvocationHandler {
 		}
 		if ("notEqual".equals(name)) {
 			filters.add(arguments[0] + "!=" + arguments[1]);
+		}
+		if ("lessThan".equals(name)) {
+			filters.add(arguments[0] + "<" + arguments[1]);
 		}
 		if ("in".equals(name)) {
 			filters.add(path + " en " + arguments[0]);

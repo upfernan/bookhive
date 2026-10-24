@@ -1,5 +1,7 @@
 package co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa;
 
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,5 +26,18 @@ public interface ReservationJpaRepository
 			@Param("id") UUID id,
 			@Param("expectedStatus") String expectedStatus,
 			@Param("newStatus") String newStatus);
+
+	@Transactional
+	@Modifying(flushAutomatically = true, clearAutomatically = true)
+	@Query("UPDATE ReservationJpaEntity r SET r.status = :assigned, r.bookCopy = :bookCopy,"
+			+ " r.assignedAt = :assignedAt, r.pickupDeadline = :pickupDeadline"
+			+ " WHERE r.id = :id AND r.status = :waiting")
+	int assign(
+			@Param("id") UUID id,
+			@Param("bookCopy") UUID bookCopy,
+			@Param("assignedAt") Instant assignedAt,
+			@Param("pickupDeadline") LocalDate pickupDeadline,
+			@Param("waiting") String waiting,
+			@Param("assigned") String assigned);
 
 }

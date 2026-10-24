@@ -1,6 +1,8 @@
 package co.com.bookhive.circulation.infrastructure.output.repositories.structured.adapters;
 
 import java.sql.SQLException;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -20,6 +22,7 @@ import co.com.bookhive.circulation.services.output.ports.repositories.Reservatio
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.ReservationCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.ReservationEntity;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
+import co.com.bookhive.crosscutting.helper.DateHelper;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
@@ -94,6 +97,28 @@ public class ReservationRepositoryAdapter implements ReservationRepository {
 		return repository.changeStatus(reservation, expectedStatus.trim(), newStatus.trim()) == 1;
 	}
 
+	@Override
+	public boolean assign(
+			final UUID reservation,
+			final UUID bookCopy,
+			final Instant assignedAt,
+			final LocalDate pickupDeadline) {
+
+		if (UUIDHelper.isDefaultValue(reservation)
+				|| UUIDHelper.isDefaultValue(bookCopy)
+				|| DateHelper.isDefaultValue(assignedAt)
+				|| DateHelper.isDefaultValue(pickupDeadline)) {
+			return false;
+		}
+		return repository.assign(
+				reservation,
+				bookCopy,
+				assignedAt,
+				pickupDeadline,
+				ReservationEntity.STATUS_WAITING,
+				ReservationEntity.STATUS_ASSIGNED) == 1;
+	}
+
 	private static Specification<ReservationJpaEntity> specificationOf(final ReservationCriteria criteria) {
 		return (root, query, builder) -> {
 			final List<Predicate> predicates = new ArrayList<>();
@@ -102,6 +127,12 @@ public class ReservationRepositoryAdapter implements ReservationRepository {
 			}
 			if (criteria.filtersByBook()) {
 				predicates.add(builder.equal(root.get("book"), criteria.getBook()));
+			}
+			if (criteria.filtersByBookCopy()) {
+				predicates.add(builder.equal(root.get("bookCopy"), criteria.getBookCopy()));
+			}
+			if (criteria.filtersByPickupBefore()) {
+				predicates.add(builder.lessThan(root.<LocalDate>get("pickupDeadline"), criteria.getPickupBefore()));
 			}
 			predicates.add(root.get("status").in(criteria.getStatuses()));
 			return builder.and(predicates.toArray(Predicate[]::new));

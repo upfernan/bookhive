@@ -2,6 +2,7 @@ package co.com.bookhive.circulation.services.usecase.loan.lendbook.impl;
 
 import java.time.LocalDate;
 
+import co.com.bookhive.circulation.domain.bookcopy.BookCopyLendingRule;
 import co.com.bookhive.circulation.domain.institution.CurrentInstitution;
 import co.com.bookhive.circulation.domain.loan.lendbook.LendBookDomain;
 import co.com.bookhive.circulation.services.output.ports.NotificationRequestPort;
@@ -11,8 +12,10 @@ import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRe
 import co.com.bookhive.circulation.services.output.ports.repositories.FineRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionParametersRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.LoanRepository;
+import co.com.bookhive.circulation.services.output.ports.repositories.ReservationRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.UserRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.ReservationEntity;
 import co.com.bookhive.circulation.services.usecase.loan.lendbook.LendBookUseCase;
 import co.com.bookhive.circulation.services.usecase.loan.lendbook.impl.mapper.LoanDomainMapper;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
@@ -32,6 +35,7 @@ public final class LendBookUseCaseImpl implements LendBookUseCase {
 	private final SessionContextPort sessionContext;
 	private final AuditPort audit;
 	private final NotificationRequestPort notificationRequests;
+	private final ReservationRepository reservationRepository;
 
 	@SuppressWarnings("java:S107")
 	public LendBookUseCaseImpl(
@@ -43,7 +47,8 @@ public final class LendBookUseCaseImpl implements LendBookUseCase {
 			final LoanDomainMapper loanDomainMapper,
 			final SessionContextPort sessionContext,
 			final AuditPort audit,
-			final NotificationRequestPort notificationRequests) {
+			final NotificationRequestPort notificationRequests,
+			final ReservationRepository reservationRepository) {
 
 		super();
 		this.institutionParametersRepository = requireDependency(
@@ -56,6 +61,7 @@ public final class LendBookUseCaseImpl implements LendBookUseCase {
 		this.sessionContext = requireDependency(sessionContext, "el contexto de la sesión");
 		this.audit = requireDependency(audit, "la auditoría");
 		this.notificationRequests = requireDependency(notificationRequests, "la cola de avisos");
+		this.reservationRepository = requireDependency(reservationRepository, "el repositorio de reservas");
 	}
 
 	@Override
@@ -66,19 +72,25 @@ public final class LendBookUseCaseImpl implements LendBookUseCase {
 				bookCopyRepository,
 				fineRepository,
 				loanRepository,
-				institutionParametersRepository);
+				institutionParametersRepository)
+				.withReservations(reservationRepository);
 
 		loan.validate();
 
 		final BookCopyEntity lentCopy = bookCopyRepository.findById(loan.getBookCopy())
 				.orElseGet(BookCopyEntity::new);
+		final boolean reserved = BookCopyEntity.STATUS_RESERVED.equals(lentCopy.getStatus());
 
-		if (!bookCopyRepository.changeStatus(
-				loan.getBookCopy(), BookCopyEntity.STATUS_AVAILABLE, BookCopyEntity.STATUS_LENT)) {
+		if (reserved) {
+			pickUpReservation(loan);
+		}
+
+		final String expectedStatus = reserved ? BookCopyEntity.STATUS_RESERVED : BookCopyEntity.STATUS_AVAILABLE;
+		if (!bookCopyRepository.changeStatus(loan.getBookCopy(), expectedStatus, BookCopyEntity.STATUS_LENT)) {
 			throw BookHiveException.createConflict(
 					MessageKey.BOOK_COPY_NOT_AVAILABLE,
 					"Otro préstamo del ejemplar " + loan.getBookCopy()
-							+ " se registró al mismo tiempo; el ejemplar ya no estaba DISPONIBLE (RT-01).");
+							+ " se registró al mismo tiempo; el ejemplar ya no estaba " + expectedStatus + " (RT-01).");
 		}
 
 		final LocalDate dueDate = loan.calculateDueDate();
@@ -108,6 +120,24 @@ public final class LendBookUseCaseImpl implements LendBookUseCase {
 				registeredLoan.getDueDate()));
 
 		return registeredLoan;
+	}
+
+	private void pickUpReservation(final LendBookDomain loan) {
+
+		final ReservationEntity held = BookCopyLendingRule.heldReservation(loan.getBookCopy(), reservationRepository)
+				.filter(reservation -> reservation.getUser().equals(loan.getUser()))
+				.orElseThrow(() -> BookHiveException.createConflict(
+						MessageKey.BOOK_COPY_RESERVED,
+						"El ejemplar " + loan.getBookCopy() + " dejó de estar apartado para el usuario "
+								+ loan.getUser() + " antes de registrar el préstamo."));
+
+		if (!reservationRepository.changeStatus(
+				held.getId(), ReservationEntity.STATUS_ASSIGNED, ReservationEntity.STATUS_PICKED_UP)) {
+			throw BookHiveException.createConflict(
+					MessageKey.BOOK_COPY_RESERVED,
+					"La reserva " + held.getId() + " cambió de estado al mismo tiempo que se prestaba el ejemplar "
+							+ loan.getBookCopy() + "; por ejemplo, venció.");
+		}
 	}
 
 	private LendBookDomain withSession(final LendBookDomain domain, final LocalDate today) {

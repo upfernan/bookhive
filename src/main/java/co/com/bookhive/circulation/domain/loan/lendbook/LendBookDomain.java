@@ -2,14 +2,17 @@ package co.com.bookhive.circulation.domain.loan.lendbook;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
+import co.com.bookhive.circulation.domain.bookcopy.BookCopyLendingRule;
 import co.com.bookhive.circulation.domain.institution.CurrentInstitution;
 import co.com.bookhive.circulation.domain.user.BorrowerChecks;
 import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.FineRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionParametersRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.LoanRepository;
+import co.com.bookhive.circulation.services.output.ports.repositories.ReservationRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.UserRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.LoanCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
@@ -39,6 +42,7 @@ public final class LendBookDomain {
 	private FineRepository fineRepository;
 	private LoanRepository loanRepository;
 	private InstitutionParametersRepository institutionParametersRepository;
+	private ReservationRepository reservationRepository;
 
 	public LendBookDomain(
 			final UUID id,
@@ -76,6 +80,20 @@ public final class LendBookDomain {
 		withPorts.fineRepository = fineRepository;
 		withPorts.loanRepository = loanRepository;
 		withPorts.institutionParametersRepository = institutionParametersRepository;
+		withPorts.reservationRepository = reservationRepository;
+
+		return withPorts;
+	}
+
+	public LendBookDomain withReservations(final ReservationRepository reservations) {
+
+		final LendBookDomain withPorts = withRepositories(
+				userRepository,
+				bookCopyRepository,
+				fineRepository,
+				loanRepository,
+				institutionParametersRepository);
+		withPorts.reservationRepository = reservations;
 
 		return withPorts;
 	}
@@ -213,13 +231,14 @@ public final class LendBookDomain {
 	private void validateBookCopyIsAvailable() {
 
 		final BookCopyEntity found = findBookCopy();
+		final Optional<String> block = BookCopyLendingRule.blockFor(found, user, reservationRepository);
 
-		if (!BookCopyEntity.STATUS_AVAILABLE.equals(found.getStatus())) {
+		if (block.isPresent()) {
 			throw BookHiveException.createConflict(
-					MessageKey.BOOK_COPY_NOT_AVAILABLE,
+					block.get(),
 					"El ejemplar " + bookCopy + " está en estado " + found.getStatus()
-							+ " y para prestarse debe estar "
-							+ BookCopyEntity.STATUS_AVAILABLE + ".");
+							+ " y para prestarse debe estar " + BookCopyEntity.STATUS_AVAILABLE
+							+ ", o " + BookCopyEntity.STATUS_RESERVED + " para el usuario " + user + ".");
 		}
 	}
 

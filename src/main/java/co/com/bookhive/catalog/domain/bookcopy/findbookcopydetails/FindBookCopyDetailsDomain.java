@@ -1,13 +1,21 @@
 package co.com.bookhive.catalog.domain.bookcopy.findbookcopydetails;
 
+import java.util.UUID;
+
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.TextHelper;
+import co.com.bookhive.crosscutting.helper.UUIDHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;
 
-public record FindBookCopyDetailsDomain(String barcode) {
+public record FindBookCopyDetailsDomain(String barcode, UUID user) {
 
 	public FindBookCopyDetailsDomain {
 		barcode = TextHelper.getDefaultValue(barcode);
+		user = UUIDHelper.getDefaultValue(user);
+	}
+
+	public FindBookCopyDetailsDomain(final String barcode) {
+		this(barcode, null);
 	}
 
 	public void validate() {

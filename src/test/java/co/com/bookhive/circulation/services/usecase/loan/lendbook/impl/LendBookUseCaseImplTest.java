@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import co.com.bookhive.circulation.services.output.ports.entities.NotificationRe
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.InstitutionParametersEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.ReservationEntity;
 import co.com.bookhive.circulation.services.usecase.loan.lendbook.impl.mapper.LoanDomainMapperImpl;
 import co.com.bookhive.circulation.testdata.FakeRepositories;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
@@ -44,6 +46,7 @@ class LendBookUseCaseImplTest {
 	private FakeRepositories.Fines fines;
 	private FakeRepositories.Loans loans;
 	private FakeRepositories.Parameters parameters;
+	private FakeRepositories.Reservations reservations;
 	private List<String> audited;
 	private List<NotificationRequestEntity> notices;
 
@@ -55,6 +58,7 @@ class LendBookUseCaseImplTest {
 		fines = new FakeRepositories.Fines();
 		loans = new FakeRepositories.Loans();
 		parameters = new FakeRepositories.Parameters().with(LOAN_DAYS, 3);
+		reservations = new FakeRepositories.Reservations();
 		audited = new ArrayList<>();
 		notices = new ArrayList<>();
 	}
@@ -178,15 +182,62 @@ class LendBookUseCaseImplTest {
 		final AuditPort audit = this::audit;
 
 		final BookHiveException exception = assertThrows(BookHiveException.class,
-				() -> new LendBookUseCaseImpl(parameters, bookCopies, fines, loans, users, null, session, audit, notices::add));
+				() -> new LendBookUseCaseImpl(parameters, bookCopies, fines, loans, users, null, session, audit,
+						notices::add, reservations));
+		final LoanDomainMapperImpl mapper = new LoanDomainMapperImpl();
 
 		assertEquals(BookHiveException.Kind.UNEXPECTED, exception.getKind());
 		assertEquals(MessageKey.LOAN_UNEXPECTED, exception.getUserMessageKey());
+		assertThrows(BookHiveException.class, () -> new LendBookUseCaseImpl(
+				parameters, bookCopies, fines, loans, users, mapper, session, audit, notices::add, null));
+	}
+
+	@Test
+	@DisplayName("el ejemplar apartado se le presta a quien lo reservó y su reserva queda retirada")
+	void holderPicksUpReservedCopy() {
+		final ReservationEntity held = reserveCopyFor(USER);
+
+		final LendBookDomain registered = useCase().execute(request());
+
+		assertFalse(UUIDHelper.isDefaultValue(registered.getId()));
+		assertEquals(List.of(BOOK_COPY + ":RESERVADO->PRESTADO"), bookCopies.statusChanges());
+		assertEquals(ReservationEntity.STATUS_PICKED_UP, held.getStatus());
+		assertEquals(1, loans.created().size());
+	}
+
+	@Test
+	@DisplayName("el ejemplar apartado para otra persona no se presta")
+	void reservedCopyIsNotLentToSomeoneElse() {
+		final ReservationEntity held = reserveCopyFor(UUIDHelper.generateNew());
+		final LendBookUseCaseImpl useCase = useCase();
+		final LendBookDomain request = request();
+
+		final BookHiveException exception = assertThrows(BookHiveException.class, () -> useCase.execute(request));
+
+		assertEquals(MessageKey.BOOK_COPY_RESERVED, exception.getUserMessageKey());
+		assertEquals(ReservationEntity.STATUS_ASSIGNED, held.getStatus());
+		assertTrue(bookCopies.statusChanges().isEmpty());
+		assertTrue(loans.created().isEmpty());
+	}
+
+	@Test
+	@DisplayName("si la reserva venció mientras se prestaba, el préstamo se rechaza y el ejemplar no cambia")
+	void reservationChangedWhileLending() {
+		reserveCopyFor(USER);
+		reservations.changedByOtherRequestTo(ReservationEntity.STATUS_EXPIRED);
+		final LendBookUseCaseImpl useCase = useCase();
+		final LendBookDomain request = request();
+
+		final BookHiveException exception = assertThrows(BookHiveException.class, () -> useCase.execute(request));
+
+		assertEquals(MessageKey.BOOK_COPY_RESERVED, exception.getUserMessageKey());
+		assertTrue(bookCopies.statusChanges().isEmpty());
+		assertTrue(loans.created().isEmpty());
 	}
 
 	private LendBookUseCaseImpl useCase() {
 		return new LendBookUseCaseImpl(parameters, bookCopies, fines, loans, users, new LoanDomainMapperImpl(),
-				new FakeSession(), this::audit, notices::add);
+				new FakeSession(), this::audit, notices::add, reservations);
 	}
 
 	private void audit(final String action, final UUID institution, final UUID person, final String detail) {
@@ -195,6 +246,16 @@ class LendBookUseCaseImplTest {
 
 	private static LendBookDomain request() {
 		return new LendBookDomain(null, BOOK_COPY, USER, null, null, null, null);
+	}
+
+	private ReservationEntity reserveCopyFor(final UUID holder) {
+		bookCopies = new FakeRepositories.BookCopies()
+				.with(FakeRepositories.bookCopy(BOOK_COPY, BookCopyEntity.STATUS_RESERVED, true));
+		final ReservationEntity held = FakeRepositories.reservation(
+				UUIDHelper.generateNew(), holder, ReservationEntity.STATUS_ASSIGNED, Instant.now());
+		held.setBookCopy(BOOK_COPY);
+		reservations.with(held);
+		return held;
 	}
 
 	private static final class FakeSession implements SessionContextPort {

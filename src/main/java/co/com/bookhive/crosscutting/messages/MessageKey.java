@@ -20,6 +20,7 @@ public final class MessageKey {
 	public static final String BOOK_COPY_NOT_AVAILABLE = "book-copy.not-available";
 	public static final String BOOK_COPY_REFERENCE_ONLY = "book-copy.reference-only";
 	public static final String BOOK_COPY_BARCODE_REQUIRED = "book-copy.barcode.required";
+	public static final String BOOK_COPY_RESERVED = "book-copy.reserved";
 
 	public static final String USER_WITH_PENDING_FINES = "user.with-pending-fines";
 	public static final String USER_AT_LOAN_LIMIT = "user.at-loan-limit";
@@ -59,6 +60,8 @@ public final class MessageKey {
 	public static final String EMAIL_LOAN_DUE_SOON_BODY = "email.loan-due-soon.body";
 	public static final String EMAIL_FINE_GENERATED_SUBJECT = "email.fine-generated.subject";
 	public static final String EMAIL_FINE_GENERATED_BODY = "email.fine-generated.body";
+	public static final String EMAIL_RESERVATION_READY_SUBJECT = "email.reservation-ready.subject";
+	public static final String EMAIL_RESERVATION_READY_BODY = "email.reservation-ready.body";
 	public static final String REQUEST_UNEXPECTED = "request.unexpected";
 	public static final String REQUEST_INVALID_DATA = "request.invalid-data";
 	public static final String REQUEST_UNHANDLED = "request.unhandled";

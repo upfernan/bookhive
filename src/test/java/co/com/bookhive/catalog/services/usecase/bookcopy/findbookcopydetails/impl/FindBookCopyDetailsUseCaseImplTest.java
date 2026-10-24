@@ -28,14 +28,17 @@ class FindBookCopyDetailsUseCaseImplTest {
 	private static final UUID BOOK = UUID.randomUUID();
 
 	private List<String> askedBarcodes;
+	private List<UUID> askedUsers;
 	private BookCopyStatusPort bookCopyStatus;
 	private FakeCatalog.Books books;
 
 	@BeforeEach
 	void prepare() {
 		askedBarcodes = new ArrayList<>();
-		bookCopyStatus = barcode -> {
+		askedUsers = new ArrayList<>();
+		bookCopyStatus = (barcode, user) -> {
 			askedBarcodes.add(barcode);
+			askedUsers.add(user);
 			return new BookCopyStatusEntity(BOOK_COPY, BOOK, barcode, false, true,
 					List.of(MessageKey.BOOK_COPY_NOT_AVAILABLE));
 		};
@@ -58,6 +61,16 @@ class FindBookCopyDetailsUseCaseImplTest {
 		assertFalse(details.available());
 		assertTrue(details.lendable());
 		assertEquals(List.of(MessageKey.BOOK_COPY_NOT_AVAILABLE), details.blocks());
+	}
+
+	@Test
+	@DisplayName("le pasa al módulo de préstamos el usuario que se lo va a llevar, para saber si el ejemplar es suyo")
+	void passesTheBorrower() {
+		final UUID borrower = UUID.randomUUID();
+
+		useCase().execute(new FindBookCopyDetailsDomain("UCO-0001", borrower));
+
+		assertEquals(List.of(borrower), askedUsers);
 	}
 
 	@Test
@@ -86,7 +99,7 @@ class FindBookCopyDetailsUseCaseImplTest {
 	@Test
 	@DisplayName("deja pasar el rechazo del módulo de préstamos cuando el ejemplar no existe")
 	void letsNotFoundPass() {
-		bookCopyStatus = barcode -> {
+		bookCopyStatus = (barcode, user) -> {
 			throw BookHiveException.createConflict(MessageKey.BOOK_COPY_NOT_FOUND, "No existe.");
 		};
 		final FindBookCopyDetailsUseCaseImpl useCase = useCase();

@@ -146,7 +146,9 @@ export class Loans {
     this.bookCopy.set(null);
 
     try {
-      this.bookCopy.set(await this.desk.findBookCopy(this.copyForm.controls.barcode.value));
+      this.bookCopy.set(
+        await this.desk.findBookCopy(this.copyForm.controls.barcode.value, this.borrower()?.id ?? ''),
+      );
     } catch (error) {
       this.copyProblem.set(describeRequestProblem(error, this.messages.copyNotFound).message);
     } finally {

@@ -50,7 +50,9 @@ public final class ReturnBookInputAdapter implements ReturnBookInputPort {
 				returned.hasFine(),
 				returned.fine(),
 				returned.dailyRate(),
-				returned.fineAmount());
+				returned.fineAmount(),
+				returned.isReserved(),
+				returned.reservedFor());
 	}
 
 }

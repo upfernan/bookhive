@@ -27,7 +27,10 @@ public final class ScheduleDueRemindersUseCaseImpl implements ScheduleDueReminde
 	@Override
 	public ScheduleDueRemindersDomain execute() {
 		final List<String> institutions = institutionDirectory.activeSchemas();
-		institutions.forEach(institution -> institutionTasks.schedule(ScheduleDueRemindersDomain.TASK, institution));
+		institutions.forEach(institution -> {
+			institutionTasks.schedule(ScheduleDueRemindersDomain.TASK, institution);
+			institutionTasks.schedule(ScheduleDueRemindersDomain.RESERVATIONS_TASK, institution);
+		});
 		return new ScheduleDueRemindersDomain(institutions);
 	}
 

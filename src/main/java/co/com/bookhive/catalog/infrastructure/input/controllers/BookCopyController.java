@@ -1,6 +1,7 @@
 package co.com.bookhive.catalog.infrastructure.input.controllers;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,12 +42,13 @@ public class BookCopyController {
 	@Transactional(readOnly = true)
 	@GetMapping
 	public ResponseEntity<FindBookCopyDetailsResponseDTO> find(
-			@RequestParam(name = "codigo", required = false) final String barcode) {
+			@RequestParam(name = "codigo", required = false) final String barcode,
+			@RequestParam(name = "usuario", required = false) final UUID user) {
 
 		logger.info("Inicia la búsqueda de un ejemplar para prestarlo.");
 
 		final FindBookCopyDetailsResponseDTO found =
-				findBookCopyDetailsInputPort.execute(new FindBookCopyDetailsRequestDTO(barcode));
+				findBookCopyDetailsInputPort.execute(new FindBookCopyDetailsRequestDTO(barcode, user));
 
 		logger.info("Ejemplar encontrado con {} bloqueo(s) para prestar.", found.blocks().size());
 
