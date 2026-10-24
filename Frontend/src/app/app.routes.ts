@@ -36,12 +36,6 @@ export const routes: Routes = [
         canMatch: [requirePermission(PermissionCode.searchCatalog)],
         loadComponent: () => import('./catalog/catalog').then((m) => m.Catalog),
       },
-      {
-        path: 'catalogo/actualizar',
-        title: 'Actualizar el buscador · BookHive',
-        canMatch: [requirePermission(PermissionCode.syncCatalog)],
-        loadComponent: () => import('./catalog/catalog-sync').then((m) => m.CatalogSync),
-      },
       { path: '', pathMatch: 'full', redirectTo: 'inicio' },
     ],
   },
