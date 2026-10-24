@@ -3,23 +3,29 @@ package co.com.bookhive.initializer.configuration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import co.com.bookhive.circulation.services.input.adapters.CancelReservationInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.CountBookCopiesInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.FindBookCopyInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.FindUserContactInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.FindUserInputAdapter;
+import co.com.bookhive.circulation.services.input.adapters.FindUserReservationsInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.LendBookInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.RemindDueLoansInputAdapter;
+import co.com.bookhive.circulation.services.input.adapters.ReserveBookInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.ReturnBookInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.ScheduleDueRemindersInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.mapper.FindBookCopyMapperImpl;
 import co.com.bookhive.circulation.services.input.adapters.mapper.FindUserMapperImpl;
 import co.com.bookhive.circulation.services.input.adapters.mapper.LendBookMapperImpl;
+import co.com.bookhive.circulation.services.input.ports.CancelReservationInputPort;
 import co.com.bookhive.circulation.services.input.ports.CountBookCopiesInputPort;
 import co.com.bookhive.circulation.services.input.ports.FindBookCopyInputPort;
 import co.com.bookhive.circulation.services.input.ports.FindUserContactInputPort;
 import co.com.bookhive.circulation.services.input.ports.FindUserInputPort;
+import co.com.bookhive.circulation.services.input.ports.FindUserReservationsInputPort;
 import co.com.bookhive.circulation.services.input.ports.LendBookInputPort;
 import co.com.bookhive.circulation.services.input.ports.RemindDueLoansInputPort;
+import co.com.bookhive.circulation.services.input.ports.ReserveBookInputPort;
 import co.com.bookhive.circulation.services.input.ports.ReturnBookInputPort;
 import co.com.bookhive.circulation.services.input.ports.ScheduleDueRemindersInputPort;
 import co.com.bookhive.circulation.services.output.ports.InstitutionDirectoryPort;
@@ -31,6 +37,7 @@ import co.com.bookhive.circulation.services.output.ports.repositories.FineReposi
 import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionParametersRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.LoanRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.LoanReturnRepository;
+import co.com.bookhive.circulation.services.output.ports.repositories.ReservationRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.UserRepository;
 import co.com.bookhive.circulation.services.usecase.bookcopy.countbookcopies.CountBookCopiesUseCase;
 import co.com.bookhive.circulation.services.usecase.bookcopy.countbookcopies.impl.CountBookCopiesUseCaseImpl;
@@ -45,6 +52,12 @@ import co.com.bookhive.circulation.services.usecase.loan.returnbook.ReturnBookUs
 import co.com.bookhive.circulation.services.usecase.loan.returnbook.impl.ReturnBookUseCaseImpl;
 import co.com.bookhive.circulation.services.usecase.loan.scheduleduereminders.ScheduleDueRemindersUseCase;
 import co.com.bookhive.circulation.services.usecase.loan.scheduleduereminders.impl.ScheduleDueRemindersUseCaseImpl;
+import co.com.bookhive.circulation.services.usecase.reservation.cancelreservation.CancelReservationUseCase;
+import co.com.bookhive.circulation.services.usecase.reservation.cancelreservation.impl.CancelReservationUseCaseImpl;
+import co.com.bookhive.circulation.services.usecase.reservation.finduserreservations.FindUserReservationsUseCase;
+import co.com.bookhive.circulation.services.usecase.reservation.finduserreservations.impl.FindUserReservationsUseCaseImpl;
+import co.com.bookhive.circulation.services.usecase.reservation.reservebook.ReserveBookUseCase;
+import co.com.bookhive.circulation.services.usecase.reservation.reservebook.impl.ReserveBookUseCaseImpl;
 import co.com.bookhive.circulation.services.usecase.user.finduser.FindUserUseCase;
 import co.com.bookhive.circulation.services.usecase.user.finduser.impl.FindUserUseCaseImpl;
 import co.com.bookhive.circulation.services.usecase.user.findusercontact.FindUserContactUseCase;
@@ -187,5 +200,57 @@ public class CirculationConfiguration {
 	@Bean
 	ReturnBookInputPort returnBookInputPort(final ReturnBookUseCase returnBookUseCase) {
 		return new ReturnBookInputAdapter(returnBookUseCase);
+	}
+
+	@Bean
+	ReserveBookUseCase reserveBookUseCase(
+			final UserRepository userRepository,
+			final BookCopyRepository bookCopyRepository,
+			final FineRepository fineRepository,
+			final ReservationRepository reservationRepository,
+			final SessionContextPort sessionContext,
+			final AuditPort audit) {
+
+		return new ReserveBookUseCaseImpl(
+				userRepository,
+				bookCopyRepository,
+				fineRepository,
+				reservationRepository,
+				sessionContext,
+				audit);
+	}
+
+	@Bean
+	ReserveBookInputPort reserveBookInputPort(final ReserveBookUseCase reserveBookUseCase) {
+		return new ReserveBookInputAdapter(reserveBookUseCase);
+	}
+
+	@Bean
+	CancelReservationUseCase cancelReservationUseCase(
+			final ReservationRepository reservationRepository,
+			final SessionContextPort sessionContext,
+			final AuditPort audit) {
+
+		return new CancelReservationUseCaseImpl(reservationRepository, sessionContext, audit);
+	}
+
+	@Bean
+	CancelReservationInputPort cancelReservationInputPort(final CancelReservationUseCase cancelReservationUseCase) {
+		return new CancelReservationInputAdapter(cancelReservationUseCase);
+	}
+
+	@Bean
+	FindUserReservationsUseCase findUserReservationsUseCase(
+			final ReservationRepository reservationRepository,
+			final SessionContextPort sessionContext) {
+
+		return new FindUserReservationsUseCaseImpl(reservationRepository, sessionContext);
+	}
+
+	@Bean
+	FindUserReservationsInputPort findUserReservationsInputPort(
+			final FindUserReservationsUseCase findUserReservationsUseCase) {
+
+		return new FindUserReservationsInputAdapter(findUserReservationsUseCase);
 	}
 }

@@ -36,6 +36,12 @@ export const routes: Routes = [
         canMatch: [requirePermission(PermissionCode.searchCatalog)],
         loadComponent: () => import('./catalog/catalog').then((m) => m.Catalog),
       },
+      {
+        path: 'reservas',
+        title: 'Mis reservas · BookHive',
+        canMatch: [requirePermission(PermissionCode.reserveBook)],
+        loadComponent: () => import('./reservations/reservations').then((m) => m.Reservations),
+      },
       { path: '', pathMatch: 'full', redirectTo: 'inicio' },
     ],
   },

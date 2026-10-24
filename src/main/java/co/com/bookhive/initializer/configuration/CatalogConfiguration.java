@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 
 import co.com.bookhive.catalog.services.input.adapters.FindBookCopyDetailsInputAdapter;
 import co.com.bookhive.catalog.services.input.adapters.FindBookTitleInputAdapter;
+import co.com.bookhive.catalog.services.input.adapters.ListMyReservationsInputAdapter;
 import co.com.bookhive.catalog.services.input.adapters.SearchBooksInputAdapter;
 import co.com.bookhive.catalog.services.input.adapters.SyncAllCatalogsInputAdapter;
 import co.com.bookhive.catalog.services.input.adapters.SyncCatalogInputAdapter;
@@ -12,6 +13,7 @@ import co.com.bookhive.catalog.services.input.adapters.mapper.FindBookCopyDetail
 import co.com.bookhive.catalog.services.input.adapters.mapper.SearchBooksMapperImpl;
 import co.com.bookhive.catalog.services.input.ports.FindBookCopyDetailsInputPort;
 import co.com.bookhive.catalog.services.input.ports.FindBookTitleInputPort;
+import co.com.bookhive.catalog.services.input.ports.ListMyReservationsInputPort;
 import co.com.bookhive.catalog.services.input.ports.SearchBooksInputPort;
 import co.com.bookhive.catalog.services.input.ports.SyncAllCatalogsInputPort;
 import co.com.bookhive.catalog.services.input.ports.SyncCatalogInputPort;
@@ -19,6 +21,7 @@ import co.com.bookhive.catalog.services.output.ports.BookCopiesPort;
 import co.com.bookhive.catalog.services.output.ports.BookCopyStatusPort;
 import co.com.bookhive.catalog.services.output.ports.InstitutionDirectoryPort;
 import co.com.bookhive.catalog.services.output.ports.TenantScopePort;
+import co.com.bookhive.catalog.services.output.ports.UserReservationsPort;
 import co.com.bookhive.catalog.services.output.ports.repositories.BookIndexRepository;
 import co.com.bookhive.catalog.services.output.ports.repositories.BookRepository;
 import co.com.bookhive.catalog.services.output.ports.repositories.CatalogChangeRepository;
@@ -32,6 +35,8 @@ import co.com.bookhive.catalog.services.usecase.catalog.syncallcatalogs.SyncAllC
 import co.com.bookhive.catalog.services.usecase.catalog.syncallcatalogs.impl.SyncAllCatalogsUseCaseImpl;
 import co.com.bookhive.catalog.services.usecase.catalog.synccatalog.SyncCatalogUseCase;
 import co.com.bookhive.catalog.services.usecase.catalog.synccatalog.impl.SyncCatalogUseCaseImpl;
+import co.com.bookhive.catalog.services.usecase.reservation.listmyreservations.ListMyReservationsUseCase;
+import co.com.bookhive.catalog.services.usecase.reservation.listmyreservations.impl.ListMyReservationsUseCaseImpl;
 
 @Configuration
 public class CatalogConfiguration {
@@ -95,5 +100,20 @@ public class CatalogConfiguration {
 	@Bean
 	FindBookTitleInputPort findBookTitleInputPort(final FindBookTitleUseCase findBookTitleUseCase) {
 		return new FindBookTitleInputAdapter(findBookTitleUseCase);
+	}
+
+	@Bean
+	ListMyReservationsUseCase listMyReservationsUseCase(
+			final UserReservationsPort userReservations,
+			final BookRepository bookRepository) {
+
+		return new ListMyReservationsUseCaseImpl(userReservations, bookRepository);
+	}
+
+	@Bean
+	ListMyReservationsInputPort listMyReservationsInputPort(
+			final ListMyReservationsUseCase listMyReservationsUseCase) {
+
+		return new ListMyReservationsInputAdapter(listMyReservationsUseCase);
 	}
 }

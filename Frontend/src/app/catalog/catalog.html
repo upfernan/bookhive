@@ -101,6 +101,28 @@
                 @if (book.isbn) {
                   <p class="book__details">{{ messages.isbn }} {{ book.isbn }}</p>
                 }
+                @if (book.reservable) {
+                  <div class="book__reserve">
+                    @if (book.reservation?.status === 'reserved') {
+                      <p class="book__note book__note--success" role="status">
+                        {{ book.reservation?.message }}
+                        <a class="book__link" routerLink="/reservas">{{ messages.seeReservations }}</a>
+                      </p>
+                    } @else {
+                      <button
+                        mat-stroked-button
+                        type="button"
+                        [disabled]="book.reservation?.status === 'reserving'"
+                        (click)="reserve(book.id)"
+                      >
+                        {{ book.reservation?.status === 'reserving' ? messages.reserving : messages.reserve }}
+                      </button>
+                      @if (book.reservation?.status === 'failed') {
+                        <p class="book__note book__note--error" role="alert">{{ book.reservation?.message }}</p>
+                      }
+                    }
+                  </div>
+                }
               </div>
               <span [class]="book.availabilityClass">{{ book.availability }}</span>
             </li>

@@ -1,7 +1,7 @@
 import { messages } from '../messages';
 import { PermissionCode } from '../session/permission-code';
 
-export type TaskIcon = 'lend' | 'search';
+export type TaskIcon = 'lend' | 'search' | 'reserve';
 
 export interface Section {
   readonly path: string;
@@ -20,6 +20,7 @@ export interface Task {
 export const sections: readonly Section[] = [
   { path: '/prestamos', label: messages.shell.loans, permission: PermissionCode.lendBook },
   { path: '/catalogo', label: messages.shell.catalog, permission: PermissionCode.searchCatalog },
+  { path: '/reservas', label: messages.shell.reservations, permission: PermissionCode.reserveBook },
 ];
 
 export const tasks: readonly Task[] = [
@@ -36,5 +37,12 @@ export const tasks: readonly Task[] = [
     description: messages.tasks.search.description,
     icon: 'search',
     permission: PermissionCode.searchCatalog,
+  },
+  {
+    path: '/reservas',
+    title: messages.tasks.reservations.title,
+    description: messages.tasks.reservations.description,
+    icon: 'reserve',
+    permission: PermissionCode.reserveBook,
   },
 ];

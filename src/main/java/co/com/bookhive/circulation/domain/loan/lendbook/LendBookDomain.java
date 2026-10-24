@@ -5,15 +5,14 @@ import java.util.List;
 import java.util.UUID;
 
 import co.com.bookhive.circulation.domain.institution.CurrentInstitution;
+import co.com.bookhive.circulation.domain.user.BorrowerChecks;
 import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.FineRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionParametersRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.LoanRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.UserRepository;
-import co.com.bookhive.circulation.services.output.ports.repositories.criteria.FineCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.LoanCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
-import co.com.bookhive.circulation.services.output.ports.repositories.entities.FineEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.InstitutionParametersEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.UserEntity;
@@ -95,9 +94,7 @@ public final class LendBookDomain {
 		validateBookCopyExists();
 		validateBookCopyIsAvailable();
 		validateBookCopyIsLendable();
-		validateUserExists();
-		validateUserIsActive();
-		validateUserWithoutPendingFines();
+		validateBorrower();
 		validateUserUnderLoanLimit();
 	}
 
@@ -235,44 +232,11 @@ public final class LendBookDomain {
 		}
 	}
 
-	private void validateUserExists() {
-
-		if (UUIDHelper.isDefaultValue(findUser().getId())) {
-			throw BookHiveException.createConflict(
-					MessageKey.LOAN_USER_NOT_FOUND,
-					"No se encontró el usuario " + user + " en la institución en curso.");
-		}
-	}
-
-	private void validateUserIsActive() {
-
-		final String status = findUser().getStatus();
-
-		if (UserEntity.STATUS_RETIRED.equals(status)) {
-			throw BookHiveException.createConflict(
-					MessageKey.USER_RETIRED,
-					"El usuario " + user + " está en estado " + UserEntity.STATUS_RETIRED + ".");
-		}
-
-		if (!UserEntity.STATUS_ACTIVE.equals(status)) {
-			throw BookHiveException.createConflict(
-					MessageKey.USER_SUSPENDED,
-					"El usuario " + user + " está en estado " + status
-							+ " y para llevar ejemplares debe estar " + UserEntity.STATUS_ACTIVE + ".");
-		}
-	}
-
-	private void validateUserWithoutPendingFines() {
-
-		final List<FineEntity> pendingFines = fineRepository.findByCriteria(
-				FineCriteria.pendingByUser(user));
-
-		if (!pendingFines.isEmpty()) {
-			throw BookHiveException.createConflict(
-					MessageKey.USER_WITH_PENDING_FINES,
-					"El usuario " + user + " tiene " + pendingFines.size()
-							+ " multa(s) en estado " + FineEntity.STATUS_PENDING + ".");
-		}
+	private void validateBorrower() {
+		final UserEntity found = BorrowerChecks.requireExisting(
+				userRepository.findById(user), user, MessageKey.LOAN_USER_NOT_FOUND);
+		BorrowerChecks.requireActive(found);
+		BorrowerChecks.requireWithoutPendingFines(fineRepository, user);
 	}
 
 	private void validateUserUnderLoanLimit() {
@@ -288,10 +252,6 @@ public final class LendBookDomain {
 					"El usuario " + user + " tiene " + activeLoans.size()
 							+ " préstamos activos y el máximo de la institución es " + max + ".");
 		}
-	}
-
-	private UserEntity findUser() {
-		return userRepository.findById(user).orElseGet(UserEntity::new);
 	}
 
 	private BookCopyEntity findBookCopy() {

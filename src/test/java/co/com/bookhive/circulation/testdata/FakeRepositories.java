@@ -1,6 +1,7 @@
 package co.com.bookhive.circulation.testdata;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -13,17 +14,20 @@ import co.com.bookhive.circulation.services.output.ports.repositories.FineReposi
 import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionParametersRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.LoanRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.LoanReturnRepository;
+import co.com.bookhive.circulation.services.output.ports.repositories.ReservationRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.UserRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.BookCopyCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.FineCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.LoanCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.LoanReturnCriteria;
+import co.com.bookhive.circulation.services.output.ports.repositories.criteria.ReservationCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.UserCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.FineEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.InstitutionParametersEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanReturnEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.ReservationEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.UserEntity;
 import co.com.bookhive.shared.services.output.ports.repositories.criteria.PageCriteria;
 
@@ -276,6 +280,83 @@ public final class FakeRepositories {
 		@Override
 		public List<InstitutionParametersEntity> findAll(final PageCriteria page) {
 			return List.copyOf(stored);
+		}
+
+	}
+
+	public static ReservationEntity reservation(
+			final UUID book, final UUID user, final String status, final Instant requestedAt) {
+
+		final ReservationEntity reservation = new ReservationEntity();
+		reservation.setId(UUID.randomUUID());
+		reservation.setBook(book);
+		reservation.setUser(user);
+		reservation.setStatus(status);
+		reservation.setRequestedAt(requestedAt);
+		return reservation;
+	}
+
+	public static final class Reservations implements ReservationRepository {
+
+		private final List<ReservationEntity> stored = new ArrayList<>();
+		private final List<ReservationEntity> created = new ArrayList<>();
+		private final List<ReservationCriteria> searches = new ArrayList<>();
+		private String statusSetByOther = "";
+
+		public Reservations with(final ReservationEntity reservation) {
+			stored.add(reservation);
+			return this;
+		}
+
+		public Reservations changedByOtherRequestTo(final String status) {
+			statusSetByOther = status;
+			return this;
+		}
+
+		public List<ReservationEntity> created() {
+			return created;
+		}
+
+		public List<ReservationCriteria> searches() {
+			return searches;
+		}
+
+		@Override
+		public void create(final ReservationEntity entity) {
+			created.add(entity);
+			stored.add(entity);
+		}
+
+		@Override
+		public Optional<ReservationEntity> findById(final UUID id) {
+			return stored.stream().filter(reservation -> reservation.getId().equals(id)).findFirst();
+		}
+
+		@Override
+		public List<ReservationEntity> findAll(final PageCriteria page) {
+			return List.copyOf(stored);
+		}
+
+		@Override
+		public List<ReservationEntity> findByCriteria(final ReservationCriteria criteria) {
+			searches.add(criteria);
+			return stored.stream()
+					.filter(reservation -> !criteria.filtersByUser() || reservation.getUser().equals(criteria.getUser()))
+					.filter(reservation -> !criteria.filtersByBook() || reservation.getBook().equals(criteria.getBook()))
+					.filter(reservation -> criteria.getStatuses().contains(reservation.getStatus()))
+					.toList();
+		}
+
+		@Override
+		public boolean changeStatus(final UUID reservation, final String expectedStatus, final String newStatus) {
+			if (!statusSetByOther.isEmpty()) {
+				findById(reservation).ifPresent(found -> found.setStatus(statusSetByOther));
+				return false;
+			}
+			final Optional<ReservationEntity> found = findById(reservation)
+					.filter(entity -> entity.getStatus().equals(expectedStatus));
+			found.ifPresent(entity -> entity.setStatus(newStatus));
+			return found.isPresent();
 		}
 
 	}

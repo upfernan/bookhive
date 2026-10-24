@@ -6,6 +6,8 @@ public interface AuditPort {
 
 	String LOAN_REGISTERED = "PRESTAMO_REGISTRADO";
 	String LOAN_RETURNED = "PRESTAMO_DEVUELTO";
+	String RESERVATION_CREATED = "RESERVA_CREADA";
+	String RESERVATION_CANCELLED = "RESERVA_CANCELADA";
 	String PERMISSION_DENIED = "PERMISO_DENEGADO";
 
 	void record(String action, UUID institution, UUID person, String detail);
