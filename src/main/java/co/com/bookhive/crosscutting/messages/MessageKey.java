@@ -28,6 +28,15 @@ public final class MessageKey {
 	public static final String USER_SUSPENDED = "user.suspended";
 	public static final String USER_RETIRED = "user.retired";
 
+	public static final String RESERVATION_BOOK_REQUIRED = "reservation.book.required";
+	public static final String RESERVATION_USER_NOT_FOUND = "reservation.user.not-found";
+	public static final String RESERVATION_BOOK_NOT_RESERVABLE = "reservation.book.not-reservable";
+	public static final String RESERVATION_COPIES_AVAILABLE = "reservation.copies-available";
+	public static final String RESERVATION_ALREADY_ACTIVE = "reservation.already-active";
+	public static final String RESERVATION_ID_REQUIRED = "reservation.id.required";
+	public static final String RESERVATION_NOT_FOUND = "reservation.not-found";
+	public static final String RESERVATION_NOT_CANCELLABLE = "reservation.not-cancellable";
+
 	public static final String INSTITUTION_NOT_ACTIVE = "institution.not-active";
 	public static final String INSTITUTION_WITHOUT_PARAMETERS = "institution.without-parameters";
 

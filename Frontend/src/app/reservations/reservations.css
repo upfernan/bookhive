@@ -1,0 +1,105 @@
+.reservations,
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+p,
+h2 {
+  margin: 0;
+}
+
+.retry {
+  margin-top: 12px;
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 18px 20px;
+  border-radius: 14px;
+  border: 1px solid var(--bh-line);
+  background: var(--bh-paper);
+}
+
+.item__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.item__title {
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--bh-walnut-dark);
+}
+
+.item__authors,
+.item__note,
+.list__loading {
+  color: var(--bh-wood-text);
+}
+
+.item__note {
+  font-size: 14px;
+}
+
+.item__side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  flex: none;
+}
+
+.empty {
+  padding: 32px 24px;
+  border-radius: 14px;
+  border: 1px dashed var(--bh-line);
+  background: var(--bh-paper);
+  text-align: center;
+}
+
+.empty__title {
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--bh-walnut-dark);
+}
+
+.empty__hint {
+  margin-top: 4px;
+  color: var(--bh-wood-text);
+}
+
+.empty__link {
+  display: inline-block;
+  margin-top: 12px;
+  font-weight: 600;
+  color: var(--bh-walnut);
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 760px) {
+  .item {
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  .item__side {
+    align-items: flex-start;
+  }
+}

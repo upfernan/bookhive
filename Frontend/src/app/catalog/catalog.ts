@@ -13,7 +13,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { RouterLink } from '@angular/router';
 import { messages } from '../messages';
+import { ReservationDesk } from '../reservations/reservation-desk';
+import { CurrentSession } from '../session/current-session';
+import { PermissionCode } from '../session/permission-code';
 import { fillTemplate } from '../shared/fill-template';
 import { RequestProblem, describeRequestProblem } from '../shared/request-errors';
 import { CatalogSearch, FacetValue, FoundBook, SearchFilters, SearchResult } from './catalog-search';
@@ -29,6 +33,11 @@ interface FilterOption {
   readonly label: string;
 }
 
+interface CardReservation {
+  readonly status: 'reserving' | 'reserved' | 'failed';
+  readonly message: string;
+}
+
 interface BookCard {
   readonly id: string;
   readonly title: string;
@@ -37,18 +46,23 @@ interface BookCard {
   readonly isbn: string;
   readonly availability: string;
   readonly availabilityClass: string;
+  readonly reservable: boolean;
+  readonly reservation: CardReservation | null;
 }
 
 @Component({
   selector: 'app-catalog',
-  imports: [ReactiveFormsModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule],
+  imports: [ReactiveFormsModule, RouterLink, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule],
   templateUrl: './catalog.html',
   styleUrls: ['../shell/section-page.css', '../shared/feedback.css', './catalog.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Catalog {
   private readonly catalog = inject(CatalogSearch);
+  private readonly reservationDesk = inject(ReservationDesk);
+  private readonly currentSession = inject(CurrentSession);
   private readonly formBuilder = inject(NonNullableFormBuilder);
+  private readonly reservations = signal<ReadonlyMap<string, CardReservation>>(new Map());
   private readonly textInput = viewChild<ElementRef<HTMLInputElement>>('textInput');
   private readonly resultsTop = viewChild<ElementRef<HTMLElement>>('resultsTop');
   private latestRequest = 0;
@@ -84,7 +98,12 @@ export class Catalog {
     optionsOf(this.result()?.publishers ?? [], this.applied().publisher),
   );
 
-  protected readonly cards = computed(() => (this.result()?.books ?? []).map((book) => this.cardOf(book)));
+  protected readonly canReserve = computed(() => this.currentSession.allows(PermissionCode.reserveBook));
+
+  protected readonly cards = computed(() => {
+    const reservations = this.reservations();
+    return (this.result()?.books ?? []).map((book) => this.cardOf(book, reservations.get(book.id) ?? null));
+  });
 
   protected readonly pages = computed(() =>
     Math.min(Math.ceil((this.result()?.found ?? 0) / PAGE_SIZE), MAX_PAGE),
@@ -153,7 +172,33 @@ export class Catalog {
     this.resultsTop()?.nativeElement.scrollIntoView({ block: 'start' });
   }
 
-  private cardOf(book: FoundBook): BookCard {
+  protected async reserve(book: string): Promise<void> {
+    const current = this.reservations().get(book);
+    if (current?.status === 'reserving' || current?.status === 'reserved') {
+      return;
+    }
+
+    this.setReservation(book, { status: 'reserving', message: '' });
+
+    try {
+      const reserved = await this.reservationDesk.reserve(book);
+      this.setReservation(book, {
+        status: 'reserved',
+        message: fillTemplate(this.messages.reserved, { position: String(reserved.position) }),
+      });
+    } catch (error) {
+      this.setReservation(book, {
+        status: 'failed',
+        message: describeRequestProblem(error, this.messages.reserveFailed).message,
+      });
+    }
+  }
+
+  private setReservation(book: string, reservation: CardReservation): void {
+    this.reservations.update((current) => new Map(current).set(book, reservation));
+  }
+
+  private cardOf(book: FoundBook, reservation: CardReservation | null): BookCard {
     const format = book.format === DIGITAL_FORMAT ? this.messages.digital : this.messages.physical;
     const year = book.year > 0 ? String(book.year) : '';
     const tone =
@@ -173,6 +218,8 @@ export class Catalog {
               total: String(book.totalCopies),
             }),
       availabilityClass: `chip book__availability chip--${tone}`,
+      reservable: this.canReserve() && book.totalCopies > 0 && book.availableCopies === 0,
+      reservation,
     };
   }
 }

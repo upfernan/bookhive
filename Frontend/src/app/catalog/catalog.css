@@ -111,6 +111,33 @@ h2 {
   white-space: nowrap;
 }
 
+.book__reserve {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin-top: 8px;
+}
+
+.book__note {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.book__note--success {
+  color: var(--bh-success);
+}
+
+.book__note--error {
+  color: var(--bh-brick-text);
+}
+
+.book__link {
+  margin-left: 6px;
+  color: inherit;
+  text-underline-offset: 3px;
+}
+
 .empty {
   padding: 32px 24px;
   border-radius: 14px;
