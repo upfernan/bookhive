@@ -18,6 +18,8 @@ import org.junit.jupiter.api.Test;
 
 import co.com.bookhive.circulation.domain.loan.returnbook.ReturnBookDomain;
 import co.com.bookhive.circulation.domain.loan.returnbook.ReturnedLoanDomain;
+import co.com.bookhive.circulation.domain.reservation.handoverbookcopy.HandOverBookCopyDomain;
+import co.com.bookhive.circulation.domain.reservation.handoverbookcopy.HandedOverBookCopyDomain;
 import co.com.bookhive.circulation.services.output.ports.SessionContextPort;
 import co.com.bookhive.circulation.services.output.ports.entities.NotificationRequestEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
@@ -48,9 +50,13 @@ class ReturnBookUseCaseImplTest {
 	private FakeRepositories.Parameters parameters;
 	private List<String> audited;
 	private List<NotificationRequestEntity> notices;
+	private List<HandOverBookCopyDomain> handOvers;
+	private HandedOverBookCopyDomain handOverResult;
 
 	@BeforeEach
 	void prepare() {
+		handOvers = new ArrayList<>();
+		handOverResult = HandedOverBookCopyDomain.nobody();
 		final BookCopyEntity copy = FakeRepositories.bookCopyOf(BOOK, BookCopyEntity.STATUS_LENT);
 		copy.setId(BOOK_COPY);
 		bookCopies = new FakeRepositories.BookCopies().with(copy);
@@ -194,12 +200,60 @@ class ReturnBookUseCaseImplTest {
 		assertEquals(MessageKey.LOAN_DATA_REQUIRED,
 				assertThrows(BookHiveException.class, () -> useCase.execute(null)).getUserMessageKey());
 		assertThrows(BookHiveException.class, () -> new ReturnBookUseCaseImpl(
-				parameters, bookCopies, loans, null, fines, session, this::audit, notices::add));
+				parameters, bookCopies, loans, null, fines, session, this::audit, notices::add, this::handOver));
+		assertThrows(BookHiveException.class, () -> new ReturnBookUseCaseImpl(
+				parameters, bookCopies, loans, loanReturns, fines, session, this::audit, notices::add, null));
+	}
+
+	@Test
+	@DisplayName("al quedar libre, el ejemplar se ofrece a la fila de reservas de su libro")
+	void freedCopyIsOfferedToTheQueue() {
+		loans.withActive(loan(LoanEntity.STATUS_ACTIVE, TODAY.plusDays(2)));
+
+		final ReturnedLoanDomain returned = useCase().execute(request());
+
+		assertEquals(List.of(new HandOverBookCopyDomain(BOOK_COPY, BOOK)), handOvers);
+		assertFalse(returned.isReserved());
+		assertEquals("", returned.reservedFor());
+	}
+
+	@Test
+	@DisplayName("si alguien lo reservó, la devolución dice para quién hay que apartarlo")
+	void returnTellsWhoTheCopyIsHeldFor() {
+		loans.withActive(loan(LoanEntity.STATUS_ACTIVE, TODAY.plusDays(2)));
+		handOverResult = new HandedOverBookCopyDomain(UUID.randomUUID(), UUID.randomUUID(), "Luis Mora", TODAY.plusDays(2));
+
+		final ReturnedLoanDomain returned = useCase().execute(request());
+
+		assertTrue(returned.isReserved());
+		assertEquals("Luis Mora", returned.reservedFor());
+	}
+
+	@Test
+	@DisplayName("una devolución repetida o rechazada no vuelve a ofrecer el ejemplar a la fila")
+	void repeatedOrRejectedReturnDoesNotHandOver() {
+		final ReturnBookUseCaseImpl useCase = useCase();
+		final ReturnBookDomain request = request();
+
+		assertThrows(BookHiveException.class, () -> useCase.execute(request));
+
+		final LoanEntity loan = loan(LoanEntity.STATUS_ACTIVE, TODAY.minusDays(3));
+		loans.withReturned(loan);
+		loanReturns.with(loanReturn(TODAY, 3));
+		fines.withFine(fineOf(loan));
+		useCase().execute(request());
+
+		assertTrue(handOvers.isEmpty());
 	}
 
 	private ReturnBookUseCaseImpl useCase() {
 		return new ReturnBookUseCaseImpl(parameters, bookCopies, loans, loanReturns, fines, new FakeSession(),
-				this::audit, notices::add);
+				this::audit, notices::add, this::handOver);
+	}
+
+	private HandedOverBookCopyDomain handOver(final HandOverBookCopyDomain domain) {
+		handOvers.add(domain);
+		return handOverResult;
 	}
 
 	private static ReturnBookDomain request() {

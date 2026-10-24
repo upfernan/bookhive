@@ -70,7 +70,8 @@ public class ReservationEntity {
 	}
 
 	public void setStatus(final String status) {
-		this.status = TextHelper.isDefaultValue(status) ? STATUS_WAITING : status.trim();
+		final String clean = TextHelper.getDefaultValue(status);
+		this.status = clean.isEmpty() ? STATUS_WAITING : clean;
 	}
 
 	public Instant getRequestedAt() {

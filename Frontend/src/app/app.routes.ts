@@ -31,6 +31,12 @@ export const routes: Routes = [
         loadComponent: () => import('./loans/loans').then((m) => m.Loans),
       },
       {
+        path: 'devoluciones',
+        title: 'Devoluciones · BookHive',
+        canMatch: [requirePermission(PermissionCode.returnBook)],
+        loadComponent: () => import('./returns/returns').then((m) => m.Returns),
+      },
+      {
         path: 'catalogo',
         title: 'Catálogo · BookHive',
         canMatch: [requirePermission(PermissionCode.searchCatalog)],

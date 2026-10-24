@@ -16,11 +16,15 @@ public final class ReservationQueue {
 		super();
 	}
 
-	public static int positionOf(final UUID reservation, final List<ReservationEntity> waiting) {
-		final List<ReservationEntity> ordered = waiting.stream()
+	public static List<ReservationEntity> inArrivalOrder(final List<ReservationEntity> reservations) {
+		return reservations.stream()
 				.filter(ReservationEntity::isWaiting)
 				.sorted(ARRIVAL_ORDER)
 				.toList();
+	}
+
+	public static int positionOf(final UUID reservation, final List<ReservationEntity> waiting) {
+		final List<ReservationEntity> ordered = inArrivalOrder(waiting);
 
 		for (int index = 0; index < ordered.size(); index++) {
 			if (ordered.get(index).getId().equals(reservation)) {

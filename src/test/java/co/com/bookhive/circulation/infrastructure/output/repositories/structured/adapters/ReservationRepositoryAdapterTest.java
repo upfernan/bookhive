@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Proxy;
 import java.sql.SQLException;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -125,6 +127,53 @@ class ReservationRepositoryAdapterTest {
 		adapter(repository.as(ReservationJpaRepository.class)).findByCriteria(ReservationCriteria.waitingForBook(BOOK));
 
 		assertEquals(List.of("book=" + BOOK, "status en [EN_ESPERA]"), repository.filters());
+	}
+
+	@Test
+	@DisplayName("la reserva que tiene apartado un ejemplar se busca por el ejemplar y el estado asignada")
+	void findsReservationHoldingCopy() {
+		final FakeJpaRepository<ReservationJpaEntity> repository = FakeJpaRepository.storing(new ReservationJpaEntity());
+		final UUID bookCopy = UUID.randomUUID();
+
+		adapter(repository.as(ReservationJpaRepository.class))
+				.findByCriteria(ReservationCriteria.assignedToBookCopy(bookCopy));
+
+		assertEquals(List.of("bookCopy=" + bookCopy, "status en [ASIGNADA]"), repository.filters());
+	}
+
+	@Test
+	@DisplayName("las reservas por vencer se buscan por plazo anterior a la fecha y estado asignada")
+	void findsAssignedWithPickupBefore() {
+		final FakeJpaRepository<ReservationJpaEntity> repository = FakeJpaRepository.storing(new ReservationJpaEntity());
+		final LocalDate today = LocalDate.of(2026, 10, 24);
+
+		adapter(repository.as(ReservationJpaRepository.class))
+				.findByCriteria(ReservationCriteria.assignedWithPickupBefore(today));
+
+		assertEquals(List.of("pickupDeadline<" + today, "status en [ASIGNADA]"), repository.filters());
+	}
+
+	@Test
+	@DisplayName("asigna el ejemplar solo si la reserva sigue en espera y con datos completos")
+	void assignsConditionally() {
+		final UUID reservation = UUID.randomUUID();
+		final UUID bookCopy = UUID.randomUUID();
+		final Instant now = Instant.parse("2026-10-24T15:00:00Z");
+		final LocalDate deadline = LocalDate.of(2026, 10, 26);
+		final FakeJpaRepository<ReservationJpaEntity> assigned = FakeJpaRepository.storing();
+		final FakeJpaRepository<ReservationJpaEntity> taken = FakeJpaRepository.<ReservationJpaEntity>storing()
+				.changingRows(0);
+		final ReservationRepositoryAdapter adapter = adapter(assigned.as(ReservationJpaRepository.class));
+
+		assertTrue(adapter.assign(reservation, bookCopy, now, deadline));
+		assertEquals(List.of(reservation + ":EN_ESPERA->ASIGNADA ejemplar " + bookCopy + " hasta " + deadline),
+				assigned.filters());
+		assertFalse(adapter(taken.as(ReservationJpaRepository.class)).assign(reservation, bookCopy, now, deadline));
+		assertFalse(adapter.assign(null, bookCopy, now, deadline));
+		assertFalse(adapter.assign(reservation, null, now, deadline));
+		assertFalse(adapter.assign(reservation, bookCopy, null, deadline));
+		assertFalse(adapter.assign(reservation, bookCopy, now, null));
+		assertEquals(1, assigned.filters().size());
 	}
 
 	@Test

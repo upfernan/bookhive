@@ -73,4 +73,24 @@ class ReservationEntityTest {
 		assertFalse(ReservationCriteria.activeOfUser(null).isComplete());
 	}
 
+	@Test
+	@DisplayName("los criterios por ejemplar y por plazo vencido solo buscan reservas asignadas")
+	void assignedCriteria() {
+		final UUID bookCopy = UUID.randomUUID();
+		final LocalDate today = LocalDate.of(2026, 10, 24);
+
+		final ReservationCriteria holding = ReservationCriteria.assignedToBookCopy(bookCopy);
+		final ReservationCriteria late = ReservationCriteria.assignedWithPickupBefore(today);
+
+		assertTrue(holding.filtersByBookCopy());
+		assertEquals(bookCopy, holding.getBookCopy());
+		assertFalse(holding.filtersByPickupBefore());
+		assertEquals(List.of(ReservationEntity.STATUS_ASSIGNED), holding.getStatuses());
+		assertTrue(late.filtersByPickupBefore());
+		assertEquals(today, late.getPickupBefore());
+		assertTrue(late.isComplete());
+		assertFalse(ReservationCriteria.assignedToBookCopy(null).isComplete());
+		assertFalse(ReservationCriteria.assignedWithPickupBefore(null).isComplete());
+	}
+
 }

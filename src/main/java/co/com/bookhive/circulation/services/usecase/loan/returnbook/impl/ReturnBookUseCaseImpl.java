@@ -9,6 +9,8 @@ import co.com.bookhive.circulation.domain.loan.returnbook.FinePolicy;
 import co.com.bookhive.circulation.domain.loan.returnbook.LoanState;
 import co.com.bookhive.circulation.domain.loan.returnbook.ReturnBookDomain;
 import co.com.bookhive.circulation.domain.loan.returnbook.ReturnedLoanDomain;
+import co.com.bookhive.circulation.domain.reservation.handoverbookcopy.HandOverBookCopyDomain;
+import co.com.bookhive.circulation.domain.reservation.handoverbookcopy.HandedOverBookCopyDomain;
 import co.com.bookhive.circulation.services.output.ports.NotificationRequestPort;
 import co.com.bookhive.circulation.services.output.ports.SessionContextPort;
 import co.com.bookhive.circulation.services.output.ports.entities.NotificationRequestEntity;
@@ -24,6 +26,7 @@ import co.com.bookhive.circulation.services.output.ports.repositories.entities.F
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanReturnEntity;
 import co.com.bookhive.circulation.services.usecase.loan.returnbook.ReturnBookUseCase;
+import co.com.bookhive.circulation.services.usecase.reservation.handoverbookcopy.HandOverBookCopyUseCase;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
@@ -40,6 +43,7 @@ public final class ReturnBookUseCaseImpl implements ReturnBookUseCase {
 	private final SessionContextPort sessionContext;
 	private final AuditPort audit;
 	private final NotificationRequestPort notificationRequests;
+	private final HandOverBookCopyUseCase handOverBookCopy;
 
 	@SuppressWarnings("java:S107")
 	public ReturnBookUseCaseImpl(
@@ -50,7 +54,8 @@ public final class ReturnBookUseCaseImpl implements ReturnBookUseCase {
 			final FineRepository fineRepository,
 			final SessionContextPort sessionContext,
 			final AuditPort audit,
-			final NotificationRequestPort notificationRequests) {
+			final NotificationRequestPort notificationRequests,
+			final HandOverBookCopyUseCase handOverBookCopy) {
 
 		super();
 		this.institutionParametersRepository = requireDependency(
@@ -62,6 +67,7 @@ public final class ReturnBookUseCaseImpl implements ReturnBookUseCase {
 		this.sessionContext = requireDependency(sessionContext, "el contexto de la sesión");
 		this.audit = requireDependency(audit, "la auditoría");
 		this.notificationRequests = requireDependency(notificationRequests, "la cola de avisos");
+		this.handOverBookCopy = requireDependency(handOverBookCopy, "la entrega del ejemplar a la fila de reservas");
 	}
 
 	@Override
@@ -112,7 +118,11 @@ public final class ReturnBookUseCaseImpl implements ReturnBookUseCase {
 					loan.getDueDate()));
 		}
 
-		return resultOf(loan, returning.getBookCopy(), returning.getReturnDate(), overdueDays, fine);
+		final HandedOverBookCopyDomain handedOver = handOverBookCopy.execute(
+				new HandOverBookCopyDomain(returning.getBookCopy(), bookCopy.getBook()));
+
+		return resultOf(loan, returning.getBookCopy(), returning.getReturnDate(), overdueDays, fine)
+				.withReservedFor(handedOver.userName());
 	}
 
 	private Optional<ReturnedLoanDomain> alreadyReturnedToday(final ReturnBookDomain returning) {

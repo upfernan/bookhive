@@ -1,0 +1,85 @@
+<div class="returns">
+  <div>
+    <h1 class="page__title">{{ messages.title }}</h1>
+    <p class="page__lead">{{ messages.lead }}</p>
+  </div>
+
+  <form class="scan" [formGroup]="form" (ngSubmit)="registerReturn()" novalidate>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>{{ messages.barcodeLabel }}</mat-label>
+      <input #barcodeInput matInput type="text" formControlName="barcode" autocomplete="off" />
+      @if (form.controls.barcode.hasError('required')) {
+        <mat-error>{{ messages.barcodeRequired }}</mat-error>
+      }
+    </mat-form-field>
+    <button class="scan__button" mat-flat-button type="submit" [disabled]="registering()">
+      {{ registering() ? messages.registering : messages.register }}
+    </button>
+  </form>
+
+  @if (problem(); as failure) {
+    <div class="banner banner--error" role="alert">
+      <svg class="banner__icon" aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9" />
+        <line x1="12" y1="7.5" x2="12" y2="13" />
+        <line x1="12" y1="16.5" x2="12" y2="16.6" />
+      </svg>
+      <div>
+        <p class="banner__title">{{ messages.rejectedTitle }}</p>
+        <p class="banner__text">{{ failure.message }}</p>
+        @if (traceText()) {
+          <p class="banner__trace">{{ traceText() }}</p>
+        }
+      </div>
+    </div>
+  }
+
+  @if (returned(); as book) {
+    @if (book.reserved) {
+      <div class="banner banner--reserved" role="alert">
+        <svg class="banner__icon" aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7 3h10a1 1 0 0 1 1 1v17l-6-4-6 4V4a1 1 0 0 1 1-1z" />
+        </svg>
+        <div>
+          <p class="banner__title">{{ messages.reservedTitle }}</p>
+          <p class="banner__text">{{ reservedText() }}</p>
+        </div>
+      </div>
+    }
+
+    <section class="result" role="status" [attr.aria-label]="messages.registeredTitle">
+      <div class="result__header">
+        <span [class]="book.fineGenerated ? 'chip chip--error' : 'chip chip--success'">
+          {{ book.fineGenerated ? messages.withFine : messages.noFine }}
+        </span>
+        <p class="result__title">{{ messages.registeredTitle }}</p>
+      </div>
+      <p class="result__summary">{{ summary() }}</p>
+
+      <dl class="facts">
+        <div class="fact">
+          <dt>{{ messages.barcode }}</dt>
+          <dd>{{ book.barcode }}</dd>
+        </div>
+        <div class="fact">
+          <dt>{{ messages.dueDate }}</dt>
+          <dd>{{ dueDate() }}</dd>
+        </div>
+        @if (book.fineGenerated) {
+          <div class="fact">
+            <dt>{{ messages.overdueDays }}</dt>
+            <dd>{{ book.overdueDays }}</dd>
+          </div>
+          <div class="fact">
+            <dt>{{ messages.dailyRate }}</dt>
+            <dd>{{ dailyRate() }}</dd>
+          </div>
+          <div class="fact fact--total">
+            <dt>{{ messages.fineAmount }}</dt>
+            <dd>{{ fineAmount() }}</dd>
+          </div>
+        }
+      </dl>
+    </section>
+  }
+</div>

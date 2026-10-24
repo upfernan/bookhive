@@ -43,8 +43,11 @@ export class LoanDesk {
     return firstValueFrom(this.http.get<Borrower>(USERS_PATH, { params }));
   }
 
-  findBookCopy(barcode: string): Promise<BookCopy> {
-    const params = new HttpParams().set('codigo', barcode.trim());
+  findBookCopy(barcode: string, borrower: string): Promise<BookCopy> {
+    let params = new HttpParams().set('codigo', barcode.trim());
+    if (borrower !== '') {
+      params = params.set('usuario', borrower);
+    }
     return firstValueFrom(this.http.get<BookCopy>(BOOK_COPIES_PATH, { params }));
   }
 

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import co.com.bookhive.circulation.domain.institution.CurrentInstitution;
 import co.com.bookhive.circulation.domain.loan.lendbook.LendBookDomain;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.ReservationEntity;
 import co.com.bookhive.circulation.testdata.FakeRepositories;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.DateHelper;
@@ -69,10 +71,40 @@ class FindBookCopyDomainTest {
 	@Test
 	@DisplayName("bloquea por no disponible igual que lo rechaza el registro del préstamo")
 	void blocksNotAvailableLikeLending() {
-		final FakeRepositories.BookCopies bookCopies = bookCopies(BookCopyEntity.STATUS_RESERVED, true);
+		final FakeRepositories.BookCopies bookCopies = bookCopies(BookCopyEntity.STATUS_LENT, true);
 
 		assertEquals(rejectionOfLending(bookCopies),
 				new FindBookCopyDomain(BARCODE).withRepositories(bookCopies).find().blocks().get(0));
+	}
+
+	@Test
+	@DisplayName("bloquea el ejemplar apartado para otra persona igual que lo rechaza el registro del préstamo")
+	void blocksCopyReservedForSomeoneElseLikeLending() {
+		final FakeRepositories.BookCopies bookCopies = bookCopies(BookCopyEntity.STATUS_RESERVED, true);
+		final FakeRepositories.Reservations reservations = heldFor(UUIDHelper.generateNew());
+		final UUID borrower = UUIDHelper.generateNew();
+
+		final String lending = assertThrows(BookHiveException.class,
+				lending(bookCopies, borrower).withReservations(reservations)::validate).getUserMessageKey();
+
+		assertEquals(MessageKey.BOOK_COPY_RESERVED, lending);
+		assertEquals(List.of(lending), new FindBookCopyDomain(BARCODE, borrower)
+				.withRepositories(bookCopies, reservations).find().blocks());
+	}
+
+	@Test
+	@DisplayName("el ejemplar apartado no tiene bloqueos para quien lo reservó, igual que el registro del préstamo lo acepta")
+	void copyHeldForBorrowerPassesLikeLending() {
+		final FakeRepositories.BookCopies bookCopies = bookCopies(BookCopyEntity.STATUS_RESERVED, true);
+		final UUID borrower = UUIDHelper.generateNew();
+		final FakeRepositories.Reservations reservations = heldFor(borrower);
+
+		final FoundBookCopyDomain found = new FindBookCopyDomain(BARCODE, borrower)
+				.withRepositories(bookCopies, reservations).find();
+
+		assertTrue(found.available());
+		assertTrue(found.blocks().isEmpty());
+		assertDoesNotThrow(lending(bookCopies, borrower).withReservations(reservations)::validate);
 	}
 
 	@Test
@@ -146,9 +178,14 @@ class FindBookCopyDomainTest {
 	}
 
 	private static String rejectionOfLending(final FakeRepositories.BookCopies bookCopies) {
-		final UUID user = UUIDHelper.generateNew();
+		final LendBookDomain loan = lending(bookCopies, UUIDHelper.generateNew());
+
+		return assertThrows(BookHiveException.class, loan::validate).getUserMessageKey();
+	}
+
+	private static LendBookDomain lending(final FakeRepositories.BookCopies bookCopies, final UUID user) {
 		final FakeRepositories.Parameters parameters = new FakeRepositories.Parameters().with(15, 3);
-		final LendBookDomain loan = new LendBookDomain(
+		return new LendBookDomain(
 				UUIDHelper.getDefaultValue(),
 				BOOK_COPY,
 				user,
@@ -162,8 +199,13 @@ class FindBookCopyDomainTest {
 						new FakeRepositories.Fines(),
 						new FakeRepositories.Loans(),
 						parameters);
+	}
 
-		return assertThrows(BookHiveException.class, loan::validate).getUserMessageKey();
+	private static FakeRepositories.Reservations heldFor(final UUID holder) {
+		final ReservationEntity held = FakeRepositories.reservation(
+				BOOK, holder, ReservationEntity.STATUS_ASSIGNED, Instant.now());
+		held.setBookCopy(BOOK_COPY);
+		return new FakeRepositories.Reservations().with(held);
 	}
 
 }

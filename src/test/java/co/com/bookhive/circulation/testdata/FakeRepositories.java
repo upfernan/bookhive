@@ -2,6 +2,7 @@ package co.com.bookhive.circulation.testdata;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -301,11 +302,21 @@ public final class FakeRepositories {
 		private final List<ReservationEntity> stored = new ArrayList<>();
 		private final List<ReservationEntity> created = new ArrayList<>();
 		private final List<ReservationCriteria> searches = new ArrayList<>();
+		private final List<UUID> takenByOther = new ArrayList<>();
 		private String statusSetByOther = "";
 
 		public Reservations with(final ReservationEntity reservation) {
 			stored.add(reservation);
 			return this;
+		}
+
+		public Reservations takenByOtherRequest(final UUID reservation) {
+			takenByOther.add(reservation);
+			return this;
+		}
+
+		public Optional<ReservationEntity> stored(final UUID id) {
+			return findById(id);
 		}
 
 		public Reservations changedByOtherRequestTo(final String status) {
@@ -343,8 +354,33 @@ public final class FakeRepositories {
 			return stored.stream()
 					.filter(reservation -> !criteria.filtersByUser() || reservation.getUser().equals(criteria.getUser()))
 					.filter(reservation -> !criteria.filtersByBook() || reservation.getBook().equals(criteria.getBook()))
+					.filter(reservation -> !criteria.filtersByBookCopy()
+							|| reservation.getBookCopy().equals(criteria.getBookCopy()))
+					.filter(reservation -> !criteria.filtersByPickupBefore()
+							|| reservation.getPickupDeadline().isBefore(criteria.getPickupBefore()))
 					.filter(reservation -> criteria.getStatuses().contains(reservation.getStatus()))
 					.toList();
+		}
+
+		@Override
+		public boolean assign(
+				final UUID reservation,
+				final UUID bookCopy,
+				final Instant assignedAt,
+				final LocalDate pickupDeadline) {
+
+			if (takenByOther.contains(reservation)) {
+				return false;
+			}
+			final Optional<ReservationEntity> found = findById(reservation)
+					.filter(ReservationEntity::isWaiting);
+			found.ifPresent(entity -> {
+				entity.setStatus(ReservationEntity.STATUS_ASSIGNED);
+				entity.setBookCopy(bookCopy);
+				entity.setAssignedAt(assignedAt);
+				entity.setPickupDeadline(pickupDeadline);
+			});
+			return found.isPresent();
 		}
 
 		@Override

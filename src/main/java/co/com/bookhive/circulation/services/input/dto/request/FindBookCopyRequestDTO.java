@@ -1,11 +1,19 @@
 package co.com.bookhive.circulation.services.input.dto.request;
 
-import co.com.bookhive.crosscutting.helper.TextHelper;
+import java.util.UUID;
 
-public record FindBookCopyRequestDTO(String barcode) {
+import co.com.bookhive.crosscutting.helper.TextHelper;
+import co.com.bookhive.crosscutting.helper.UUIDHelper;
+
+public record FindBookCopyRequestDTO(String barcode, UUID user) {
 
 	public FindBookCopyRequestDTO {
 		barcode = TextHelper.getDefaultValue(barcode);
+		user = UUIDHelper.getDefaultValue(user);
+	}
+
+	public FindBookCopyRequestDTO(final String barcode) {
+		this(barcode, null);
 	}
 
 }
