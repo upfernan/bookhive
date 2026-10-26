@@ -268,6 +268,7 @@ public final class FakeRepositories {
 	public static final class Parameters implements InstitutionParametersRepository {
 
 		private final List<InstitutionParametersEntity> stored = new ArrayList<>();
+		private final List<InstitutionParametersEntity> updated = new ArrayList<>();
 
 		public Parameters with(final int loanDays, final int maxConcurrentLoans) {
 			return with(loanDays, maxConcurrentLoans, BigDecimal.ZERO);
@@ -283,6 +284,7 @@ public final class FakeRepositories {
 				final BigDecimal dailyFineRate,
 				final String timeZone) {
 			final InstitutionParametersEntity parameters = new InstitutionParametersEntity();
+			parameters.setId(UUID.randomUUID());
 			parameters.setLoanDays(loanDays);
 			parameters.setMaxConcurrentLoans(maxConcurrentLoans);
 			parameters.setDailyFineRate(dailyFineRate);
@@ -299,6 +301,15 @@ public final class FakeRepositories {
 		@Override
 		public List<InstitutionParametersEntity> findAll(final PageCriteria page) {
 			return List.copyOf(stored);
+		}
+
+		@Override
+		public void update(final InstitutionParametersEntity entity) {
+			updated.add(entity);
+		}
+
+		public List<InstitutionParametersEntity> updated() {
+			return updated;
 		}
 
 	}

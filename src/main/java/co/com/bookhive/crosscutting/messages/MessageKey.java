@@ -55,6 +55,11 @@ public final class MessageKey {
 
 	public static final String INSTITUTION_NOT_ACTIVE = "institution.not-active";
 	public static final String INSTITUTION_WITHOUT_PARAMETERS = "institution.without-parameters";
+	public static final String INSTITUTION_SETTINGS_DATA_REQUIRED = "institution.settings.data.required";
+	public static final String INSTITUTION_SETTINGS_LOAN_DAYS_INVALID = "institution.settings.loan-days.invalid";
+	public static final String INSTITUTION_SETTINGS_MAX_LOANS_INVALID = "institution.settings.max-loans.invalid";
+	public static final String INSTITUTION_SETTINGS_FINE_RATE_INVALID = "institution.settings.fine-rate.invalid";
+	public static final String INSTITUTION_SETTINGS_TIME_ZONE_INVALID = "institution.settings.time-zone.invalid";
 
 	public static final String SESSION_NOT_RESOLVED = "session.not-resolved";
 	public static final String SESSION_ID_TOKEN_REQUIRED = "session.id-token.required";

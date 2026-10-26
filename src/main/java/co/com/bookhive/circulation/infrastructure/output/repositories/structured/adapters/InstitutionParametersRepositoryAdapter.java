@@ -31,6 +31,11 @@ public class InstitutionParametersRepositoryAdapter implements InstitutionParame
 	}
 
 	@Override
+	public void update(final InstitutionParametersEntity entity) {
+		repository.saveAndFlush(mapper.toJpaEntity(entity));
+	}
+
+	@Override
 	public Optional<InstitutionParametersEntity> findById(final UUID id) {
 		return repository.findById(id).map(mapper::toEntity);
 	}
