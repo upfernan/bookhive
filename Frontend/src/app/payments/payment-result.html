@@ -1,0 +1,55 @@
+<div class="payment">
+  <div>
+    <h1 #heading class="page__title heading" tabindex="-1">{{ messages.title }}</h1>
+    <p class="page__lead">{{ messages.lead }}</p>
+  </div>
+
+  @if (problem(); as failure) {
+    <div class="banner banner--error" role="alert">
+      <div>
+        <p class="banner__title">{{ messages.checkFailedTitle }}</p>
+        <p class="banner__text">{{ failure.message }}</p>
+        @if (traceText()) {
+          <p class="banner__trace">{{ traceText() }}</p>
+        }
+        <button class="action" mat-stroked-button type="button" [disabled]="checking()" (click)="check()">
+          {{ checking() ? messages.checking : messages.checkAgain }}
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (view(); as current) {
+    <section [class]="'result result--' + current.tone" role="status">
+      <p class="result__title">{{ current.title }}</p>
+      <p class="result__text">{{ current.text }}</p>
+
+      @if (result()) {
+        <dl class="facts">
+          <div class="fact">
+            <dt>{{ messages.amount }}</dt>
+            <dd>{{ amount() }}</dd>
+          </div>
+          <div class="fact">
+            <dt>{{ messages.reference }}</dt>
+            <dd class="fact__code">{{ reference }}</dd>
+          </div>
+          <div class="fact">
+            <dt>{{ messages.transaction }}</dt>
+            <dd class="fact__code">{{ transaction }}</dd>
+          </div>
+        </dl>
+      }
+
+      @if (current.canCheckAgain) {
+        <button class="action" mat-stroked-button type="button" [disabled]="checking()" (click)="check()">
+          {{ checking() ? messages.checking : messages.checkAgain }}
+        </button>
+      }
+    </section>
+  } @else if (checking()) {
+    <p class="loading" role="status">{{ messages.checking }}</p>
+  }
+
+  <a class="back" routerLink="/mi-cuenta">{{ messages.backToAccount }}</a>
+</div>

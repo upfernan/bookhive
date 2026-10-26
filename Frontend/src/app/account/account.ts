@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DOCUMENT, DestroyRef, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 import { messages } from '../messages';
+import { PaymentDesk, checkoutAddress } from '../payments/payment-desk';
 import { CurrentSession } from '../session/current-session';
 import { PermissionCode } from '../session/permission-code';
 import { fillTemplate } from '../shared/fill-template';
@@ -25,6 +26,7 @@ const MONEY_FORMAT = new Intl.NumberFormat('es-CO', {
 const DEFAULT_DATE = '1900-01-01';
 
 interface AccountRow {
+  readonly fine: string;
   readonly title: string;
   readonly authors: string;
   readonly detail: string;
@@ -49,14 +51,24 @@ interface AccountGroup {
 })
 export class Account {
   private readonly desk = inject(AccountDesk);
+  private readonly paymentDesk = inject(PaymentDesk);
   private readonly currentSession = inject(CurrentSession);
+  private readonly document = inject(DOCUMENT);
 
   protected readonly messages = messages.account;
   protected readonly account = signal<MyAccount | null>(null);
   protected readonly loading = signal(false);
   protected readonly problem = signal<RequestProblem | null>(null);
+  protected readonly paying = signal('');
+  protected readonly payProblem = signal<RequestProblem | null>(null);
 
   protected readonly canReserve = computed(() => this.currentSession.allows(PermissionCode.reserveBook));
+  protected readonly canPay = computed(() => this.currentSession.allows(PermissionCode.payFine));
+
+  protected readonly payTraceText = computed(() => {
+    const traceId = this.payProblem()?.traceId ?? '';
+    return traceId === '' ? '' : fillTemplate(this.messages.traceId, { traceId });
+  });
 
   protected readonly finesTotal = computed(() => money(this.account()?.pendingFinesTotal));
 
@@ -106,6 +118,15 @@ export class Account {
 
   constructor() {
     void this.load();
+
+    const page = this.document.defaultView;
+    const releasePayButtons = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        this.paying.set('');
+      }
+    };
+    page?.addEventListener('pageshow', releasePayButtons);
+    inject(DestroyRef).onDestroy(() => page?.removeEventListener('pageshow', releasePayButtons));
   }
 
   protected async load(): Promise<void> {
@@ -121,10 +142,32 @@ export class Account {
     }
   }
 
+  protected async pay(row: AccountRow): Promise<void> {
+    if (this.paying() !== '' || row.fine === '') {
+      return;
+    }
+
+    this.paying.set(row.fine);
+    this.payProblem.set(null);
+
+    try {
+      const checkout = await this.paymentDesk.start(row.fine);
+      this.document.location.assign(checkoutAddress(checkout, this.document.location.origin));
+    } catch (error) {
+      this.payProblem.set(describeRequestProblem(error, this.messages.payFailed));
+      this.paying.set('');
+    }
+  }
+
+  protected payLabel(row: AccountRow): string {
+    return fillTemplate(this.messages.payLabel, { title: row.title, amount: row.badge });
+  }
+
   private loanRow(item: ActiveLoan): AccountRow {
     const overdue = item.overdueDays > 0;
 
     return {
+      fine: '',
       ...this.bookOf(item.book),
       detail: fillTemplate(this.messages.loanDates, {
         loaned: formatDate(item.loanDate),
@@ -138,6 +181,7 @@ export class Account {
 
   private fineRow(item: PendingFine): AccountRow {
     return {
+      fine: item.fine,
       ...this.bookOf(item.book),
       detail: fillTemplate(item.overdueDays === 1 ? this.messages.fineDetailOne : this.messages.fineDetailMany, {
         days: String(item.overdueDays),
@@ -153,6 +197,7 @@ export class Account {
     const late = item.overdueDays > 0;
 
     return {
+      fine: '',
       ...this.bookOf(item.book),
       detail: fillTemplate(this.messages.historyDates, {
         loaned: formatDate(item.loanDate),
@@ -170,6 +215,7 @@ export class Account {
     const reference = item.reference.trim();
 
     return {
+      fine: '',
       ...this.bookOf(item.book),
       detail: dated(this.messages.paidOn, item.paidAt),
       note: reference === '' ? '' : fillTemplate(this.messages.reference, { reference }),

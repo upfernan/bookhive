@@ -61,6 +61,18 @@ export const routes: Routes = [
         canMatch: [requirePermission(PermissionCode.viewAccount)],
         loadComponent: () => import('./account/account').then((m) => m.Account),
       },
+      {
+        path: 'pagos/resultado/:referencia',
+        title: 'Resultado del pago · BookHive',
+        canMatch: [requirePermission(PermissionCode.payFine)],
+        loadComponent: () => import('./payments/payment-result').then((m) => m.PaymentResult),
+      },
+      {
+        path: 'pagos/resultado',
+        title: 'Resultado del pago · BookHive',
+        canMatch: [requirePermission(PermissionCode.payFine)],
+        loadComponent: () => import('./payments/payment-result').then((m) => m.PaymentResult),
+      },
       { path: '', pathMatch: 'full', redirectTo: 'inicio' },
     ],
   },

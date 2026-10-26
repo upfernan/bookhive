@@ -55,6 +55,19 @@
     @for (group of groups(); track group.key) {
       <section class="group" [attr.aria-labelledby]="'cuenta-' + group.key">
         <h2 class="group__title" [id]="'cuenta-' + group.key">{{ group.title }}</h2>
+        @if (group.key === 'fines') {
+          @if (payProblem(); as failure) {
+            <div class="banner banner--error" role="alert">
+              <div>
+                <p class="banner__title">{{ messages.payFailedTitle }}</p>
+                <p class="banner__text">{{ failure.message }}</p>
+                @if (payTraceText()) {
+                  <p class="banner__trace">{{ payTraceText() }}</p>
+                }
+              </div>
+            </div>
+          }
+        }
         @if (group.rows.length === 0) {
           <p class="group__empty">{{ group.empty }}</p>
         } @else {
@@ -73,7 +86,20 @@
                     <p class="row__note">{{ row.note }}</p>
                   }
                 </div>
-                <span [class]="row.badgeClass">{{ row.badge }}</span>
+                <div class="row__side">
+                  <span [class]="row.badgeClass">{{ row.badge }}</span>
+                  @if (row.fine && canPay()) {
+                    <button
+                      mat-flat-button
+                      type="button"
+                      [disabled]="paying() !== ''"
+                      [attr.aria-label]="payLabel(row)"
+                      (click)="pay(row)"
+                    >
+                      {{ paying() === row.fine ? messages.paying : messages.pay }}
+                    </button>
+                  }
+                </div>
               </li>
             }
           </ul>
