@@ -1,0 +1,60 @@
+.heading:focus {
+  outline: none;
+}
+
+.meta {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.policy {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: min(46vh, 420px);
+  overflow-y: auto;
+  margin-bottom: 20px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  border: 1px solid var(--bh-line);
+  background: var(--bh-paper);
+}
+
+.policy:focus-visible {
+  outline: 2px solid var(--bh-honey);
+  outline-offset: 2px;
+}
+
+.policy__paragraph {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--bh-walnut-dark);
+}
+
+.actions {
+  display: grid;
+  gap: 14px;
+}
+
+.actions .notice {
+  margin: 0;
+}
+
+.actions__primary {
+  min-height: 48px;
+}
+
+.actions__close {
+  justify-self: center;
+  padding: 4px 8px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.actions__close:disabled {
+  cursor: default;
+  opacity: 0.6;
+}

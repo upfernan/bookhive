@@ -8,6 +8,7 @@ import {
 } from '@firebase/auth';
 import { firstValueFrom } from 'rxjs';
 import { CurrentSession } from './current-session';
+import { DataPolicy } from './data-policy';
 import { IDENTITY_PROVIDER } from './identity-provider';
 import { identityProviderCodeOf } from './session-errors';
 
@@ -21,6 +22,7 @@ export class Session {
   private readonly identityProvider = inject(IDENTITY_PROVIDER);
   private readonly csrfToken = inject(HttpXsrfTokenExtractor);
   private readonly currentSession = inject(CurrentSession);
+  private readonly dataPolicy = inject(DataPolicy);
 
   async preloadBotProtection(): Promise<void> {
     try {
@@ -38,6 +40,7 @@ export class Session {
       await this.ensureCsrfToken();
       await firstValueFrom(this.http.post<void>(SESSION_PATH, { idToken }));
       this.currentSession.forget();
+      this.dataPolicy.forget();
     } finally {
       await signOut(this.identityProvider);
     }
@@ -47,6 +50,7 @@ export class Session {
     await this.ensureCsrfToken();
     await firstValueFrom(this.http.delete<void>(SESSION_PATH));
     this.currentSession.forget();
+    this.dataPolicy.forget();
   }
 
   async requestPasswordReset(email: string): Promise<void> {
