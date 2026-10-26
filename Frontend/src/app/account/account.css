@@ -139,12 +139,19 @@ dd {
   font-weight: 600;
 }
 
-.row .chip {
+.row__side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
   flex: none;
 }
 
+.group .banner {
+  margin: 0;
+}
+
 .amount {
-  flex: none;
   font-size: 17px;
   font-weight: 700;
   color: var(--bh-walnut-dark);
@@ -160,5 +167,11 @@ dd {
     flex-direction: column;
     gap: 8px;
     padding: 14px 16px;
+  }
+
+  .row__side {
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
   }
 }
