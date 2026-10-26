@@ -47,13 +47,7 @@ public class WompiEventsController {
 			@RequestBody(required = false) final String body,
 			@RequestHeader(name = CHECKSUM_HEADER, required = false) final String checksumHeader) {
 
-		final JsonNode event;
-		try {
-			event = json.readTree(TextHelper.getDefaultValue(body));
-		} catch (final JacksonException _) {
-			logger.warn("Se ignoró un aviso de Wompi que no es JSON.");
-			return ResponseEntity.ok().build();
-		}
+		final JsonNode event = eventOf(body);
 		final String type = event.path("event").asString("");
 		if (!TRANSACTION_UPDATED.equals(type)) {
 			logger.info("Se ignoró un aviso de Wompi de tipo {}.", type);
@@ -81,6 +75,15 @@ public class WompiEventsController {
 		final String outcome = response.applied() ? "registrado" : "no corresponde a un pago de BookHive";
 		logger.info("Aviso de Wompi de la transacción {} en estado {}: {}.", transactionId, status, outcome);
 		return ResponseEntity.ok().build();
+	}
+
+	private JsonNode eventOf(final String body) {
+		try {
+			return json.readTree(TextHelper.getDefaultValue(body));
+		} catch (final JacksonException _) {
+			logger.warn("Llegó a la dirección de avisos de Wompi algo que no es JSON.");
+			return json.missingNode();
+		}
 	}
 
 	private static List<String> signedValuesOf(final JsonNode properties, final JsonNode data) {
