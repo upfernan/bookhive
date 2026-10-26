@@ -31,7 +31,8 @@ public class CirculationBookCopyStatusAdapter implements BookCopyStatusPort {
 				found.barcode(),
 				found.available(),
 				found.lendable(),
-				found.blocks());
+				found.blocks(),
+				found.branch());
 	}
 
 }

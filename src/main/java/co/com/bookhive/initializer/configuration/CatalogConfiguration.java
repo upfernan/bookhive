@@ -8,6 +8,7 @@ import co.com.bookhive.catalog.services.input.adapters.FindBookTitleInputAdapter
 import co.com.bookhive.catalog.services.input.adapters.ListMyReservationsInputAdapter;
 import co.com.bookhive.catalog.services.input.adapters.ViewMyAccountInputAdapter;
 import co.com.bookhive.catalog.services.input.ports.ViewMyAccountInputPort;
+import co.com.bookhive.catalog.services.output.ports.BranchDirectoryPort;
 import co.com.bookhive.catalog.services.output.ports.UserAccountPort;
 import co.com.bookhive.catalog.services.usecase.account.viewmyaccount.impl.ViewMyAccountUseCaseImpl;
 import co.com.bookhive.catalog.services.input.adapters.SearchBooksInputAdapter;
@@ -58,8 +59,9 @@ public class CatalogConfiguration {
 	@Bean
 	FindBookCopyDetailsUseCase findBookCopyDetailsUseCase(
 			final BookCopyStatusPort bookCopyStatus,
-			final BookRepository bookRepository) {
-		return new FindBookCopyDetailsUseCaseImpl(bookCopyStatus, bookRepository);
+			final BookRepository bookRepository,
+			final BranchDirectoryPort branchDirectory) {
+		return new FindBookCopyDetailsUseCaseImpl(bookCopyStatus, bookRepository, branchDirectory);
 	}
 
 	@Bean
