@@ -13,6 +13,7 @@ import co.com.bookhive.access.infrastructure.input.interceptors.TenantIntercepto
 import co.com.bookhive.access.infrastructure.output.repositories.structured.tenancy.TenantConnectionProvider;
 import co.com.bookhive.access.infrastructure.output.repositories.structured.tenancy.TenantSchemaResolver;
 import co.com.bookhive.initializer.security.InternalPaths;
+import co.com.bookhive.payment.infrastructure.input.controllers.WompiEventsController;
 
 @Configuration
 public class TenancyConfiguration implements WebMvcConfigurer {
@@ -42,10 +43,12 @@ public class TenancyConfiguration implements WebMvcConfigurer {
 		registry.addInterceptor(tenantInterceptor)
 				.addPathPatterns(TENANTED_PATHS)
 				.excludePathPatterns(SessionController.PATH)
+				.excludePathPatterns(WompiEventsController.PATH)
 				.excludePathPatterns(InternalPaths.all());
 		registry.addInterceptor(permissionInterceptor)
 				.addPathPatterns(TENANTED_PATHS)
 				.excludePathPatterns(SessionController.PATH)
+				.excludePathPatterns(WompiEventsController.PATH)
 				.excludePathPatterns(InternalPaths.all());
 	}
 

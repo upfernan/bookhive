@@ -10,6 +10,7 @@ public class BookHiveException extends RuntimeException {
 		MISSING_DATA,
 		STATE_DOES_NOT_ALLOW_IT,
 		NOT_ALLOWED,
+		UNAVAILABLE,
 		UNEXPECTED
 	}
 
@@ -64,6 +65,14 @@ public class BookHiveException extends RuntimeException {
 			final String technicalMessage) {
 
 		return new BookHiveException(rootCause, userMessageKey, technicalMessage, Kind.UNEXPECTED);
+	}
+
+	public static BookHiveException createUnavailable(
+			final Throwable rootCause,
+			final String userMessageKey,
+			final String technicalMessage) {
+
+		return new BookHiveException(rootCause, userMessageKey, technicalMessage, Kind.UNAVAILABLE);
 	}
 
 	public Throwable getRootCause() {

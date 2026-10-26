@@ -105,6 +105,7 @@ public class ApiExceptionHandler {
 			case MISSING_DATA -> HttpStatus.BAD_REQUEST;
 			case STATE_DOES_NOT_ALLOW_IT -> HttpStatus.CONFLICT;
 			case NOT_ALLOWED -> HttpStatus.FORBIDDEN;
+			case UNAVAILABLE -> HttpStatus.SERVICE_UNAVAILABLE;
 			case UNEXPECTED -> HttpStatus.INTERNAL_SERVER_ERROR;
 		};
 	}

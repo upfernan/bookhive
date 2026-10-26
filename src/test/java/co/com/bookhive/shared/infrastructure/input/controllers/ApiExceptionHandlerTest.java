@@ -42,6 +42,16 @@ class ApiExceptionHandlerTest {
 	}
 
 	@Test
+	@DisplayName("un servicio externo caído responde 503 con el mensaje del catálogo")
+	void unavailableServiceIsServiceUnavailable() {
+		final ResponseEntity<ErrorResponseDTO> response = handler.handle(BookHiveException.createUnavailable(
+				new IllegalStateException("caído"), MessageKey.PAYMENT_GATEWAY_UNAVAILABLE, "Wompi no responde."));
+
+		assertEquals(HttpStatus.SERVICE_UNAVAILABLE, response.getStatusCode());
+		assertEquals("Texto de " + MessageKey.PAYMENT_GATEWAY_UNAVAILABLE, messageOf(response));
+	}
+
+	@Test
 	@DisplayName("una acción sin permiso responde 403 con el mensaje del catálogo")
 	void missingPermissionIsForbidden() {
 		final ResponseEntity<ErrorResponseDTO> response =

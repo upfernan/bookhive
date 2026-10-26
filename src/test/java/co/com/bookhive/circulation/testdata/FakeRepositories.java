@@ -4,14 +4,17 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.FineRepository;
+import co.com.bookhive.circulation.services.output.ports.repositories.FineSettlementRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionParametersRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.LoanRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.LoanReturnRepository;
@@ -19,12 +22,14 @@ import co.com.bookhive.circulation.services.output.ports.repositories.Reservatio
 import co.com.bookhive.circulation.services.output.ports.repositories.UserRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.BookCopyCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.FineCriteria;
+import co.com.bookhive.circulation.services.output.ports.repositories.criteria.FineSettlementCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.LoanCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.LoanReturnCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.ReservationCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.UserCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.FineEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.FineSettlementEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.InstitutionParametersEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanReturnEntity;
@@ -158,6 +163,7 @@ public final class FakeRepositories {
 
 		private final List<FineEntity> pending = new ArrayList<>();
 		private final List<FineEntity> created = new ArrayList<>();
+		private final Set<UUID> settled = new HashSet<>();
 
 		public Fines withPendingFine() {
 			pending.add(new FineEntity());
@@ -178,12 +184,24 @@ public final class FakeRepositories {
 			created.add(entity);
 		}
 
+		public Fines withSettledFine(final FineEntity fine) {
+			pending.add(fine);
+			settled.add(fine.getId());
+			return this;
+		}
+
 		@Override
 		public List<FineEntity> findByCriteria(final FineCriteria criteria) {
 			if (criteria.filtersByLoan()) {
 				return pending.stream().filter(fine -> fine.getLoan().getId().equals(criteria.getLoan())).toList();
 			}
-			return List.copyOf(pending);
+			if (criteria.filtersById()) {
+				return pending.stream()
+						.filter(fine -> fine.getId().equals(criteria.getId()))
+						.filter(fine -> !criteria.filtersByUser() || fine.getUser().getId().equals(criteria.getUser()))
+						.toList();
+			}
+			return pending.stream().filter(fine -> !settled.contains(fine.getId())).toList();
 		}
 
 	}
@@ -421,6 +439,35 @@ public final class FakeRepositories {
 			return stored.stream()
 					.filter(loanReturn -> loanReturn.getReturnDate().equals(criteria.getReturnDate()))
 					.toList();
+		}
+
+	}
+
+	public static final class FineSettlements implements FineSettlementRepository {
+
+		private final List<FineSettlementEntity> settled = new ArrayList<>();
+
+		public FineSettlements with(final FineSettlementEntity settlement) {
+			settled.add(settlement);
+			return this;
+		}
+
+		public List<FineSettlementEntity> settled() {
+			return settled;
+		}
+
+		@Override
+		public boolean settle(final FineSettlementEntity settlement) {
+			if (settled.stream().anyMatch(existing -> existing.fine().equals(settlement.fine()))) {
+				return false;
+			}
+			settled.add(settlement);
+			return true;
+		}
+
+		@Override
+		public List<FineSettlementEntity> findByCriteria(final FineSettlementCriteria criteria) {
+			return settled.stream().filter(settlement -> settlement.fine().equals(criteria.getFine())).toList();
 		}
 
 	}

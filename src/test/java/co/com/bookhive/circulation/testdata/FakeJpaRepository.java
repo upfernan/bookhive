@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.data.domain.PageImpl;
@@ -64,6 +65,7 @@ public final class FakeJpaRepository<T> implements InvocationHandler {
 			case "findAll" -> findAll(arguments[0]);
 			case "changeStatus" -> changeStatus(arguments);
 			case "assign" -> assign(arguments);
+			case "settle", "register" -> rowsChangedBy(method.getName(), arguments);
 			case "hashCode" -> System.identityHashCode(repository);
 			case "equals" -> repository == arguments[0];
 			default -> "FakeJpaRepository";
@@ -77,6 +79,11 @@ public final class FakeJpaRepository<T> implements InvocationHandler {
 
 	private int changeStatus(final Object[] arguments) {
 		filters.add(arguments[0] + ":" + arguments[1] + "->" + arguments[2]);
+		return changedRows;
+	}
+
+	private int rowsChangedBy(final String operation, final Object[] arguments) {
+		filters.add(operation + " " + Arrays.toString(arguments));
 		return changedRows;
 	}
 
@@ -118,6 +125,15 @@ public final class FakeJpaRepository<T> implements InvocationHandler {
 		}
 		if ("notEqual".equals(name)) {
 			filters.add(arguments[0] + "!=" + arguments[1]);
+		}
+		if ("greaterThan".equals(name)) {
+			filters.add(arguments[0] + ">" + arguments[1]);
+		}
+		if ("between".equals(name)) {
+			filters.add(arguments[0] + " entre " + arguments[1] + " y " + arguments[2]);
+		}
+		if ("disjunction".equals(name)) {
+			filters.add("ninguna");
 		}
 		if ("lessThan".equals(name)) {
 			filters.add(arguments[0] + "<" + arguments[1]);

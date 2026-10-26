@@ -30,7 +30,7 @@ class FineRepositoryAdapterTest {
 
 		assertEquals(1, fines.size());
 		assertEquals(FINE, fines.get(0).getId());
-		assertEquals(List.of("user.id=" + USER, "status=" + FineEntity.STATUS_PENDING), repository.filters());
+		assertEquals(List.of("user.id=" + USER, "fine=id", "existe la subconsulta", "negada"), repository.filters());
 	}
 
 	@Test
@@ -46,13 +46,33 @@ class FineRepositoryAdapterTest {
 	}
 
 	@Test
-	@DisplayName("sin usuario solo filtra por estado")
-	void filtersOnlyByStatusWithoutUser() {
+	@DisplayName("sin usuario solo deja las multas que no tienen pago registrado")
+	void filtersOnlyUnsettledWithoutUser() {
 		final FakeJpaRepository<FineJpaEntity> repository = FakeJpaRepository.storing();
 
 		adapter(repository).findByCriteria(FineCriteria.pendingByUser(null));
 
-		assertEquals(List.of("status=" + FineEntity.STATUS_PENDING), repository.filters());
+		assertEquals(List.of("fine=id", "existe la subconsulta", "negada"), repository.filters());
+	}
+
+	@Test
+	@DisplayName("busca una multa por su identificador y su dueño")
+	void findsFineOfUser() {
+		final FakeJpaRepository<FineJpaEntity> repository = FakeJpaRepository.storing();
+
+		adapter(repository).findByCriteria(FineCriteria.ofUser(FINE, USER));
+
+		assertEquals(List.of("id=" + FINE, "user.id=" + USER), repository.filters());
+	}
+
+	@Test
+	@DisplayName("busca una multa solo por su identificador")
+	void findsFineById() {
+		final FakeJpaRepository<FineJpaEntity> repository = FakeJpaRepository.storing();
+
+		adapter(repository).findByCriteria(FineCriteria.withId(FINE));
+
+		assertEquals(List.of("id=" + FINE), repository.filters());
 	}
 
 	@Test
