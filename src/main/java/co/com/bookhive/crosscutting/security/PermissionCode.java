@@ -10,6 +10,8 @@ public final class PermissionCode {
 	public static final String PAY_FINE = "fine.pay";
 	public static final String CONFIGURE_INSTITUTION = "institution.configure";
 
+	public static final String VIEW_ACCOUNT = "account.view";
+
 	private PermissionCode() {
 		super();
 	}

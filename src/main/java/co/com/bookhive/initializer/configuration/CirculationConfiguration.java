@@ -26,6 +26,10 @@ import co.com.bookhive.circulation.services.input.ports.FindBookCopyInputPort;
 import co.com.bookhive.circulation.services.input.ports.FindUserContactInputPort;
 import co.com.bookhive.circulation.services.input.ports.FindUserInputPort;
 import co.com.bookhive.circulation.services.input.ports.FindUserReservationsInputPort;
+import co.com.bookhive.circulation.services.input.adapters.FindUserAccountInputAdapter;
+import co.com.bookhive.circulation.services.input.ports.FindUserAccountInputPort;
+import co.com.bookhive.circulation.services.output.ports.repositories.UserHistoryRepository;
+import co.com.bookhive.circulation.services.usecase.account.finduseraccount.impl.FindUserAccountUseCaseImpl;
 import co.com.bookhive.circulation.services.input.ports.LendBookInputPort;
 import co.com.bookhive.circulation.services.input.ports.RemindDueLoansInputPort;
 import co.com.bookhive.circulation.services.input.ports.ReserveBookInputPort;
@@ -305,4 +309,17 @@ public class CirculationConfiguration {
 
 		return new FindUserReservationsInputAdapter(findUserReservationsUseCase);
 	}
+
+	@Bean
+	FindUserAccountInputPort findUserAccountInputPort(
+			final SessionContextPort sessionContext,
+			final InstitutionParametersRepository institutionParametersRepository,
+			final LoanRepository loanRepository,
+			final FineRepository fineRepository,
+			final UserHistoryRepository userHistoryRepository) {
+
+		return new FindUserAccountInputAdapter(new FindUserAccountUseCaseImpl(
+				sessionContext, institutionParametersRepository, loanRepository, fineRepository, userHistoryRepository));
+	}
+
 }
