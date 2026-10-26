@@ -72,7 +72,8 @@ public final class FindBookCopyDomain {
 				bookCopy.getBarcode(),
 				TextHelper.isDefaultValue(availabilityBlock),
 				bookCopy.isLendable(),
-				blocksOf(availabilityBlock, bookCopy.isLendable()));
+				blocksOf(availabilityBlock, bookCopy.isLendable()),
+				bookCopy.getBranch());
 	}
 
 	public String getBarcode() {

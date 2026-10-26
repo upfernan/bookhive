@@ -17,6 +17,14 @@ public final class MessageKey {
 	public static final String LOAN_RETURN_NOT_CONFIRMED = "loan.return.not-confirmed";
 
 	public static final String BOOK_COPY_NOT_FOUND = "book-copy.not-found";
+	public static final String BOOK_COPY_LOCATION_INVALID = "book-copy.location.invalid";
+	public static final String BOOK_COPY_WITHDRAWN = "book-copy.withdrawn";
+	public static final String BOOK_COPY_NOT_WITHDRAWABLE = "book-copy.not-withdrawable";
+	public static final String BRANCH_NAME_INVALID = "branch.name.invalid";
+	public static final String BRANCH_NAME_TAKEN = "branch.name.taken";
+	public static final String BRANCH_NOT_FOUND = "branch.not-found";
+	public static final String LOCATION_LEVELS_INVALID = "location.levels.invalid";
+	public static final String LOCATION_LEVELS_IN_USE = "location.levels.in-use";
 	public static final String BOOK_COPY_NOT_AVAILABLE = "book-copy.not-available";
 	public static final String BOOK_COPY_REFERENCE_ONLY = "book-copy.reference-only";
 	public static final String BOOK_COPY_BARCODE_REQUIRED = "book-copy.barcode.required";

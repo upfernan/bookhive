@@ -5,6 +5,7 @@ import java.util.List;
 import co.com.bookhive.catalog.domain.bookcopy.findbookcopydetails.BookCopyDetailsDomain;
 import co.com.bookhive.catalog.domain.bookcopy.findbookcopydetails.FindBookCopyDetailsDomain;
 import co.com.bookhive.catalog.services.output.ports.BookCopyStatusPort;
+import co.com.bookhive.catalog.services.output.ports.BranchDirectoryPort;
 import co.com.bookhive.catalog.services.output.ports.entities.BookCopyStatusEntity;
 import co.com.bookhive.catalog.services.output.ports.repositories.BookRepository;
 import co.com.bookhive.catalog.services.output.ports.repositories.criteria.BookCriteria;
@@ -21,14 +22,17 @@ public final class FindBookCopyDetailsUseCaseImpl implements FindBookCopyDetails
 
 	private final BookCopyStatusPort bookCopyStatus;
 	private final BookRepository bookRepository;
+	private final BranchDirectoryPort branches;
 
 	public FindBookCopyDetailsUseCaseImpl(
 			final BookCopyStatusPort bookCopyStatus,
-			final BookRepository bookRepository) {
+			final BookRepository bookRepository,
+			final BranchDirectoryPort branches) {
 
 		super();
 		this.bookCopyStatus = requireDependency(bookCopyStatus, "el estado de los ejemplares");
 		this.bookRepository = requireDependency(bookRepository, "el repositorio de libros");
+		this.branches = requireDependency(branches, "el directorio de sedes");
 	}
 
 	@Override
@@ -48,7 +52,7 @@ public final class FindBookCopyDetailsUseCaseImpl implements FindBookCopyDetails
 				bookCopy.barcode(),
 				book.title(),
 				String.join(AUTHOR_SEPARATOR, book.authors()),
-				TextHelper.getDefaultValue(),
+				TextHelper.getDefaultValue(branches.nameOf(bookCopy.branch())),
 				bookCopy.available(),
 				bookCopy.lendable(),
 				bookCopy.blocks());

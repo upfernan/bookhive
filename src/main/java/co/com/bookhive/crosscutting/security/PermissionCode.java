@@ -12,6 +12,10 @@ public final class PermissionCode {
 
 	public static final String VIEW_ACCOUNT = "account.view";
 
+	public static final String LOCATE_BOOK_COPY = "book-copy.locate";
+	public static final String RELOCATE_BOOK_COPY = "book-copy.relocate";
+	public static final String WITHDRAW_BOOK_COPY = "book-copy.withdraw";
+
 	private PermissionCode() {
 		super();
 	}

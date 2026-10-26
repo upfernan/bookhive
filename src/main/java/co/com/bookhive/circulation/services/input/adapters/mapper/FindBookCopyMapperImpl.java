@@ -33,7 +33,8 @@ public final class FindBookCopyMapperImpl implements FindBookCopyMapper {
 				domain.barcode(),
 				domain.available(),
 				domain.lendable(),
-				domain.blocks());
+				domain.blocks(),
+				domain.branch());
 	}
 
 }

@@ -13,13 +13,25 @@ public record FindBookCopyResponseDTO(
 		String barcode,
 		boolean available,
 		boolean lendable,
-		List<String> blocks) {
+		List<String> blocks,
+		UUID branch) {
 
 	public FindBookCopyResponseDTO {
 		id = UUIDHelper.getDefaultValue(id);
 		book = UUIDHelper.getDefaultValue(book);
 		barcode = TextHelper.getDefaultValue(barcode);
 		blocks = List.copyOf(ObjectHelper.getDefaultValue(blocks, List.of()));
+		branch = UUIDHelper.getDefaultValue(branch);
+	}
+
+	public FindBookCopyResponseDTO(
+			final UUID id,
+			final UUID book,
+			final String barcode,
+			final boolean available,
+			final boolean lendable,
+			final List<String> blocks) {
+		this(id, book, barcode, available, lendable, blocks, null);
 	}
 
 }

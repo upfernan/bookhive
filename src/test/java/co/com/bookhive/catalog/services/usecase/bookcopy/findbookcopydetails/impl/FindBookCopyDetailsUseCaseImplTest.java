@@ -57,7 +57,7 @@ class FindBookCopyDetailsUseCaseImplTest {
 		assertEquals("UCO-0001", details.barcode());
 		assertEquals("Clean Architecture", details.title());
 		assertEquals("Robert C. Martin, Kevlin Henney", details.authors());
-		assertEquals("", details.branch());
+		assertEquals("Sede Centro", details.branch());
 		assertFalse(details.available());
 		assertTrue(details.lendable());
 		assertEquals(List.of(MessageKey.BOOK_COPY_NOT_AVAILABLE), details.blocks());
@@ -114,16 +114,16 @@ class FindBookCopyDetailsUseCaseImplTest {
 	@DisplayName("no se deja crear sin alguna de sus dependencias")
 	void requiresEveryDependency() {
 		final BookHiveException withoutStatus = assertThrows(BookHiveException.class,
-				() -> new FindBookCopyDetailsUseCaseImpl(null, books));
+				() -> new FindBookCopyDetailsUseCaseImpl(null, books, branch -> ""));
 		final BookHiveException withoutBooks = assertThrows(BookHiveException.class,
-				() -> new FindBookCopyDetailsUseCaseImpl(bookCopyStatus, null));
+				() -> new FindBookCopyDetailsUseCaseImpl(bookCopyStatus, null, branch -> ""));
 
 		assertEquals(MessageKey.REQUEST_UNEXPECTED, withoutStatus.getUserMessageKey());
 		assertEquals(BookHiveException.Kind.UNEXPECTED, withoutBooks.getKind());
 	}
 
 	private FindBookCopyDetailsUseCaseImpl useCase() {
-		return new FindBookCopyDetailsUseCaseImpl(bookCopyStatus, books);
+		return new FindBookCopyDetailsUseCaseImpl(bookCopyStatus, books, branch -> "Sede Centro");
 	}
 
 }
