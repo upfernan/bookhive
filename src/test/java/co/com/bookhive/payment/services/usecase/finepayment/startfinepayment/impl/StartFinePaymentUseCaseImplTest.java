@@ -121,11 +121,12 @@ class StartFinePaymentUseCaseImplTest {
 	@Test
 	@DisplayName("sin multa se pide indicar cuál y sin sesión es un error inesperado")
 	void requiresFineAndSession() {
+		final StartFinePaymentUseCaseImpl withSchema = useCase("uco");
 		final StartFinePaymentUseCaseImpl withoutSchema = useCase("");
 		final StartFinePaymentDomain request = new StartFinePaymentDomain(FINE);
 
 		assertEquals(MessageKey.FINE_ID_REQUIRED,
-				assertThrows(BookHiveException.class, () -> useCase("uco").execute(null)).getUserMessageKey());
+				assertThrows(BookHiveException.class, () -> withSchema.execute(null)).getUserMessageKey());
 		assertEquals(BookHiveException.Kind.UNEXPECTED,
 				assertThrows(BookHiveException.class, () -> withoutSchema.execute(request)).getKind());
 	}

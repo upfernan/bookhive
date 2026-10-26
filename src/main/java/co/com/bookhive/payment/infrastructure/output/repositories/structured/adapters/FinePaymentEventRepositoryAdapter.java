@@ -21,7 +21,7 @@ public class FinePaymentEventRepositoryAdapter implements FinePaymentEventReposi
 	}
 
 	@Override
-	public boolean record(final FinePaymentEventEntity event) {
+	public boolean register(final FinePaymentEventEntity event) {
 		if (ObjectHelper.isNull(event)
 				|| UUIDHelper.isDefaultValue(event.getId())
 				|| UUIDHelper.isDefaultValue(event.getPayment())
@@ -31,7 +31,7 @@ public class FinePaymentEventRepositoryAdapter implements FinePaymentEventReposi
 					MessageKey.PAYMENT_UNEXPECTED,
 					"Se intentó guardar un paso de pago sin identificador, pago, transacción o estado.");
 		}
-		return repository.record(
+		return repository.register(
 				event.getId(),
 				event.getPayment(),
 				event.getTransaction(),

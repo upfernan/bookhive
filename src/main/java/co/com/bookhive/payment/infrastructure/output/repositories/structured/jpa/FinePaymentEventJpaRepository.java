@@ -22,7 +22,7 @@ public interface FinePaymentEventJpaRepository
 	@Query(value = "INSERT INTO fine_payment_event (id, payment_id, transaction_id, status, amount_in_cents, source)"
 			+ " VALUES (:id, :payment, :transaction, :status, :amount, :source)"
 			+ " ON CONFLICT (transaction_id, status) DO NOTHING", nativeQuery = true)
-	int record(
+	int register(
 			@Param("id") UUID id,
 			@Param("payment") UUID payment,
 			@Param("transaction") String transaction,

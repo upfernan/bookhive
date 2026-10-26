@@ -78,7 +78,7 @@ class ReconcilePaymentsUseCaseImplTest {
 	@DisplayName("no se crea sin reloj")
 	void requiresClock() {
 		assertThrows(BookHiveException.class,
-				() -> new ReconcilePaymentsUseCaseImpl(() -> List.of(), tenants, payments, gateway, null, null));
+				() -> new ReconcilePaymentsUseCaseImpl(List::of, tenants, payments, gateway, null, null));
 	}
 
 	private ReconcilePaymentsUseCaseImpl useCase() {

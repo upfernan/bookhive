@@ -91,7 +91,7 @@ public final class FakePayments {
 		}
 
 		@Override
-		public boolean record(final FinePaymentEventEntity event) {
+		public boolean register(final FinePaymentEventEntity event) {
 			if (recorded.stream().anyMatch(existing -> existing.getTransaction().equals(event.getTransaction())
 					&& existing.getStatus().equals(event.getStatus()))) {
 				return false;

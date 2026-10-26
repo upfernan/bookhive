@@ -9,7 +9,7 @@ import co.com.bookhive.crosscutting.helper.UUIDHelper;
 
 public record PaymentReference(String schema, UUID payment) {
 
-	private static final Pattern SCHEMA = Pattern.compile("^[a-z][a-z0-9_]{0,62}$");
+	private static final Pattern SCHEMA_PATTERN = Pattern.compile("^[a-z][a-z0-9_]{0,62}$");
 	private static final String SEPARATOR = "-";
 
 	public PaymentReference {
@@ -24,7 +24,7 @@ public record PaymentReference(String schema, UUID payment) {
 			return Optional.empty();
 		}
 		final String schema = text.substring(0, separator);
-		if (!SCHEMA.matcher(schema).matches()) {
+		if (!SCHEMA_PATTERN.matcher(schema).matches()) {
 			return Optional.empty();
 		}
 		try {
@@ -36,7 +36,7 @@ public record PaymentReference(String schema, UUID payment) {
 	}
 
 	public boolean isComplete() {
-		return SCHEMA.matcher(schema).matches() && !UUIDHelper.isDefaultValue(payment);
+		return SCHEMA_PATTERN.matcher(schema).matches() && !UUIDHelper.isDefaultValue(payment);
 	}
 
 	public String value() {

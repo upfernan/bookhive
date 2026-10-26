@@ -65,7 +65,7 @@ public final class FakeJpaRepository<T> implements InvocationHandler {
 			case "findAll" -> findAll(arguments[0]);
 			case "changeStatus" -> changeStatus(arguments);
 			case "assign" -> assign(arguments);
-			case "settle", "record" -> rowsChangedBy(method.getName(), arguments);
+			case "settle", "register" -> rowsChangedBy(method.getName(), arguments);
 			case "hashCode" -> System.identityHashCode(repository);
 			case "equals" -> repository == arguments[0];
 			default -> "FakeJpaRepository";

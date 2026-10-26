@@ -58,7 +58,7 @@ public final class ApplyPaymentTransactionUseCaseImpl implements ApplyPaymentTra
 		}
 
 		final FinePaymentEntity payment = found.get();
-		final boolean recorded = eventRepository.record(eventOf(payment, transaction));
+		final boolean recorded = eventRepository.register(eventOf(payment, transaction));
 		if (recorded) {
 			audit.record(AuditPort.FINE_PAYMENT_UPDATED, payment.getInstitution(), payment.getPayer(),
 					payment.getReference() + " transaccion " + transaction.transaction() + " estado "

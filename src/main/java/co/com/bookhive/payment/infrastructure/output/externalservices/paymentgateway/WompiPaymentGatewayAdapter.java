@@ -77,7 +77,7 @@ public class WompiPaymentGatewayAdapter implements PaymentGatewayPort {
 			@Value("${bookhive.payments.redirect-url:}") final String redirectUrl) {
 
 		super();
-		this.apiUrl = TextHelper.getDefaultValue(apiUrl).trim().replaceAll("/+$", "");
+		this.apiUrl = withoutTrailingSlashes(TextHelper.getDefaultValue(apiUrl).trim());
 		this.checkoutUrl = TextHelper.getDefaultValue(checkoutUrl).trim();
 		this.publicKey = TextHelper.getDefaultValue(publicKey).trim();
 		this.privateKey = TextHelper.getDefaultValue(privateKey).trim();
@@ -195,6 +195,14 @@ public class WompiPaymentGatewayAdapter implements PaymentGatewayPort {
 				transaction.path("reference").asString(""),
 				transaction.path("status").asString(""),
 				transaction.path("amount_in_cents").asLong(0L));
+	}
+
+	private static String withoutTrailingSlashes(final String url) {
+		int end = url.length();
+		while (end > 0 && url.charAt(end - 1) == '/') {
+			end--;
+		}
+		return url.substring(0, end);
 	}
 
 	private static void requireConfigured(final String value, final String property) {

@@ -61,20 +61,19 @@ public class WompiEventsController {
 				? signature.path("checksum").asString("")
 				: checksumHeader;
 
+		final String transactionId = transaction.path("id").asString("");
+		final String status = transaction.path("status").asString("");
 		final PaymentEventResponseDTO response = recordPaymentEvent.execute(new PaymentEventRequestDTO(
 				transaction.path("reference").asString(""),
-				transaction.path("id").asString(""),
-				transaction.path("status").asString(""),
+				transactionId,
+				status,
 				transaction.path("amount_in_cents").asLong(0L),
 				signedValuesOf(signature.path("properties"), data),
 				event.path("timestamp").asLong(0L),
 				checksum));
 
-		final boolean applied = response.applied();
-		logger.info("Aviso de Wompi de la transacción {} en estado {}: {}.",
-				transaction.path("id").asString(""),
-				transaction.path("status").asString(""),
-				applied ? "registrado" : "no corresponde a un pago de BookHive");
+		final String outcome = response.applied() ? "registrado" : "no corresponde a un pago de BookHive";
+		logger.info("Aviso de Wompi de la transacción {} en estado {}: {}.", transactionId, status, outcome);
 		return ResponseEntity.ok().build();
 	}
 

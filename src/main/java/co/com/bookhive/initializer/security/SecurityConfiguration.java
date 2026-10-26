@@ -24,6 +24,21 @@ public class SecurityConfiguration {
 	private static final String PUBLIC_HEALTH_ROOT = "/actuator/health";
 
 	@Bean
+	@Order(0)
+	@SuppressWarnings("java:S4502")
+	SecurityFilterChain paymentEventsFilterChain(final HttpSecurity http) {
+
+		http.securityMatcher(WompiEventsController.PATH)
+				.sessionManagement(session -> session
+						.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.csrf(csrf -> csrf.ignoringRequestMatchers(WompiEventsController.PATH))
+				.authorizeHttpRequests(requests -> requests
+						.requestMatchers(HttpMethod.POST, WompiEventsController.PATH).permitAll()
+						.anyRequest().denyAll());
+		return http.build();
+	}
+
+	@Bean
 	@Order(1)
 	@SuppressWarnings("java:S4502")
 	SecurityFilterChain internalCallsFilterChain(
@@ -62,12 +77,11 @@ public class SecurityConfiguration {
 						.requestMatchers(HttpMethod.GET, PUBLIC_HEALTH, PUBLIC_HEALTH_ROOT).permitAll()
 						.requestMatchers(HttpMethod.POST, SessionController.PATH).permitAll()
 						.requestMatchers(HttpMethod.DELETE, SessionController.PATH).permitAll()
-						.requestMatchers(HttpMethod.POST, WompiEventsController.PATH).permitAll()
 						.anyRequest().authenticated())
 				.oauth2ResourceServer(resourceServer -> resourceServer
 						.bearerTokenResolver(tokenResolver)
 						.jwt(Customizer.withDefaults()))
-				.csrf(csrf -> csrf.spa().ignoringRequestMatchers(WompiEventsController.PATH));
+				.csrf(csrf -> csrf.spa());
 
 		return http.build();
 	}

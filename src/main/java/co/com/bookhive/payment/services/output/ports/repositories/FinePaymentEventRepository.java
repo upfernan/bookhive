@@ -4,6 +4,6 @@ import co.com.bookhive.payment.services.output.ports.repositories.entities.FineP
 
 public interface FinePaymentEventRepository {
 
-	boolean record(FinePaymentEventEntity event);
+	boolean register(FinePaymentEventEntity event);
 
 }

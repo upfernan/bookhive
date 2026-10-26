@@ -89,9 +89,9 @@ class FinePaymentRepositoryAdaptersTest {
 		final FakeJpaRepository<FinePaymentEventJpaEntity> repeated =
 				FakeJpaRepository.<FinePaymentEventJpaEntity>storing().changingRows(0);
 
-		assertTrue(eventAdapter(first).record(event()));
-		assertFalse(eventAdapter(repeated).record(event()));
-		assertTrue(first.filters().get(0).startsWith("record ["));
+		assertTrue(eventAdapter(first).register(event()));
+		assertFalse(eventAdapter(repeated).register(event()));
+		assertTrue(first.filters().get(0).startsWith("register ["));
 	}
 
 	@Test
@@ -101,9 +101,9 @@ class FinePaymentRepositoryAdaptersTest {
 		final FinePaymentEventEntity incomplete = new FinePaymentEventEntity();
 
 		assertEquals(BookHiveException.Kind.UNEXPECTED,
-				assertThrows(BookHiveException.class, () -> adapter.record(incomplete)).getKind());
+				assertThrows(BookHiveException.class, () -> adapter.register(incomplete)).getKind());
 		assertEquals(BookHiveException.Kind.UNEXPECTED,
-				assertThrows(BookHiveException.class, () -> adapter.record(null)).getKind());
+				assertThrows(BookHiveException.class, () -> adapter.register(null)).getKind());
 	}
 
 	private static FinePaymentEventEntity event() {
