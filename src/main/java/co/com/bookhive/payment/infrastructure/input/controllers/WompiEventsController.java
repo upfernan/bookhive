@@ -6,6 +6,7 @@ import java.util.stream.StreamSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -36,17 +37,22 @@ public class WompiEventsController {
 		this.recordPaymentEvent = recordPaymentEvent;
 	}
 
+	@GetMapping(PATH)
+	public ResponseEntity<Void> check() {
+		return ResponseEntity.ok().build();
+	}
+
 	@PostMapping(PATH)
 	public ResponseEntity<Void> receive(
-			@RequestBody final String body,
+			@RequestBody(required = false) final String body,
 			@RequestHeader(name = CHECKSUM_HEADER, required = false) final String checksumHeader) {
 
 		final JsonNode event;
 		try {
 			event = json.readTree(TextHelper.getDefaultValue(body));
 		} catch (final JacksonException _) {
-			logger.warn("Llegó a la dirección de avisos de Wompi algo que no es JSON.");
-			return ResponseEntity.badRequest().build();
+			logger.warn("Se ignoró un aviso de Wompi que no es JSON.");
+			return ResponseEntity.ok().build();
 		}
 		final String type = event.path("event").asString("");
 		if (!TRANSACTION_UPDATED.equals(type)) {
