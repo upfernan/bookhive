@@ -14,6 +14,7 @@ public interface AuditPort {
 	String FINE_PAID = "MULTA_PAGADA";
 	String FINE_PAYMENT_DUPLICATED = "PAGO_MULTA_DUPLICADO";
 	String FINE_PAYMENT_INCONSISTENT = "PAGO_MULTA_INCONSISTENTE";
+	String INSTITUTION_CONFIGURED = "PARAMETROS_INSTITUCION_CAMBIADOS";
 
 	void record(String action, UUID institution, UUID person, String detail);
 

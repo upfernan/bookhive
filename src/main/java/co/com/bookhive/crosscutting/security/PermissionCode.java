@@ -8,6 +8,7 @@ public final class PermissionCode {
 	public static final String SYNC_CATALOG = "catalog.sync";
 	public static final String RESERVE_BOOK = "reservation.create";
 	public static final String PAY_FINE = "fine.pay";
+	public static final String CONFIGURE_INSTITUTION = "institution.configure";
 
 	private PermissionCode() {
 		super();
