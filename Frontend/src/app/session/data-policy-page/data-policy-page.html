@@ -1,0 +1,46 @@
+<app-session-layout>
+  <h1 #heading class="heading" tabindex="-1">{{ messages.title }}</h1>
+  <p class="lead">{{ messages.lead }}</p>
+
+  @if (policy(); as current) {
+    <p class="meta">{{ versionText() }}</p>
+
+    <div class="policy" role="document" tabindex="0" [attr.aria-label]="messages.textLabel">
+      @for (paragraph of paragraphs(); track $index) {
+        <p class="policy__paragraph">{{ paragraph }}</p>
+      }
+    </div>
+
+    @if (errorMessage()) {
+      <p class="error" role="alert">{{ errorMessage() }}</p>
+    }
+
+    <div class="actions">
+      @if (current.accepted) {
+        <p class="notice" role="status">{{ acceptedText() }}</p>
+        <button class="actions__primary" mat-flat-button type="button" (click)="continue()">
+          {{ messages.continue }}
+        </button>
+      } @else {
+        <button class="actions__primary" mat-flat-button type="button" [disabled]="accepting()" (click)="accept()">
+          {{ accepting() ? messages.accepting : messages.accept }}
+        </button>
+      }
+      <button class="link actions__close" type="button" [disabled]="closing()" (click)="closeSession()">
+        {{ closing() ? messages.closing : messages.closeSession }}
+      </button>
+    </div>
+  } @else if (loading()) {
+    <p class="meta" role="status">{{ messages.loading }}</p>
+  } @else {
+    @if (errorMessage()) {
+      <p class="error" role="alert">{{ errorMessage() }}</p>
+    }
+    <div class="actions">
+      <button class="actions__primary" mat-flat-button type="button" (click)="load()">{{ messages.retry }}</button>
+      <button class="link actions__close" type="button" [disabled]="closing()" (click)="closeSession()">
+        {{ closing() ? messages.closing : messages.closeSession }}
+      </button>
+    </div>
+  }
+</app-session-layout>

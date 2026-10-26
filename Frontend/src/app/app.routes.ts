@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { PermissionCode } from './session/permission-code';
-import { requirePermission, requireSession } from './session/session-guards';
+import { requireAcceptedDataPolicy, requirePermission, requireSession } from './session/session-guards';
 
 export const routes: Routes = [
   {
@@ -15,8 +15,15 @@ export const routes: Routes = [
       import('./session/password-reset/password-reset').then((m) => m.PasswordReset),
   },
   {
-    path: '',
+    path: 'politica-datos',
+    title: 'Política de datos · BookHive',
     canMatch: [requireSession],
+    loadComponent: () =>
+      import('./session/data-policy-page/data-policy-page').then((m) => m.DataPolicyPage),
+  },
+  {
+    path: '',
+    canMatch: [requireSession, requireAcceptedDataPolicy],
     loadComponent: () => import('./shell/shell').then((m) => m.Shell),
     children: [
       {
