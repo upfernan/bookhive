@@ -6,6 +6,10 @@ import org.springframework.context.annotation.Configuration;
 import co.com.bookhive.catalog.services.input.adapters.FindBookCopyDetailsInputAdapter;
 import co.com.bookhive.catalog.services.input.adapters.FindBookTitleInputAdapter;
 import co.com.bookhive.catalog.services.input.adapters.ListMyReservationsInputAdapter;
+import co.com.bookhive.catalog.services.input.adapters.ViewMyAccountInputAdapter;
+import co.com.bookhive.catalog.services.input.ports.ViewMyAccountInputPort;
+import co.com.bookhive.catalog.services.output.ports.UserAccountPort;
+import co.com.bookhive.catalog.services.usecase.account.viewmyaccount.impl.ViewMyAccountUseCaseImpl;
 import co.com.bookhive.catalog.services.input.adapters.SearchBooksInputAdapter;
 import co.com.bookhive.catalog.services.input.adapters.SyncAllCatalogsInputAdapter;
 import co.com.bookhive.catalog.services.input.adapters.SyncCatalogInputAdapter;
@@ -115,5 +119,15 @@ public class CatalogConfiguration {
 			final ListMyReservationsUseCase listMyReservationsUseCase) {
 
 		return new ListMyReservationsInputAdapter(listMyReservationsUseCase);
+	}
+
+	@Bean
+	ViewMyAccountInputPort viewMyAccountInputPort(
+			final UserAccountPort userAccount,
+			final ListMyReservationsUseCase listMyReservationsUseCase,
+			final BookRepository bookRepository) {
+
+		return new ViewMyAccountInputAdapter(
+				new ViewMyAccountUseCaseImpl(userAccount, listMyReservationsUseCase, bookRepository));
 	}
 }
