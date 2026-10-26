@@ -36,18 +36,18 @@ public class FineSettlementRepositoryAdapter implements FineSettlementRepository
 	@Override
 	public boolean settle(final FineSettlementEntity settlement) {
 		if (ObjectHelper.isNull(settlement)
-				|| UUIDHelper.isDefaultValue(settlement.getId())
-				|| UUIDHelper.isDefaultValue(settlement.getFine())
-				|| TextHelper.isDefaultValue(settlement.getPaymentReference())) {
+				|| UUIDHelper.isDefaultValue(settlement.id())
+				|| UUIDHelper.isDefaultValue(settlement.fine())
+				|| TextHelper.isDefaultValue(settlement.paymentReference())) {
 			throw BookHiveException.createUnexpected(
 					MessageKey.FINE_UNEXPECTED,
 					"Se intentó saldar una multa sin identificador, multa o referencia de pago.");
 		}
 		return repository.settle(
-				settlement.getId(),
-				settlement.getFine(),
-				settlement.getPaymentReference(),
-				settlement.getAmount()) == 1;
+				settlement.id(),
+				settlement.fine(),
+				settlement.paymentReference(),
+				settlement.amount()) == 1;
 	}
 
 	@Override

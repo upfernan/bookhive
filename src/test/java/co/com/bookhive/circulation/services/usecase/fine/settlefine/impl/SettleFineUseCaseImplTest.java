@@ -67,7 +67,7 @@ class SettleFineUseCaseImplTest {
 		assertTrue(settled.newlySettled());
 		assertEquals(REFERENCE, settled.paymentReference());
 		assertEquals(1, settlements.settled().size());
-		assertEquals(AMOUNT, settlements.settled().get(0).getAmount());
+		assertEquals(AMOUNT, settlements.settled().get(0).amount());
 		assertEquals(1, notices.size());
 		final NotificationRequestEntity notice = notices.get(0);
 		assertEquals(SettleFineDomain.NOTICE_KIND, notice.kind());
@@ -80,10 +80,7 @@ class SettleFineUseCaseImplTest {
 	@Test
 	@DisplayName("una multa ya saldada no se salda otra vez y dice con qué pago quedó")
 	void repeatedSettlementKeepsTheFirst() {
-		final FineSettlementEntity first = new FineSettlementEntity();
-		first.setFine(FINE);
-		first.setPaymentReference("uco-primero");
-		settlements.with(first);
+		settlements.with(new FineSettlementEntity(null, FINE, "uco-primero", AMOUNT, null));
 
 		final SettledFineDomain settled = useCase().execute(new SettleFineDomain(FINE, REFERENCE, AMOUNT));
 

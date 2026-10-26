@@ -60,8 +60,8 @@ public final class ApplyPaymentTransactionUseCaseImpl implements ApplyPaymentTra
 		final FinePaymentEntity payment = found.get();
 		final boolean recorded = eventRepository.register(eventOf(payment, transaction));
 		if (recorded) {
-			audit.record(AuditPort.FINE_PAYMENT_UPDATED, payment.getInstitution(), payment.getPayer(),
-					payment.getReference() + " transaccion " + transaction.transaction() + " estado "
+			audit.record(AuditPort.FINE_PAYMENT_UPDATED, payment.institution(), payment.payer(),
+					payment.reference() + " transaccion " + transaction.transaction() + " estado "
 							+ transaction.status() + " origen " + transaction.source());
 		}
 
@@ -69,7 +69,7 @@ public final class ApplyPaymentTransactionUseCaseImpl implements ApplyPaymentTra
 				&& settle(payment, transaction, recorded);
 
 		return new AppliedPaymentTransactionDomain(
-				true, payment.getReference(), transaction.status(), transaction.amountInCents(), finePaid);
+				true, payment.reference(), transaction.status(), transaction.amountInCents(), finePaid);
 	}
 
 	private boolean settle(
@@ -77,25 +77,25 @@ public final class ApplyPaymentTransactionUseCaseImpl implements ApplyPaymentTra
 			final PaymentTransactionDomain transaction,
 			final boolean firstTime) {
 
-		if (transaction.amountInCents() != payment.getAmountInCents()) {
+		if (transaction.amountInCents() != payment.amountInCents()) {
 			if (firstTime) {
-				audit.record(AuditPort.FINE_PAYMENT_INCONSISTENT, payment.getInstitution(), payment.getPayer(),
-						payment.getReference() + " aprobado por " + transaction.amountInCents()
-								+ " centavos y se esperaban " + payment.getAmountInCents());
+				audit.record(AuditPort.FINE_PAYMENT_INCONSISTENT, payment.institution(), payment.payer(),
+						payment.reference() + " aprobado por " + transaction.amountInCents()
+								+ " centavos y se esperaban " + payment.amountInCents());
 			}
 			return false;
 		}
 
 		final SettledFineEntity settled = fines.settle(
-				payment.getFine(), payment.getReference(), PaymentAmount.fromCents(payment.getAmountInCents()));
+				payment.fine(), payment.reference(), PaymentAmount.fromCents(payment.amountInCents()));
 
 		if (settled.newlySettled()) {
-			audit.record(AuditPort.FINE_PAID, payment.getInstitution(), payment.getPayer(),
-					"multa " + payment.getFine() + " pago " + payment.getReference());
-		} else if (firstTime && !payment.getReference().equals(settled.paymentReference())) {
-			audit.record(AuditPort.FINE_PAYMENT_DUPLICATED, payment.getInstitution(), payment.getPayer(),
-					"multa " + payment.getFine() + " ya saldada con " + settled.paymentReference()
-							+ "; el pago " + payment.getReference() + " debe reversarse");
+			audit.record(AuditPort.FINE_PAID, payment.institution(), payment.payer(),
+					"multa " + payment.fine() + " pago " + payment.reference());
+		} else if (firstTime && !payment.reference().equals(settled.paymentReference())) {
+			audit.record(AuditPort.FINE_PAYMENT_DUPLICATED, payment.institution(), payment.payer(),
+					"multa " + payment.fine() + " ya saldada con " + settled.paymentReference()
+							+ "; el pago " + payment.reference() + " debe reversarse");
 		}
 		return true;
 	}
@@ -103,14 +103,14 @@ public final class ApplyPaymentTransactionUseCaseImpl implements ApplyPaymentTra
 	private static FinePaymentEventEntity eventOf(
 			final FinePaymentEntity payment, final PaymentTransactionDomain transaction) {
 
-		final FinePaymentEventEntity event = new FinePaymentEventEntity();
-		event.setId(UUIDHelper.generateNew());
-		event.setPayment(payment.getId());
-		event.setTransaction(transaction.transaction());
-		event.setStatus(transaction.status());
-		event.setAmountInCents(transaction.amountInCents());
-		event.setSource(transaction.source());
-		return event;
+		return new FinePaymentEventEntity(
+				UUIDHelper.generateNew(),
+				payment.id(),
+				transaction.transaction(),
+				transaction.status(),
+				transaction.amountInCents(),
+				transaction.source(),
+				null);
 	}
 
 	private static <T> T requireDependency(final T dependency, final String name) {

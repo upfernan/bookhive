@@ -22,9 +22,10 @@ class FinePaymentJpaEntitiesTest {
 	@DisplayName("el pago guarda todos sus datos y nunca queda con nulos")
 	void paymentStoresItsData() {
 		final FinePaymentJpaEntity jpa = new FinePaymentJpaEntity();
-		final FinePaymentEntity entity = new FinePaymentEntity();
+		final FinePaymentEntity entity = new FinePaymentEntity(null, null, null, null, null, -1L, null, null, null);
 		assertEquals(UUIDHelper.getDefaultValue(), jpa.getPayer());
-		assertEquals(DateHelper.getDefaultTimestamp(), entity.getExpiresAt());
+		assertEquals(DateHelper.getDefaultTimestamp(), entity.expiresAt());
+		assertEquals(0L, entity.amountInCents());
 
 		jpa.setId(ID);
 		jpa.setReference(" uco-1 ");
@@ -35,8 +36,6 @@ class FinePaymentJpaEntitiesTest {
 		jpa.setCurrency(" COP ");
 		jpa.setExpiresAt(NOW);
 		jpa.setCreatedAt(NOW);
-		entity.setInstitution(null);
-		entity.setCurrency(null);
 
 		assertEquals(ID, jpa.getId());
 		assertEquals("uco-1", jpa.getReference());
@@ -47,17 +46,18 @@ class FinePaymentJpaEntitiesTest {
 		assertEquals("COP", jpa.getCurrency());
 		assertEquals(NOW, jpa.getExpiresAt());
 		assertEquals(NOW, jpa.getCreatedAt());
-		assertEquals(UUIDHelper.getDefaultValue(), entity.getInstitution());
-		assertEquals("", entity.getCurrency());
+		assertEquals(UUIDHelper.getDefaultValue(), entity.institution());
+		assertEquals("", entity.currency());
 	}
 
 	@Test
 	@DisplayName("cada paso del pago guarda su transacción, estado, valor y origen")
 	void eventStoresItsData() {
 		final FinePaymentEventJpaEntity jpa = new FinePaymentEventJpaEntity();
-		final FinePaymentEventEntity entity = new FinePaymentEventEntity();
+		final FinePaymentEventEntity entity = new FinePaymentEventEntity(null, null, " t-1 ", null, -1L, null, NOW);
 		assertEquals("", jpa.getStatus());
-		assertEquals(DateHelper.getDefaultTimestamp(), entity.getReceivedAt());
+		assertEquals("t-1", entity.transaction());
+		assertEquals(0L, entity.amountInCents());
 
 		jpa.setId(ID);
 		jpa.setPayment(ID);
@@ -66,8 +66,6 @@ class FinePaymentJpaEntitiesTest {
 		jpa.setAmountInCents(300000L);
 		jpa.setSource(" EVENTO ");
 		jpa.setReceivedAt(NOW);
-		entity.setReceivedAt(NOW);
-		entity.setSource(null);
 
 		assertEquals(ID, jpa.getId());
 		assertEquals(ID, jpa.getPayment());
@@ -76,8 +74,8 @@ class FinePaymentJpaEntitiesTest {
 		assertEquals(300000L, jpa.getAmountInCents());
 		assertEquals("EVENTO", jpa.getSource());
 		assertEquals(NOW, jpa.getReceivedAt());
-		assertEquals(NOW, entity.getReceivedAt());
-		assertEquals("", entity.getSource());
+		assertEquals(NOW, entity.receivedAt());
+		assertEquals("", entity.source());
 	}
 
 }

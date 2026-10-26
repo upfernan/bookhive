@@ -81,19 +81,19 @@ public final class StartFinePaymentUseCaseImpl implements StartFinePaymentUseCas
 		final FinePaymentEntity payment = paymentRepository
 				.findByCriteria(FinePaymentCriteria.openFor(fine.fine(), payer, now.plus(MINIMUM_TIME_LEFT)))
 				.stream()
-				.filter(open -> open.getAmountInCents() == amountInCents)
-				.max(Comparator.comparing(FinePaymentEntity::getCreatedAt))
+				.filter(open -> open.amountInCents() == amountInCents)
+				.max(Comparator.comparing(FinePaymentEntity::createdAt))
 				.orElseGet(() -> startPayment(fine, payer, institution, schema, amountInCents, now));
 
 		final CheckoutEntity checkout = gateway.checkoutFor(new CheckoutRequestEntity(
-				payment.getReference(), payment.getAmountInCents(), payment.getCurrency(), payment.getExpiresAt()));
+				payment.reference(), payment.amountInCents(), payment.currency(), payment.expiresAt()));
 
 		return new FinePaymentCheckoutDomain(
 				checkout.checkoutUrl(),
 				checkout.publicKey(),
-				payment.getCurrency(),
-				payment.getAmountInCents(),
-				payment.getReference(),
+				payment.currency(),
+				payment.amountInCents(),
+				payment.reference(),
 				checkout.signature(),
 				checkout.expirationTime(),
 				checkout.redirectUrl());
@@ -108,20 +108,20 @@ public final class StartFinePaymentUseCaseImpl implements StartFinePaymentUseCas
 			final Instant now) {
 
 		final UUID id = UUIDHelper.generateNew(clock);
-		final FinePaymentEntity payment = new FinePaymentEntity();
-		payment.setId(id);
-		payment.setReference(new PaymentReference(schema, id).value());
-		payment.setFine(fine.fine());
-		payment.setPayer(payer);
-		payment.setInstitution(institution);
-		payment.setAmountInCents(amountInCents);
-		payment.setCurrency(PaymentAmount.CURRENCY);
-		payment.setExpiresAt(now.plus(VALID_FOR));
-		payment.setCreatedAt(now);
+		final FinePaymentEntity payment = new FinePaymentEntity(
+				id,
+				new PaymentReference(schema, id).value(),
+				fine.fine(),
+				payer,
+				institution,
+				amountInCents,
+				PaymentAmount.CURRENCY,
+				now.plus(VALID_FOR),
+				now);
 		paymentRepository.create(payment);
 
 		audit.record(AuditPort.FINE_PAYMENT_STARTED, institution, payer,
-				payment.getReference() + " multa " + fine.fine() + " por " + amountInCents + " centavos");
+				payment.reference() + " multa " + fine.fine() + " por " + amountInCents + " centavos");
 		return payment;
 	}
 

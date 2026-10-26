@@ -80,7 +80,7 @@ public final class ReconcilePaymentsUseCaseImpl implements ReconcilePaymentsUseC
 			}
 			reviewed++;
 			finesPaid += (int) transactions.get().stream()
-					.filter(transaction -> payment.getReference().equals(transaction.reference()))
+					.filter(transaction -> payment.reference().equals(transaction.reference()))
 					.filter(transaction -> applyTransaction.execute(transactionOf(payment, transaction)).finePaid())
 					.count();
 		}
@@ -89,7 +89,7 @@ public final class ReconcilePaymentsUseCaseImpl implements ReconcilePaymentsUseC
 
 	private Optional<List<GatewayTransactionEntity>> transactionsOf(final FinePaymentEntity payment) {
 		try {
-			return Optional.of(gateway.findTransactionsOf(payment.getReference(), payment.getCreatedAt()));
+			return Optional.of(gateway.findTransactionsOf(payment.reference(), payment.createdAt()));
 		} catch (final BookHiveException exception) {
 			if (BookHiveException.Kind.UNAVAILABLE.equals(exception.getKind())) {
 				return Optional.empty();
@@ -102,7 +102,7 @@ public final class ReconcilePaymentsUseCaseImpl implements ReconcilePaymentsUseC
 			final FinePaymentEntity payment, final GatewayTransactionEntity transaction) {
 
 		return new PaymentTransactionDomain(
-				payment.getReference(),
+				payment.reference(),
 				transaction.id(),
 				transaction.status(),
 				transaction.amountInCents(),

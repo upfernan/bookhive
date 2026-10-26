@@ -22,6 +22,7 @@ import co.com.bookhive.payment.infrastructure.output.repositories.structured.map
 import co.com.bookhive.payment.services.output.ports.repositories.criteria.FinePaymentCriteria;
 import co.com.bookhive.payment.services.output.ports.repositories.entities.FinePaymentEntity;
 import co.com.bookhive.payment.services.output.ports.repositories.entities.FinePaymentEventEntity;
+import co.com.bookhive.payment.testdata.FakePayments;
 
 class FinePaymentRepositoryAdaptersTest {
 
@@ -36,14 +37,13 @@ class FinePaymentRepositoryAdaptersTest {
 		stored.setReference("uco-1");
 		final FakeJpaRepository<FinePaymentJpaEntity> repository = FakeJpaRepository.storing(stored);
 		final FinePaymentRepositoryAdapter adapter = paymentAdapter(repository);
-		final FinePaymentEntity payment = new FinePaymentEntity();
-		payment.setReference("uco-2");
+		final FinePaymentEntity payment = FakePayments.payment("uco-2", FINE, PAYER, 1L);
 
 		adapter.create(payment);
 		final List<FinePaymentEntity> found = adapter.findByCriteria(FinePaymentCriteria.withReference("uco-1"));
 
 		assertEquals("uco-2", repository.saved().get(0).getReference());
-		assertEquals("uco-1", found.get(0).getReference());
+		assertEquals("uco-1", found.get(0).reference());
 		assertEquals(List.of("reference=uco-1"), repository.filters());
 	}
 
@@ -98,7 +98,7 @@ class FinePaymentRepositoryAdaptersTest {
 	@DisplayName("un paso sin transacción o sin estado es un error inesperado")
 	void rejectsIncompleteStep() {
 		final FinePaymentEventRepositoryAdapter adapter = eventAdapter(FakeJpaRepository.storing());
-		final FinePaymentEventEntity incomplete = new FinePaymentEventEntity();
+		final FinePaymentEventEntity incomplete = new FinePaymentEventEntity(null, null, null, null, 0L, null, null);
 
 		assertEquals(BookHiveException.Kind.UNEXPECTED,
 				assertThrows(BookHiveException.class, () -> adapter.register(incomplete)).getKind());
@@ -107,14 +107,7 @@ class FinePaymentRepositoryAdaptersTest {
 	}
 
 	private static FinePaymentEventEntity event() {
-		final FinePaymentEventEntity event = new FinePaymentEventEntity();
-		event.setId(UUID.randomUUID());
-		event.setPayment(UUID.randomUUID());
-		event.setTransaction("t-1");
-		event.setStatus("APPROVED");
-		event.setAmountInCents(300000L);
-		event.setSource("EVENTO");
-		return event;
+		return new FinePaymentEventEntity(UUID.randomUUID(), UUID.randomUUID(), "t-1", "APPROVED", 300000L, "EVENTO", null);
 	}
 
 	private static FinePaymentRepositoryAdapter paymentAdapter(final FakeJpaRepository<FinePaymentJpaEntity> repository) {
@@ -130,15 +123,13 @@ class FinePaymentRepositoryAdaptersTest {
 
 		@Override
 		public FinePaymentEntity toEntity(final FinePaymentJpaEntity jpaEntity) {
-			final FinePaymentEntity entity = new FinePaymentEntity();
-			entity.setReference(jpaEntity.getReference());
-			return entity;
+			return FakePayments.payment(jpaEntity.getReference(), jpaEntity.getFine(), jpaEntity.getPayer(), 1L);
 		}
 
 		@Override
 		public FinePaymentJpaEntity toJpaEntity(final FinePaymentEntity entity) {
 			final FinePaymentJpaEntity jpaEntity = new FinePaymentJpaEntity();
-			jpaEntity.setReference(entity.getReference());
+			jpaEntity.setReference(entity.reference());
 			return jpaEntity;
 		}
 

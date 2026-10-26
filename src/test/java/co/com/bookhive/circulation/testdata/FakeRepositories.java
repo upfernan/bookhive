@@ -458,7 +458,7 @@ public final class FakeRepositories {
 
 		@Override
 		public boolean settle(final FineSettlementEntity settlement) {
-			if (settled.stream().anyMatch(existing -> existing.getFine().equals(settlement.getFine()))) {
+			if (settled.stream().anyMatch(existing -> existing.fine().equals(settlement.fine()))) {
 				return false;
 			}
 			settled.add(settlement);
@@ -467,7 +467,7 @@ public final class FakeRepositories {
 
 		@Override
 		public List<FineSettlementEntity> findByCriteria(final FineSettlementCriteria criteria) {
-			return settled.stream().filter(settlement -> settlement.getFine().equals(criteria.getFine())).toList();
+			return settled.stream().filter(settlement -> settlement.fine().equals(criteria.getFine())).toList();
 		}
 
 	}

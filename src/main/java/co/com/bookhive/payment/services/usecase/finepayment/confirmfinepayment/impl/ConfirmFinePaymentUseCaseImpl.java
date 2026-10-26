@@ -45,27 +45,27 @@ public final class ConfirmFinePaymentUseCaseImpl implements ConfirmFinePaymentUs
 		final FinePaymentEntity payment = paymentRepository
 				.findByCriteria(FinePaymentCriteria.withReference(request.reference()))
 				.stream()
-				.filter(found -> found.getPayer().equals(session.getPerson()))
+				.filter(found -> found.payer().equals(session.getPerson()))
 				.findFirst()
 				.orElseThrow(() -> BookHiveException.create(
 						MessageKey.PAYMENT_NOT_FOUND,
 						"El pago " + request.reference() + " no existe o no es de la persona en sesión."));
 
 		final GatewayTransactionEntity transaction = gateway.findTransaction(request.transaction())
-				.filter(found -> payment.getReference().equals(found.reference()))
+				.filter(found -> payment.reference().equals(found.reference()))
 				.orElseThrow(() -> BookHiveException.createConflict(
 						MessageKey.PAYMENT_TRANSACTION_MISMATCH,
-						"La transacción " + request.transaction() + " no es del pago " + payment.getReference() + "."));
+						"La transacción " + request.transaction() + " no es del pago " + payment.reference() + "."));
 
 		final AppliedPaymentTransactionDomain applied = applyTransaction.execute(new PaymentTransactionDomain(
-				payment.getReference(),
+				payment.reference(),
 				transaction.id(),
 				transaction.status(),
 				transaction.amountInCents(),
 				PaymentTransactionDomain.SOURCE_QUERY));
 
 		return new FinePaymentStatusDomain(
-				payment.getReference(), applied.status(), payment.getAmountInCents(), applied.finePaid());
+				payment.reference(), applied.status(), payment.amountInCents(), applied.finePaid());
 	}
 
 	private static <T> T requireDependency(final T dependency, final String name) {

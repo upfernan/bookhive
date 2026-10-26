@@ -15,38 +15,29 @@ import co.com.bookhive.crosscutting.helper.UUIDHelper;
 class FineSettlementEntityTest {
 
 	@Test
-	@DisplayName("nace con valores por defecto, nunca nulos")
+	@DisplayName("sin datos nace con valores por defecto, nunca nulos")
 	void startsWithDefaults() {
-		final FineSettlementEntity settlement = new FineSettlementEntity();
+		final FineSettlementEntity settlement = new FineSettlementEntity(null, null, null, null, null);
 
-		assertEquals(UUIDHelper.getDefaultValue(), settlement.getId());
-		assertEquals(UUIDHelper.getDefaultValue(), settlement.getFine());
-		assertEquals("", settlement.getPaymentReference());
-		assertEquals(BigDecimal.ZERO, settlement.getAmount());
-		assertEquals(DateHelper.getDefaultTimestamp(), settlement.getSettledAt());
+		assertEquals(UUIDHelper.getDefaultValue(), settlement.id());
+		assertEquals(UUIDHelper.getDefaultValue(), settlement.fine());
+		assertEquals("", settlement.paymentReference());
+		assertEquals(BigDecimal.ZERO, settlement.amount());
+		assertEquals(DateHelper.getDefaultTimestamp(), settlement.settledAt());
 	}
 
 	@Test
-	@DisplayName("guarda los datos del pago y convierte los nulos en valores por defecto")
+	@DisplayName("guarda los datos del pago con que se saldó la multa")
 	void storesPaymentData() {
-		final FineSettlementEntity settlement = new FineSettlementEntity();
 		final UUID fine = UUID.randomUUID();
 		final Instant now = Instant.now();
 
-		settlement.setFine(fine);
-		settlement.setPaymentReference(" uco-1 ");
-		settlement.setAmount(new BigDecimal("3000"));
-		settlement.setSettledAt(now);
+		final FineSettlementEntity settlement = new FineSettlementEntity(fine, fine, " uco-1 ", new BigDecimal("3000"), now);
 
-		assertEquals(fine, settlement.getFine());
-		assertEquals("uco-1", settlement.getPaymentReference());
-		assertEquals(new BigDecimal("3000"), settlement.getAmount());
-		assertEquals(now, settlement.getSettledAt());
-
-		settlement.setPaymentReference(null);
-		settlement.setAmount(null);
-		assertEquals("", settlement.getPaymentReference());
-		assertEquals(BigDecimal.ZERO, settlement.getAmount());
+		assertEquals(fine, settlement.fine());
+		assertEquals("uco-1", settlement.paymentReference());
+		assertEquals(new BigDecimal("3000"), settlement.amount());
+		assertEquals(now, settlement.settledAt());
 	}
 
 }

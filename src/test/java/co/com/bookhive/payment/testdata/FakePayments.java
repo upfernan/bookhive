@@ -32,17 +32,14 @@ public final class FakePayments {
 	}
 
 	public static FinePaymentEntity payment(final String reference, final UUID fine, final UUID payer, final long cents) {
-		final FinePaymentEntity payment = new FinePaymentEntity();
-		payment.setId(UUID.randomUUID());
-		payment.setReference(reference);
-		payment.setFine(fine);
-		payment.setPayer(payer);
-		payment.setInstitution(UUID.randomUUID());
-		payment.setAmountInCents(cents);
-		payment.setCurrency("COP");
-		payment.setCreatedAt(Instant.parse("2026-10-26T12:00:00Z"));
-		payment.setExpiresAt(Instant.parse("2026-10-26T12:30:00Z"));
-		return payment;
+		return payment(reference, fine, payer, cents, Instant.parse("2026-10-26T12:30:00Z"));
+	}
+
+	public static FinePaymentEntity payment(
+			final String reference, final UUID fine, final UUID payer, final long cents, final Instant expiresAt) {
+
+		return new FinePaymentEntity(UUID.randomUUID(), reference, fine, payer, UUID.randomUUID(), cents, "COP",
+				expiresAt, Instant.parse("2026-10-26T12:00:00Z"));
 	}
 
 	public static final class Payments implements FinePaymentRepository {
@@ -73,10 +70,10 @@ public final class FakePayments {
 		public List<FinePaymentEntity> findByCriteria(final FinePaymentCriteria criteria) {
 			searches.add(criteria);
 			return stored.stream()
-					.filter(payment -> !criteria.filtersByReference() || payment.getReference().equals(criteria.getReference()))
-					.filter(payment -> !criteria.filtersByFine() || payment.getFine().equals(criteria.getFine()))
+					.filter(payment -> !criteria.filtersByReference() || payment.reference().equals(criteria.getReference()))
+					.filter(payment -> !criteria.filtersByFine() || payment.fine().equals(criteria.getFine()))
 					.filter(payment -> !criteria.filtersByExpiration()
-							|| payment.getExpiresAt().isAfter(criteria.getExpiresAfter()))
+							|| payment.expiresAt().isAfter(criteria.getExpiresAfter()))
 					.toList();
 		}
 
@@ -92,8 +89,8 @@ public final class FakePayments {
 
 		@Override
 		public boolean register(final FinePaymentEventEntity event) {
-			if (recorded.stream().anyMatch(existing -> existing.getTransaction().equals(event.getTransaction())
-					&& existing.getStatus().equals(event.getStatus()))) {
+			if (recorded.stream().anyMatch(existing -> existing.transaction().equals(event.transaction())
+					&& existing.status().equals(event.status()))) {
 				return false;
 			}
 			recorded.add(event);

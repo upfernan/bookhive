@@ -52,17 +52,17 @@ class StartFinePaymentUseCaseImplTest {
 		final FinePaymentCheckoutDomain checkout = useCase("uco").execute(new StartFinePaymentDomain(FINE));
 
 		final FinePaymentEntity created = payments.created().get(0);
-		assertEquals(300000L, created.getAmountInCents());
-		assertEquals("COP", created.getCurrency());
-		assertEquals(FINE, created.getFine());
-		assertEquals(PAYER, created.getPayer());
-		assertEquals(INSTITUTION, created.getInstitution());
-		assertEquals(NOW.plus(StartFinePaymentUseCaseImpl.VALID_FOR), created.getExpiresAt());
-		assertEquals(new PaymentReference("uco", created.getId()).value(), created.getReference());
-		assertEquals(created.getReference(), checkout.reference());
+		assertEquals(300000L, created.amountInCents());
+		assertEquals("COP", created.currency());
+		assertEquals(FINE, created.fine());
+		assertEquals(PAYER, created.payer());
+		assertEquals(INSTITUTION, created.institution());
+		assertEquals(NOW.plus(StartFinePaymentUseCaseImpl.VALID_FOR), created.expiresAt());
+		assertEquals(new PaymentReference("uco", created.id()).value(), created.reference());
+		assertEquals(created.reference(), checkout.reference());
 		assertEquals(300000L, checkout.amountInCents());
 		assertEquals("COP", checkout.currency());
-		assertEquals("firma-" + created.getReference(), checkout.signature());
+		assertEquals("firma-" + created.reference(), checkout.signature());
 		assertEquals("pub_test_1", checkout.publicKey());
 		assertEquals(List.of(AuditPort.FINE_PAYMENT_STARTED), audited);
 	}
@@ -70,9 +70,7 @@ class StartFinePaymentUseCaseImplTest {
 	@Test
 	@DisplayName("un doble clic reutiliza el pago abierto en vez de crear otro")
 	void reusesOpenPayment() {
-		final FinePaymentEntity open = FakePayments.payment("uco-abierto", FINE, PAYER, 300000L);
-		open.setExpiresAt(NOW.plusSeconds(1200));
-		payments.with(open);
+		payments.with(FakePayments.payment("uco-abierto", FINE, PAYER, 300000L, NOW.plusSeconds(1200)));
 
 		final FinePaymentCheckoutDomain checkout = useCase("uco").execute(new StartFinePaymentDomain(FINE));
 
@@ -85,9 +83,7 @@ class StartFinePaymentUseCaseImplTest {
 	@Test
 	@DisplayName("un pago abierto a punto de vencer no se reutiliza")
 	void doesNotReusePaymentAboutToExpire() {
-		final FinePaymentEntity open = FakePayments.payment("uco-abierto", FINE, PAYER, 300000L);
-		open.setExpiresAt(NOW.plusSeconds(60));
-		payments.with(open);
+		payments.with(FakePayments.payment("uco-abierto", FINE, PAYER, 300000L, NOW.plusSeconds(60)));
 
 		useCase("uco").execute(new StartFinePaymentDomain(FINE));
 

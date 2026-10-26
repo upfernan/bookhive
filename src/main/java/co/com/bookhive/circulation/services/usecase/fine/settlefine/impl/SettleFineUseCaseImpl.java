@@ -62,17 +62,14 @@ public final class SettleFineUseCaseImpl implements SettleFineUseCase {
 							+ " y la multa " + fine.getId() + " vale " + fine.getTotalAmount() + ".");
 		}
 
-		final FineSettlementEntity settlement = new FineSettlementEntity();
-		settlement.setId(UUIDHelper.generateNew());
-		settlement.setFine(fine.getId());
-		settlement.setPaymentReference(request.paymentReference());
-		settlement.setAmount(request.amount());
+		final FineSettlementEntity settlement = new FineSettlementEntity(
+				UUIDHelper.generateNew(), fine.getId(), request.paymentReference(), request.amount(), null);
 
 		if (!fineSettlementRepository.settle(settlement)) {
 			final String settledBy = fineSettlementRepository.findByCriteria(FineSettlementCriteria.ofFine(fine.getId()))
 					.stream()
 					.findFirst()
-					.map(FineSettlementEntity::getPaymentReference)
+					.map(FineSettlementEntity::paymentReference)
 					.orElse(request.paymentReference());
 			return new SettledFineDomain(false, settledBy);
 		}

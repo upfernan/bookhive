@@ -23,21 +23,21 @@ public class FinePaymentEventRepositoryAdapter implements FinePaymentEventReposi
 	@Override
 	public boolean register(final FinePaymentEventEntity event) {
 		if (ObjectHelper.isNull(event)
-				|| UUIDHelper.isDefaultValue(event.getId())
-				|| UUIDHelper.isDefaultValue(event.getPayment())
-				|| TextHelper.isDefaultValue(event.getTransaction())
-				|| TextHelper.isDefaultValue(event.getStatus())) {
+				|| UUIDHelper.isDefaultValue(event.id())
+				|| UUIDHelper.isDefaultValue(event.payment())
+				|| TextHelper.isDefaultValue(event.transaction())
+				|| TextHelper.isDefaultValue(event.status())) {
 			throw BookHiveException.createUnexpected(
 					MessageKey.PAYMENT_UNEXPECTED,
 					"Se intentó guardar un paso de pago sin identificador, pago, transacción o estado.");
 		}
 		return repository.register(
-				event.getId(),
-				event.getPayment(),
-				event.getTransaction(),
-				event.getStatus(),
-				event.getAmountInCents(),
-				event.getSource()) == 1;
+				event.id(),
+				event.payment(),
+				event.transaction(),
+				event.status(),
+				event.amountInCents(),
+				event.source()) == 1;
 	}
 
 }

@@ -46,7 +46,7 @@ class FineSettlementRepositoryAdapterTest {
 	@DisplayName("sin multa o sin referencia es un error inesperado")
 	void rejectsIncompleteSettlement() {
 		final FineSettlementRepositoryAdapter adapter = adapter(FakeJpaRepository.storing());
-		final FineSettlementEntity incomplete = new FineSettlementEntity();
+		final FineSettlementEntity incomplete = new FineSettlementEntity(null, null, null, null, null);
 
 		assertEquals(BookHiveException.Kind.UNEXPECTED,
 				assertThrows(BookHiveException.class, () -> adapter.settle(incomplete)).getKind());
@@ -64,17 +64,12 @@ class FineSettlementRepositoryAdapterTest {
 
 		final List<FineSettlementEntity> found = adapter(repository).findByCriteria(FineSettlementCriteria.ofFine(FINE));
 
-		assertEquals("uco-1", found.get(0).getPaymentReference());
+		assertEquals("uco-1", found.get(0).paymentReference());
 		assertEquals(List.of("fine=" + FINE), repository.filters());
 	}
 
 	private static FineSettlementEntity settlement() {
-		final FineSettlementEntity settlement = new FineSettlementEntity();
-		settlement.setId(UUID.randomUUID());
-		settlement.setFine(FINE);
-		settlement.setPaymentReference("uco-1");
-		settlement.setAmount(new BigDecimal("3000"));
-		return settlement;
+		return new FineSettlementEntity(UUID.randomUUID(), FINE, "uco-1", new BigDecimal("3000"), null);
 	}
 
 	private static FineSettlementRepositoryAdapter adapter(final FakeJpaRepository<FineSettlementJpaEntity> repository) {
@@ -84,22 +79,17 @@ class FineSettlementRepositoryAdapterTest {
 	}
 
 	private static FineSettlementEntity toEntity(final FineSettlementJpaEntity jpaEntity) {
-		final FineSettlementEntity entity = new FineSettlementEntity();
-		entity.setId(jpaEntity.getId());
-		entity.setFine(jpaEntity.getFine());
-		entity.setPaymentReference(jpaEntity.getPaymentReference());
-		entity.setAmount(jpaEntity.getAmount());
-		entity.setSettledAt(jpaEntity.getSettledAt());
-		return entity;
+		return new FineSettlementEntity(jpaEntity.getId(), jpaEntity.getFine(), jpaEntity.getPaymentReference(),
+				jpaEntity.getAmount(), jpaEntity.getSettledAt());
 	}
 
 	private static FineSettlementJpaEntity toJpaEntity(final FineSettlementEntity entity) {
 		final FineSettlementJpaEntity jpaEntity = new FineSettlementJpaEntity();
-		jpaEntity.setId(entity.getId());
-		jpaEntity.setFine(entity.getFine());
-		jpaEntity.setPaymentReference(entity.getPaymentReference());
-		jpaEntity.setAmount(entity.getAmount());
-		jpaEntity.setSettledAt(entity.getSettledAt());
+		jpaEntity.setId(entity.id());
+		jpaEntity.setFine(entity.fine());
+		jpaEntity.setPaymentReference(entity.paymentReference());
+		jpaEntity.setAmount(entity.amount());
+		jpaEntity.setSettledAt(entity.settledAt());
 		return jpaEntity;
 	}
 
