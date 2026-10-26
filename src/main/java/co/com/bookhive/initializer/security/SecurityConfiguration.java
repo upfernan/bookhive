@@ -32,9 +32,7 @@ public class SecurityConfiguration {
 				.sessionManagement(session -> session
 						.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.csrf(csrf -> csrf.ignoringRequestMatchers(WompiEventsController.PATH))
-				.authorizeHttpRequests(requests -> requests
-						.requestMatchers(HttpMethod.POST, WompiEventsController.PATH).permitAll()
-						.anyRequest().denyAll());
+				.authorizeHttpRequests(requests -> requests.anyRequest().permitAll());
 		return http.build();
 	}
 

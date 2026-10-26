@@ -70,10 +70,18 @@ class WompiEventsControllerTest {
 	}
 
 	@Test
-	@DisplayName("un cuerpo que no es JSON responde 400")
-	void rejectsInvalidJson() {
-		assertEquals(HttpStatus.BAD_REQUEST, controller().receive("no es json", null).getStatusCode());
+	@DisplayName("un cuerpo vacío o que no es JSON se acepta sin procesarlo, para que la verificación de Wompi pase")
+	void acceptsEmptyOrInvalidBodyWithoutProcessing() {
+		assertEquals(HttpStatus.OK, controller().receive("no es json", null).getStatusCode());
+		assertEquals(HttpStatus.OK, controller().receive(null, null).getStatusCode());
+		assertEquals(HttpStatus.OK, controller().receive("", null).getStatusCode());
 		assertTrue(received.isEmpty());
+	}
+
+	@Test
+	@DisplayName("una consulta GET o HEAD a la dirección de avisos responde 200")
+	void answersVerification() {
+		assertEquals(HttpStatus.OK, controller().check().getStatusCode());
 	}
 
 	private WompiEventsController controller() {
