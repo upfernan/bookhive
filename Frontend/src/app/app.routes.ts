@@ -55,6 +55,12 @@ export const routes: Routes = [
         canMatch: [requirePermission(PermissionCode.reserveBook)],
         loadComponent: () => import('./reservations/reservations').then((m) => m.Reservations),
       },
+      {
+        path: 'mi-cuenta',
+        title: 'Mi cuenta · BookHive',
+        canMatch: [requirePermission(PermissionCode.viewAccount)],
+        loadComponent: () => import('./account/account').then((m) => m.Account),
+      },
       { path: '', pathMatch: 'full', redirectTo: 'inicio' },
     ],
   },
