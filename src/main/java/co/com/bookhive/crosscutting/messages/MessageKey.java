@@ -38,6 +38,21 @@ public final class MessageKey {
 	public static final String RESERVATION_NOT_FOUND = "reservation.not-found";
 	public static final String RESERVATION_NOT_CANCELLABLE = "reservation.not-cancellable";
 
+	public static final String FINE_ID_REQUIRED = "fine.id.required";
+	public static final String FINE_NOT_FOUND = "fine.not-found";
+	public static final String FINE_ALREADY_PAID = "fine.already-paid";
+	public static final String FINE_PAYMENT_DATA_REQUIRED = "fine.payment.data.required";
+	public static final String FINE_UNEXPECTED = "fine.unexpected";
+
+	public static final String PAYMENT_REFERENCE_REQUIRED = "payment.reference.required";
+	public static final String PAYMENT_TRANSACTION_REQUIRED = "payment.transaction.required";
+	public static final String PAYMENT_NOT_FOUND = "payment.not-found";
+	public static final String PAYMENT_AMOUNT_INVALID = "payment.amount.invalid";
+	public static final String PAYMENT_TRANSACTION_MISMATCH = "payment.transaction.mismatch";
+	public static final String PAYMENT_EVENT_NOT_AUTHENTIC = "payment.event.not-authentic";
+	public static final String PAYMENT_GATEWAY_UNAVAILABLE = "payment.gateway.unavailable";
+	public static final String PAYMENT_UNEXPECTED = "payment.unexpected";
+
 	public static final String INSTITUTION_NOT_ACTIVE = "institution.not-active";
 	public static final String INSTITUTION_WITHOUT_PARAMETERS = "institution.without-parameters";
 
@@ -60,6 +75,8 @@ public final class MessageKey {
 	public static final String EMAIL_LOAN_DUE_SOON_BODY = "email.loan-due-soon.body";
 	public static final String EMAIL_FINE_GENERATED_SUBJECT = "email.fine-generated.subject";
 	public static final String EMAIL_FINE_GENERATED_BODY = "email.fine-generated.body";
+	public static final String EMAIL_FINE_PAID_SUBJECT = "email.fine-paid.subject";
+	public static final String EMAIL_FINE_PAID_BODY = "email.fine-paid.body";
 	public static final String EMAIL_RESERVATION_READY_SUBJECT = "email.reservation-ready.subject";
 	public static final String EMAIL_RESERVATION_READY_BODY = "email.reservation-ready.body";
 	public static final String REQUEST_UNEXPECTED = "request.unexpected";

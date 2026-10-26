@@ -12,6 +12,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
 import co.com.bookhive.access.infrastructure.input.controllers.SessionController;
+import co.com.bookhive.payment.infrastructure.input.controllers.WompiEventsController;
 import co.com.bookhive.access.infrastructure.input.security.SessionCookieTokenResolver;
 import co.com.bookhive.access.infrastructure.output.externalservices.identity.ServiceCallerDecoder;
 
@@ -61,11 +62,12 @@ public class SecurityConfiguration {
 						.requestMatchers(HttpMethod.GET, PUBLIC_HEALTH, PUBLIC_HEALTH_ROOT).permitAll()
 						.requestMatchers(HttpMethod.POST, SessionController.PATH).permitAll()
 						.requestMatchers(HttpMethod.DELETE, SessionController.PATH).permitAll()
+						.requestMatchers(HttpMethod.POST, WompiEventsController.PATH).permitAll()
 						.anyRequest().authenticated())
 				.oauth2ResourceServer(resourceServer -> resourceServer
 						.bearerTokenResolver(tokenResolver)
 						.jwt(Customizer.withDefaults()))
-				.csrf(csrf -> csrf.spa());
+				.csrf(csrf -> csrf.spa().ignoringRequestMatchers(WompiEventsController.PATH));
 
 		return http.build();
 	}

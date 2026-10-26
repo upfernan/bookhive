@@ -33,6 +33,8 @@ class SendNotificationDomainTest {
 		assertEquals(MessageKey.EMAIL_LOAN_DUE_SOON_BODY, dueSoon.bodyKey());
 		assertEquals(MessageKey.EMAIL_FINE_GENERATED_SUBJECT, notice(SendNotificationDomain.KIND_FINE_GENERATED).subjectKey());
 		assertEquals(MessageKey.EMAIL_FINE_GENERATED_BODY, notice(SendNotificationDomain.KIND_FINE_GENERATED).bodyKey());
+		assertEquals(MessageKey.EMAIL_FINE_PAID_SUBJECT, notice(SendNotificationDomain.KIND_FINE_PAID).subjectKey());
+		assertEquals(MessageKey.EMAIL_FINE_PAID_BODY, notice(SendNotificationDomain.KIND_FINE_PAID).bodyKey());
 		assertEquals(MessageKey.EMAIL_RESERVATION_READY_SUBJECT,
 				notice(SendNotificationDomain.KIND_RESERVATION_READY).subjectKey());
 		assertEquals(MessageKey.EMAIL_RESERVATION_READY_BODY,

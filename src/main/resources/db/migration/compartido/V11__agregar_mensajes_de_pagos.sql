@@ -1,0 +1,16 @@
+INSERT INTO mensaje (codigo, texto) VALUES
+    ('fine.id.required', 'Indique cuál multa quiere pagar.'),
+    ('fine.not-found', 'No encontramos esa multa entre las suyas.'),
+    ('fine.already-paid', 'Esa multa ya está pagada.'),
+    ('fine.payment.data.required', 'No llegaron los datos del pago de la multa.'),
+    ('fine.unexpected', 'No fue posible procesar la multa. Inténtelo de nuevo.'),
+    ('payment.reference.required', 'No llegó la referencia del pago.'),
+    ('payment.transaction.required', 'No llegó el número de la transacción que devolvió la pasarela de pagos.'),
+    ('payment.not-found', 'No encontramos ese pago entre los suyos.'),
+    ('payment.amount.invalid', 'El valor de la multa no se puede cobrar en línea. Acérquese a la biblioteca.'),
+    ('payment.transaction.mismatch', 'Esa transacción no corresponde a este pago.'),
+    ('payment.event.not-authentic', 'El aviso de pago no tiene una firma válida.'),
+    ('payment.gateway.unavailable', 'El pago en línea no está disponible en este momento. Inténtelo más tarde; si ya pagó, el pago se verá reflejado automáticamente.'),
+    ('payment.unexpected', 'No fue posible procesar el pago. Inténtelo de nuevo.'),
+    ('email.fine-paid.subject', 'Recibimos el pago de tu multa por «{titulo}»'),
+    ('email.fine-paid.body', E'Hola {nombre}:\n\nRecibimos el {fecha} el pago de la multa por la devolución tardía de «{titulo}». La multa quedó saldada.\n\nSi no tienes otras multas pendientes, ya puedes volver a pedir préstamos.\n\nBookHive');

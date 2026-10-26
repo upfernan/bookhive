@@ -17,12 +17,14 @@ public record SendNotificationDomain(String kind, UUID user, UUID book, UUID loa
 	public static final String KIND_LOAN_REGISTERED = "PRESTAMO_REGISTRADO";
 	public static final String KIND_LOAN_DUE_SOON = "PRESTAMO_POR_VENCER";
 	public static final String KIND_FINE_GENERATED = "MULTA_GENERADA";
+	public static final String KIND_FINE_PAID = "MULTA_PAGADA";
 	public static final String KIND_RESERVATION_READY = "RESERVA_LISTA";
 
 	private static final Map<String, List<String>> TEMPLATES = Map.of(
 			KIND_LOAN_REGISTERED, List.of(MessageKey.EMAIL_LOAN_REGISTERED_SUBJECT, MessageKey.EMAIL_LOAN_REGISTERED_BODY),
 			KIND_LOAN_DUE_SOON, List.of(MessageKey.EMAIL_LOAN_DUE_SOON_SUBJECT, MessageKey.EMAIL_LOAN_DUE_SOON_BODY),
 			KIND_FINE_GENERATED, List.of(MessageKey.EMAIL_FINE_GENERATED_SUBJECT, MessageKey.EMAIL_FINE_GENERATED_BODY),
+			KIND_FINE_PAID, List.of(MessageKey.EMAIL_FINE_PAID_SUBJECT, MessageKey.EMAIL_FINE_PAID_BODY),
 			KIND_RESERVATION_READY, List.of(
 					MessageKey.EMAIL_RESERVATION_READY_SUBJECT, MessageKey.EMAIL_RESERVATION_READY_BODY));
 	private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("dd/MM/yyyy");
