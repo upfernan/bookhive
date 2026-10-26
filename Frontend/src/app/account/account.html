@@ -1,0 +1,86 @@
+<div class="account">
+  <div>
+    <h1 class="page__title">{{ messages.title }}</h1>
+    <p class="page__lead">{{ messages.lead }}</p>
+  </div>
+
+  @if (problem(); as failure) {
+    <div class="banner banner--error" role="alert">
+      <div>
+        <p class="banner__title">{{ messages.loadFailedTitle }}</p>
+        <p class="banner__text">{{ failure.message }}</p>
+        @if (traceText()) {
+          <p class="banner__trace">{{ traceText() }}</p>
+        }
+        <button class="retry" mat-stroked-button type="button" [disabled]="loading()" (click)="load()">
+          {{ messages.retry }}
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (account(); as current) {
+    <dl class="summary">
+      <div class="summary__item">
+        <dt>{{ messages.loansCount }}</dt>
+        <dd>{{ current.activeLoans.length }}</dd>
+      </div>
+      <div class="summary__item" [class.summary__item--due]="current.pendingFinesTotal > 0">
+        <dt>{{ messages.finesTotal }}</dt>
+        <dd>{{ finesTotal() }}</dd>
+      </div>
+      <div class="summary__item">
+        <dt>{{ messages.reservationsCount }}</dt>
+        <dd>{{ current.reservations.length }}</dd>
+        @if (canReserve()) {
+          <a class="summary__link" routerLink="/reservas">{{ messages.seeReservations }}</a>
+        }
+      </div>
+    </dl>
+
+    @if (overdueText()) {
+      <div class="banner banner--warning" role="status">
+        <svg class="banner__icon" aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="13" r="8" />
+          <polyline points="12 9 12 13 14.5 14.5" />
+          <line x1="9" y1="2.5" x2="15" y2="2.5" />
+        </svg>
+        <div>
+          <p class="banner__title">{{ messages.overdueTitle }}</p>
+          <p class="banner__text">{{ overdueText() }}</p>
+        </div>
+      </div>
+    }
+
+    @for (group of groups(); track group.key) {
+      <section class="group" [attr.aria-labelledby]="'cuenta-' + group.key">
+        <h2 class="group__title" [id]="'cuenta-' + group.key">{{ group.title }}</h2>
+        @if (group.rows.length === 0) {
+          <p class="group__empty">{{ group.empty }}</p>
+        } @else {
+          <ul class="rows">
+            @for (row of group.rows; track $index) {
+              <li class="row">
+                <div class="row__body">
+                  <p class="row__title">{{ row.title }}</p>
+                  @if (row.authors) {
+                    <p class="row__authors">{{ row.authors }}</p>
+                  }
+                  @if (row.detail) {
+                    <p class="row__detail">{{ row.detail }}</p>
+                  }
+                  @if (row.note) {
+                    <p class="row__note">{{ row.note }}</p>
+                  }
+                </div>
+                <span [class]="row.badgeClass">{{ row.badge }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+    }
+  } @else if (loading()) {
+    <p class="loading" role="status">{{ messages.loading }}</p>
+  }
+</div>
