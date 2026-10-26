@@ -67,6 +67,10 @@ public final class MessageKey {
 	public static final String SESSION_PROVIDER_UNAVAILABLE = "session.provider-unavailable";
 
 	public static final String PERMISSION_DENIED = "permission.denied";
+	public static final String DATA_POLICY_NOT_ACCEPTED = "data-policy.not-accepted";
+	public static final String DATA_POLICY_VERSION_REQUIRED = "data-policy.version.required";
+	public static final String DATA_POLICY_VERSION_OUTDATED = "data-policy.version.outdated";
+	public static final String DATA_POLICY_NOT_PUBLISHED = "data-policy.not-published";
 
 	public static final String SEARCH_TEXT_TOO_LONG = "search.text.too-long";
 	public static final String SEARCH_PAGE_INVALID = "search.page.invalid";

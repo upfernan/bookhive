@@ -2,15 +2,21 @@ package co.com.bookhive.access.testdata;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import co.com.bookhive.access.services.output.ports.IdentityProviderPort;
+import co.com.bookhive.access.services.output.ports.repositories.DataPolicyAcceptanceRepository;
+import co.com.bookhive.access.services.output.ports.repositories.DataPolicyRepository;
 import co.com.bookhive.access.services.output.ports.repositories.InstitutionRepository;
 import co.com.bookhive.access.services.output.ports.repositories.PermissionRepository;
 import co.com.bookhive.access.services.output.ports.repositories.PersonRepository;
+import co.com.bookhive.access.services.output.ports.repositories.criteria.DataPolicyAcceptanceCriteria;
 import co.com.bookhive.access.services.output.ports.repositories.criteria.InstitutionCriteria;
 import co.com.bookhive.access.services.output.ports.repositories.criteria.PermissionCriteria;
 import co.com.bookhive.access.services.output.ports.repositories.criteria.PersonCriteria;
+import co.com.bookhive.access.services.output.ports.repositories.entities.DataPolicyAcceptanceEntity;
+import co.com.bookhive.access.services.output.ports.repositories.entities.DataPolicyEntity;
 import co.com.bookhive.access.services.output.ports.repositories.entities.InstitutionEntity;
 import co.com.bookhive.access.services.output.ports.repositories.entities.PermissionEntity;
 import co.com.bookhive.access.services.output.ports.repositories.entities.PersonEntity;
@@ -103,6 +109,65 @@ public final class FakeAccess {
 		public List<PermissionEntity> findByCriteria(final PermissionCriteria criteria) {
 			searches.add(criteria);
 			return List.copyOf(permissions);
+		}
+
+	}
+
+	public static final class Policies implements DataPolicyRepository {
+
+		private final List<DataPolicyEntity> policies = new ArrayList<>();
+
+		public Policies with(final int version, final String content) {
+			policies.add(new DataPolicyEntity(version, content, java.time.Instant.parse("2026-10-01T05:00:00Z")));
+			return this;
+		}
+
+		@Override
+		public Optional<DataPolicyEntity> findCurrent() {
+			return policies.stream().max(java.util.Comparator.comparingInt(DataPolicyEntity::version));
+		}
+
+	}
+
+	public static class Acceptances implements DataPolicyAcceptanceRepository {
+
+		private final List<DataPolicyAcceptanceEntity> stored = new ArrayList<>();
+		private final List<DataPolicyAcceptanceCriteria> searches = new ArrayList<>();
+		private final List<DataPolicyAcceptanceEntity> created = new ArrayList<>();
+		private int currentVersion = 1;
+
+		public Acceptances currentVersion(final int version) {
+			currentVersion = version;
+			return this;
+		}
+
+		public Acceptances with(final UUID person, final int version) {
+			stored.add(new DataPolicyAcceptanceEntity(person, version, java.time.Instant.parse("2026-10-02T15:00:00Z")));
+			return this;
+		}
+
+		public List<DataPolicyAcceptanceCriteria> searches() {
+			return searches;
+		}
+
+		public List<DataPolicyAcceptanceEntity> created() {
+			return created;
+		}
+
+		@Override
+		public void create(final DataPolicyAcceptanceEntity entity) {
+			created.add(entity);
+			stored.add(new DataPolicyAcceptanceEntity(entity.person(), entity.version(),
+					java.time.Instant.parse("2026-10-26T21:00:00Z")));
+		}
+
+		@Override
+		public List<DataPolicyAcceptanceEntity> findByCriteria(final DataPolicyAcceptanceCriteria criteria) {
+			searches.add(criteria);
+			final int version = criteria.meansCurrentPolicy() ? currentVersion : criteria.version();
+			return stored.stream()
+					.filter(acceptance -> acceptance.person().equals(criteria.person()) && acceptance.version() == version)
+					.toList();
 		}
 
 	}
