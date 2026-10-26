@@ -16,12 +16,16 @@ public final class FindInstitutionSettingsUseCaseImpl implements FindInstitution
 
 	public FindInstitutionSettingsUseCaseImpl(final InstitutionParametersRepository institutionParametersRepository) {
 		super();
-		if (ObjectHelper.isNull(institutionParametersRepository)) {
+		this.institutionParametersRepository = requireRepository(institutionParametersRepository);
+	}
+
+	private static InstitutionParametersRepository requireRepository(final InstitutionParametersRepository repository) {
+		if (ObjectHelper.isNull(repository)) {
 			throw BookHiveException.createUnexpected(
 					MessageKey.INSTITUTION_WITHOUT_PARAMETERS,
 					"El caso de uso FindInstitutionSettings se creó sin el repositorio de parámetros.");
 		}
-		this.institutionParametersRepository = institutionParametersRepository;
+		return repository;
 	}
 
 	@Override

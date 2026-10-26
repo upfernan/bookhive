@@ -50,12 +50,12 @@ public record InstitutionSettingsDomain(int loanDays, int maxConcurrentLoans, Bi
 	}
 
 	private static boolean isValidZone(final String zone) {
-		if (TextHelper.isDefaultValue(zone)) {
+		if (null == zone || !zone.contains("/")) {
 			return false;
 		}
 		try {
 			ZoneId.of(zone);
-			return zone.contains("/");
+			return true;
 		} catch (final DateTimeException _) {
 			return false;
 		}
