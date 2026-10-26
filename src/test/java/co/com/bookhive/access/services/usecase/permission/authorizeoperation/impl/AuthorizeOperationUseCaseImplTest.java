@@ -68,10 +68,36 @@ class AuthorizeOperationUseCaseImplTest {
 		assertTrue(permissions.searches().isEmpty());
 	}
 
+	@Test
+	@DisplayName("no deja usar la cuenta a quien no ha aceptado la política de datos vigente, aunque tenga el permiso")
+	void rejectsWithoutAcceptedPolicy() {
+		final FakeAccess.Permissions permissions =
+				new FakeAccess.Permissions().with(FakeAccess.permission(PermissionCode.LEND_BOOK));
+		final FakeAccess.Acceptances acceptances = new FakeAccess.Acceptances().currentVersion(2).with(PERSON, 1);
+		final AuthorizeOperationUseCaseImpl useCase = useCase(permissions, acceptances);
+		final AuthorizeOperationDomain operation =
+				new AuthorizeOperationDomain(PermissionCode.LEND_BOOK, "LoanController#lend");
+
+		final BookHiveException exception = assertThrows(BookHiveException.class, () -> useCase.execute(operation));
+
+		assertEquals(BookHiveException.Kind.NOT_ALLOWED, exception.getKind());
+		assertEquals(MessageKey.DATA_POLICY_NOT_ACCEPTED, exception.getUserMessageKey());
+		assertTrue(acceptances.searches().get(0).meansCurrentPolicy());
+		assertEquals(PERSON, acceptances.searches().get(0).person());
+		assertTrue(permissions.searches().isEmpty());
+	}
+
 	private AuthorizeOperationUseCaseImpl useCase(final FakeAccess.Permissions permissions) {
+		return useCase(permissions, new FakeAccess.Acceptances().with(PERSON, 1));
+	}
+
+	private AuthorizeOperationUseCaseImpl useCase(
+			final FakeAccess.Permissions permissions, final FakeAccess.Acceptances acceptances) {
+
 		return new AuthorizeOperationUseCaseImpl(
 				() -> new ResolveSessionDomain(PERSON, INSTITUTION),
 				permissions,
+				acceptances,
 				(action, institution, person, detail) -> audited.add(action + " " + institution + " " + person + " " + detail));
 	}
 

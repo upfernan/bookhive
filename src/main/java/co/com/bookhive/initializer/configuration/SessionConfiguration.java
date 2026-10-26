@@ -3,23 +3,31 @@ package co.com.bookhive.initializer.configuration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import co.com.bookhive.access.services.input.adapters.AcceptDataPolicyInputAdapter;
 import co.com.bookhive.access.services.input.adapters.AuthorizeOperationInputAdapter;
 import co.com.bookhive.access.services.input.adapters.CloseSessionInputAdapter;
 import co.com.bookhive.access.services.input.adapters.CurrentSessionInputAdapter;
+import co.com.bookhive.access.services.input.adapters.FindDataPolicyInputAdapter;
 import co.com.bookhive.access.services.input.adapters.ListActiveSchemasInputAdapter;
 import co.com.bookhive.access.services.input.adapters.OpenSessionInputAdapter;
 import co.com.bookhive.access.services.input.adapters.ResolveSchemaInputAdapter;
+import co.com.bookhive.access.services.input.ports.AcceptDataPolicyInputPort;
 import co.com.bookhive.access.services.input.ports.AuthorizeOperationInputPort;
 import co.com.bookhive.access.services.input.ports.CloseSessionInputPort;
 import co.com.bookhive.access.services.input.ports.CurrentSessionInputPort;
+import co.com.bookhive.access.services.input.ports.FindDataPolicyInputPort;
 import co.com.bookhive.access.services.input.ports.ListActiveSchemasInputPort;
 import co.com.bookhive.access.services.input.ports.OpenSessionInputPort;
 import co.com.bookhive.access.services.input.ports.ResolveSchemaInputPort;
 import co.com.bookhive.access.services.output.ports.IdentityProviderPort;
 import co.com.bookhive.access.services.output.ports.SessionIdentityPort;
+import co.com.bookhive.access.services.output.ports.repositories.DataPolicyAcceptanceRepository;
+import co.com.bookhive.access.services.output.ports.repositories.DataPolicyRepository;
 import co.com.bookhive.access.services.output.ports.repositories.InstitutionRepository;
 import co.com.bookhive.access.services.output.ports.repositories.PermissionRepository;
 import co.com.bookhive.access.services.output.ports.repositories.PersonRepository;
+import co.com.bookhive.access.services.usecase.datapolicy.acceptdatapolicy.impl.AcceptDataPolicyUseCaseImpl;
+import co.com.bookhive.access.services.usecase.datapolicy.finddatapolicy.impl.FindDataPolicyUseCaseImpl;
 import co.com.bookhive.access.services.usecase.institution.listactiveschemas.ListActiveSchemasUseCase;
 import co.com.bookhive.access.services.usecase.institution.listactiveschemas.impl.ListActiveSchemasUseCaseImpl;
 import co.com.bookhive.access.services.usecase.permission.authorizeoperation.AuthorizeOperationUseCase;
@@ -90,9 +98,32 @@ public class SessionConfiguration {
 	AuthorizeOperationUseCase authorizeOperationUseCase(
 			final ResolveSessionUseCase resolveSessionUseCase,
 			final PermissionRepository permissionRepository,
+			final DataPolicyAcceptanceRepository dataPolicyAcceptanceRepository,
 			final AuditPort audit) {
 
-		return new AuthorizeOperationUseCaseImpl(resolveSessionUseCase, permissionRepository, audit);
+		return new AuthorizeOperationUseCaseImpl(
+				resolveSessionUseCase, permissionRepository, dataPolicyAcceptanceRepository, audit);
+	}
+
+	@Bean
+	FindDataPolicyInputPort findDataPolicyInputPort(
+			final ResolveSessionUseCase resolveSessionUseCase,
+			final DataPolicyRepository dataPolicyRepository,
+			final DataPolicyAcceptanceRepository dataPolicyAcceptanceRepository) {
+
+		return new FindDataPolicyInputAdapter(new FindDataPolicyUseCaseImpl(
+				resolveSessionUseCase, dataPolicyRepository, dataPolicyAcceptanceRepository));
+	}
+
+	@Bean
+	AcceptDataPolicyInputPort acceptDataPolicyInputPort(
+			final ResolveSessionUseCase resolveSessionUseCase,
+			final DataPolicyRepository dataPolicyRepository,
+			final DataPolicyAcceptanceRepository dataPolicyAcceptanceRepository,
+			final AuditPort audit) {
+
+		return new AcceptDataPolicyInputAdapter(new AcceptDataPolicyUseCaseImpl(
+				resolveSessionUseCase, dataPolicyRepository, dataPolicyAcceptanceRepository, audit));
 	}
 
 	@Bean
