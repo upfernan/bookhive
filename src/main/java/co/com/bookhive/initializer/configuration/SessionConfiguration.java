@@ -6,7 +6,22 @@ import org.springframework.context.annotation.Configuration;
 import co.com.bookhive.access.services.input.adapters.AcceptDataPolicyInputAdapter;
 import co.com.bookhive.access.services.input.adapters.AuthorizeOperationInputAdapter;
 import co.com.bookhive.access.services.input.adapters.CloseSessionInputAdapter;
+import co.com.bookhive.access.services.input.adapters.ChangePersonInputAdapter;
 import co.com.bookhive.access.services.input.adapters.CurrentSessionInputAdapter;
+import co.com.bookhive.access.services.input.adapters.RegisterPersonInputAdapter;
+import co.com.bookhive.access.services.input.ports.RegisterPersonInputPort;
+import co.com.bookhive.access.services.input.adapters.FindPublicDataPolicyInputAdapter;
+import co.com.bookhive.access.services.input.ports.FindPublicDataPolicyInputPort;
+import co.com.bookhive.access.services.usecase.datapolicy.findpublicdatapolicy.impl.FindPublicDataPolicyUseCaseImpl;
+import co.com.bookhive.access.services.output.ports.repositories.RegistrationRepository;
+import co.com.bookhive.access.services.usecase.session.registerperson.impl.RegisterPersonUseCaseImpl;
+import co.com.bookhive.access.services.input.ports.ChangePersonInputPort;
+import co.com.bookhive.access.services.output.ports.repositories.PersonStatusRepository;
+import co.com.bookhive.access.services.usecase.session.changeperson.impl.ChangePersonUseCaseImpl;
+import co.com.bookhive.access.services.input.adapters.DescribeSessionInputAdapter;
+import co.com.bookhive.access.services.input.ports.DescribeSessionInputPort;
+import co.com.bookhive.access.services.output.ports.repositories.SessionProfileRepository;
+import co.com.bookhive.access.services.usecase.session.describesession.impl.DescribeSessionUseCaseImpl;
 import co.com.bookhive.access.services.input.adapters.FindDataPolicyInputAdapter;
 import co.com.bookhive.access.services.input.adapters.ListActiveSchemasInputAdapter;
 import co.com.bookhive.access.services.input.adapters.OpenSessionInputAdapter;
@@ -103,6 +118,35 @@ public class SessionConfiguration {
 
 		return new AuthorizeOperationUseCaseImpl(
 				resolveSessionUseCase, permissionRepository, dataPolicyAcceptanceRepository, audit);
+	}
+
+	@Bean
+	DescribeSessionInputPort describeSessionInputPort(
+			final ResolveSessionUseCase resolveSessionUseCase,
+			final SessionProfileRepository sessionProfileRepository,
+			final PermissionRepository permissionRepository) {
+
+		return new DescribeSessionInputAdapter(
+				new DescribeSessionUseCaseImpl(resolveSessionUseCase, sessionProfileRepository, permissionRepository));
+	}
+
+	@Bean
+	ChangePersonInputPort changePersonInputPort(final PersonStatusRepository personStatusRepository) {
+		return new ChangePersonInputAdapter(new ChangePersonUseCaseImpl(personStatusRepository));
+	}
+
+	@Bean
+	RegisterPersonInputPort registerPersonInputPort(
+			final IdentityProviderPort identityProvider,
+			final RegistrationRepository registrationRepository,
+			final AuditPort audit) {
+
+		return new RegisterPersonInputAdapter(new RegisterPersonUseCaseImpl(identityProvider, registrationRepository, audit));
+	}
+
+	@Bean
+	FindPublicDataPolicyInputPort findPublicDataPolicyInputPort(final RegistrationRepository registrationRepository) {
+		return new FindPublicDataPolicyInputAdapter(new FindPublicDataPolicyUseCaseImpl(registrationRepository));
 	}
 
 	@Bean

@@ -15,7 +15,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
-import co.com.bookhive.circulation.domain.location.LocationDomains;
+import co.com.bookhive.circulation.services.input.dto.request.RegisterBookCopiesRequestDTO;
+import co.com.bookhive.circulation.services.input.ports.RegisterBookCopiesInputPort;
+import co.com.bookhive.circulation.services.input.ports.RetireBookCopiesInputPort;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.ReservationEntity;
+import co.com.bookhive.circulation.services.usecase.location.registerbookcopies.impl.RegisterBookCopiesUseCaseImpl;
+import co.com.bookhive.circulation.services.usecase.location.retirebookcopies.impl.RetireBookCopiesUseCaseImpl;
+import co.com.bookhive.crosscutting.exception.BookHiveException;
+import co.com.bookhive.crosscutting.messages.MessageKey;
+import co.com.bookhive.circulation.services.input.adapters.LocationInputAdapters;
 import co.com.bookhive.circulation.infrastructure.input.controllers.LocationController;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.adapters.LocationRepositoryAdapter;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.LocationJpaRepository;
@@ -182,6 +190,84 @@ class LocationUseCasesTest {
 				"deleteValues", "findBranches", "findLevels", "findValues", "countValuesDeeperThan"), calls);
 	}
 
+	@Test
+	@DisplayName("registra ejemplares nuevos en una sede existente sin repetir códigos")
+	void registersBookCopies() {
+		final UUID book = UUID.randomUUID();
+		final RegisterBookCopiesInputPort register = LocationInputAdapters.registerCopies(new RegisterBookCopiesUseCaseImpl(locations));
+
+		assertEquals(2, register.execute(new RegisterBookCopiesRequestDTO(book, CENTRO, List.of(" N-1 ", "N-2"))));
+		assertEquals(List.of("N-1", "N-2"), locations.added);
+		assertEquals(MessageKey.BOOK_COPY_BARCODE_TAKEN, keyOf(() -> register.execute(new RegisterBookCopiesRequestDTO(book, CENTRO, List.of("N-1")))));
+		assertEquals(MessageKey.BRANCH_NOT_FOUND, keyOf(() -> register.execute(new RegisterBookCopiesRequestDTO(book, UUID.randomUUID(), List.of("N-3")))));
+		assertEquals(MessageKey.BOOK_TITLE_COPIES_INVALID, keyOf(() -> register.execute(new RegisterBookCopiesRequestDTO(book, CENTRO, List.of("N-4", "N-4")))));
+		assertEquals(MessageKey.BOOK_TITLE_COPIES_INVALID, keyOf(() -> register.execute(new RegisterBookCopiesRequestDTO(book, CENTRO, List.of(" ")))));
+		assertEquals(MessageKey.BOOK_TITLE_COPIES_INVALID, keyOf(() -> register.execute(new RegisterBookCopiesRequestDTO(book, CENTRO, List.of("X".repeat(51))))));
+		assertEquals(MessageKey.BOOK_TITLE_COPIES_INVALID, keyOf(() -> register.execute(new RegisterBookCopiesRequestDTO(null, CENTRO, List.of("N-5")))));
+		assertEquals(MessageKey.BOOK_TITLE_COPIES_INVALID, keyOf(() -> register.execute(null)));
+		assertThrows(BookHiveException.class, () -> new RegisterBookCopiesUseCaseImpl(null));
+	}
+
+	@Test
+	@DisplayName("retira todos los ejemplares de un título solo si están disponibles y nadie espera el libro")
+	void retiresBookCopies() {
+		final UUID book = UUID.randomUUID();
+		final BookCopyEntity first = copyOf(book, "R-1", BookCopyEntity.STATUS_AVAILABLE);
+		final BookCopyEntity second = copyOf(book, "R-2", BookCopyEntity.STATUS_AVAILABLE);
+		copies.with(first).with(second);
+		locations.values.put(first.getId(), new ArrayList<>());
+		final FakeRepositories.Reservations reservations = new FakeRepositories.Reservations();
+		final RetireBookCopiesInputPort retire =
+				LocationInputAdapters.retireCopies(new RetireBookCopiesUseCaseImpl(copies, reservations, locations));
+
+		assertEquals(2, retire.execute(book));
+		assertEquals(BookCopyEntity.STATUS_WITHDRAWN, first.getStatus());
+		assertTrue(locations.values.isEmpty());
+		assertEquals(0, retire.execute(UUID.randomUUID()));
+		assertEquals(MessageKey.BOOK_TITLE_NOT_FOUND, keyOf(() -> retire.execute(null)));
+		assertThrows(BookHiveException.class, () -> new RetireBookCopiesUseCaseImpl(null, null, null));
+	}
+
+	@Test
+	@DisplayName("no retira ejemplares prestados, con reservas en espera o que cambian a la vez")
+	void refusesToRetireBusyCopies() {
+		final UUID lent = UUID.randomUUID();
+		final UUID awaited = UUID.randomUUID();
+		final UUID racing = UUID.randomUUID();
+		copies.with(copyOf(lent, "L-1", BookCopyEntity.STATUS_LENT)).with(copyOf(awaited, "W-1", BookCopyEntity.STATUS_AVAILABLE));
+		final ReservationEntity waiting = new ReservationEntity();
+		waiting.setBook(awaited);
+		final FakeRepositories.Reservations reservations = new FakeRepositories.Reservations().with(waiting);
+		final RetireBookCopiesInputPort retire =
+				LocationInputAdapters.retireCopies(new RetireBookCopiesUseCaseImpl(copies, reservations, locations));
+		final FakeRepositories.BookCopies changing = new FakeRepositories.BookCopies()
+				.with(copyOf(racing, "C-1", BookCopyEntity.STATUS_AVAILABLE)).changedByOtherRequest();
+		final RetireBookCopiesInputPort retireRacing =
+				LocationInputAdapters.retireCopies(new RetireBookCopiesUseCaseImpl(changing, reservations, locations));
+
+		assertEquals(MessageKey.BOOK_TITLE_COPIES_IN_USE, keyOf(() -> retire.execute(lent)));
+		assertEquals(MessageKey.BOOK_TITLE_RESERVATIONS_PENDING, keyOf(() -> retire.execute(awaited)));
+		assertEquals(MessageKey.BOOK_TITLE_COPIES_IN_USE, keyOf(() -> retireRacing.execute(racing)));
+	}
+
+	private static BookCopyEntity copyOf(final UUID book, final String barcode, final String status) {
+		final BookCopyEntity entity = new BookCopyEntity();
+		entity.setId(UUID.randomUUID());
+		entity.setBook(book);
+		entity.setBarcode(barcode);
+		entity.setStatus(status);
+		return entity;
+	}
+
+	private static String keyOf(final java.util.function.Supplier<?> call) {
+		try {
+			call.get();
+			return "pasa";
+		} catch (final BookHiveException exception) {
+			return exception.getUserMessageKey();
+		}
+	}
+
 	private LocationController controller() {
 		final SessionContextPort session = new SessionContextPort() {
 
@@ -217,6 +303,7 @@ class LocationUseCasesTest {
 		private final List<LevelEntity> levels = new ArrayList<>();
 		private final Map<UUID, List<ValueEntity>> values = new HashMap<>();
 		private final Map<UUID, UUID> branchOf = new HashMap<>();
+		private final List<String> added = new ArrayList<>();
 
 		@Override
 		public List<BranchEntity> findBranches() {
@@ -258,6 +345,16 @@ class LocationUseCasesTest {
 		@Override
 		public void clearValues(final UUID bookCopy) {
 			values.remove(bookCopy);
+		}
+
+		@Override
+		public boolean anyBarcodeTaken(final List<String> barcodes) {
+			return barcodes.stream().anyMatch(added::contains);
+		}
+
+		@Override
+		public void addBookCopies(final UUID book, final UUID branch, final List<String> barcodes) {
+			added.addAll(barcodes);
 		}
 
 	}

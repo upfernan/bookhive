@@ -10,6 +10,7 @@ import co.com.bookhive.circulation.services.output.ports.repositories.LocationRe
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LocationEntities.BranchEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LocationEntities.LevelEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LocationEntities.ValueEntity;
+import co.com.bookhive.crosscutting.helper.UUIDHelper;
 
 @Component
 public class LocationRepositoryAdapter implements LocationRepository {
@@ -62,6 +63,16 @@ public class LocationRepositoryAdapter implements LocationRepository {
 	@Override
 	public void clearValues(final UUID bookCopy) {
 		repository.deleteValues(bookCopy);
+	}
+
+	@Override
+	public boolean anyBarcodeTaken(final List<String> barcodes) {
+		return !barcodes.isEmpty() && repository.countBarcodes(barcodes) > 0;
+	}
+
+	@Override
+	public void addBookCopies(final UUID book, final UUID branch, final List<String> barcodes) {
+		barcodes.forEach(barcode -> repository.saveBookCopy(UUIDHelper.generateNew(), book, branch, barcode));
 	}
 
 }

@@ -191,6 +191,13 @@ public final class FakeAccess {
 		}
 
 		@Override
+		public co.com.bookhive.access.services.output.ports.entities.VerifiedIdentityEntity verify(final String idToken) {
+			receivedIdTokens.add(idToken);
+			return new co.com.bookhive.access.services.output.ports.entities.VerifiedIdentityEntity(
+					identity, identity + "@uco.edu.co", true, "cookie-de-" + idToken);
+		}
+
+		@Override
 		public String openSession(final String idToken) {
 			receivedIdTokens.add(idToken);
 			return "cookie-de-sesion";

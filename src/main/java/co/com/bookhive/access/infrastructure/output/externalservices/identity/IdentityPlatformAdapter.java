@@ -5,11 +5,13 @@ import java.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Component;
 
 import co.com.bookhive.access.services.output.ports.IdentityProviderPort;
+import co.com.bookhive.access.services.output.ports.entities.VerifiedIdentityEntity;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.messages.MessageKey;
 
@@ -36,6 +38,22 @@ public class IdentityPlatformAdapter implements IdentityProviderPort {
 	@Override
 	public String openSession(final String idToken) {
 		return identityPlatform.createSessionCookie(idToken, sessionLength);
+	}
+
+	@Override
+	public VerifiedIdentityEntity verify(final String idToken) {
+
+		final String sessionToken = identityPlatform.createSessionCookie(idToken, sessionLength);
+
+		try {
+			final Jwt session = sessionDecoder.decode(sessionToken);
+			final Object verified = session.getClaims().get("email_verified");
+			return new VerifiedIdentityEntity(session.getSubject(), session.getClaimAsString("email"),
+					Boolean.TRUE.equals(verified) || "true".equals(String.valueOf(verified)), sessionToken);
+		} catch (final JwtException exception) {
+			throw BookHiveException.createUnexpected(
+					exception, MessageKey.SESSION_NOT_OPENED, "La cookie de sesión del registro no se pudo validar.");
+		}
 	}
 
 	@Override

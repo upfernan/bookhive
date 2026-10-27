@@ -6,6 +6,11 @@ import org.springframework.context.annotation.Configuration;
 import co.com.bookhive.circulation.infrastructure.input.controllers.LocationController;
 import co.com.bookhive.circulation.services.input.adapters.LocationInputAdapters;
 import co.com.bookhive.circulation.services.input.ports.ListBranchesInputPort;
+import co.com.bookhive.circulation.services.input.ports.RegisterBookCopiesInputPort;
+import co.com.bookhive.circulation.services.input.ports.RetireBookCopiesInputPort;
+import co.com.bookhive.circulation.services.output.ports.repositories.ReservationRepository;
+import co.com.bookhive.circulation.services.usecase.location.registerbookcopies.impl.RegisterBookCopiesUseCaseImpl;
+import co.com.bookhive.circulation.services.usecase.location.retirebookcopies.impl.RetireBookCopiesUseCaseImpl;
 import co.com.bookhive.circulation.services.output.ports.SessionContextPort;
 import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.LocationRepository;
@@ -24,6 +29,17 @@ public class LocationConfiguration {
 	@Bean
 	ListBranchesInputPort listBranchesInputPort(final LocationRepository locations) {
 		return LocationInputAdapters.listBranches(new ListBranchesUseCaseImpl(locations));
+	}
+
+	@Bean
+	RegisterBookCopiesInputPort registerBookCopiesInputPort(final LocationRepository locations) {
+		return LocationInputAdapters.registerCopies(new RegisterBookCopiesUseCaseImpl(locations));
+	}
+
+	@Bean
+	RetireBookCopiesInputPort retireBookCopiesInputPort(
+			final BookCopyRepository bookCopies, final ReservationRepository reservations, final LocationRepository locations) {
+		return LocationInputAdapters.retireCopies(new RetireBookCopiesUseCaseImpl(bookCopies, reservations, locations));
 	}
 
 	@Bean

@@ -17,6 +17,20 @@ public final class MessageKey {
 	public static final String LOAN_RETURN_NOT_CONFIRMED = "loan.return.not-confirmed";
 
 	public static final String BOOK_COPY_NOT_FOUND = "book-copy.not-found";
+	public static final String CATEGORY_NAME_INVALID = "category.name.invalid";
+	public static final String CATEGORY_NAME_TAKEN = "category.name.taken";
+	public static final String CATEGORY_NOT_FOUND = "category.not-found";
+	public static final String CATEGORY_IN_USE = "category.in-use";
+	public static final String CATEGORY_INACTIVE = "category.inactive";
+	public static final String BOOK_TITLE_DATA_INVALID = "book-title.data.invalid";
+	public static final String BOOK_TITLE_ISBN_TAKEN = "book-title.isbn.taken";
+	public static final String BOOK_TITLE_NOT_FOUND = "book-title.not-found";
+	public static final String BOOK_TITLE_WITHDRAWN = "book-title.withdrawn";
+	public static final String BOOK_TITLE_FORMAT_LOCKED = "book-title.format.locked";
+	public static final String BOOK_TITLE_COPIES_INVALID = "book-title.copies.invalid";
+	public static final String BOOK_COPY_BARCODE_TAKEN = "book-copy.barcode.taken";
+	public static final String BOOK_TITLE_COPIES_IN_USE = "book-title.copies.in-use";
+	public static final String BOOK_TITLE_RESERVATIONS_PENDING = "book-title.reservations.pending";
 	public static final String BOOK_COPY_LOCATION_INVALID = "book-copy.location.invalid";
 	public static final String BOOK_COPY_WITHDRAWN = "book-copy.withdrawn";
 	public static final String BOOK_COPY_NOT_WITHDRAWABLE = "book-copy.not-withdrawable";
@@ -36,6 +50,10 @@ public final class MessageKey {
 	public static final String USER_NOT_FOUND = "user.not-found";
 	public static final String USER_SUSPENDED = "user.suspended";
 	public static final String USER_RETIRED = "user.retired";
+	public static final String USER_PURGED = "user.purged";
+	public static final String USER_HAS_ACTIVE_LOANS = "user.has-active-loans";
+	public static final String USER_HAS_PENDING_FINES = "user.has-pending-fines";
+	public static final String USER_RETENTION_INVALID = "user.retention.invalid";
 
 	public static final String RESERVATION_BOOK_REQUIRED = "reservation.book.required";
 	public static final String RESERVATION_USER_NOT_FOUND = "reservation.user.not-found";
@@ -75,6 +93,11 @@ public final class MessageKey {
 	public static final String SESSION_PROVIDER_UNAVAILABLE = "session.provider-unavailable";
 
 	public static final String PERMISSION_DENIED = "permission.denied";
+	public static final String REGISTRATION_DATA_INVALID = "registration.data.invalid";
+	public static final String REGISTRATION_EMAIL_NOT_VERIFIED = "registration.email.not-verified";
+	public static final String REGISTRATION_DOMAIN_NOT_ALLOWED = "registration.domain.not-allowed";
+	public static final String REGISTRATION_ALREADY_REGISTERED = "registration.already-registered";
+	public static final String DATA_POLICY_PUBLIC_NOT_FOUND = "data-policy.public.not-found";
 	public static final String DATA_POLICY_NOT_ACCEPTED = "data-policy.not-accepted";
 	public static final String DATA_POLICY_VERSION_REQUIRED = "data-policy.version.required";
 	public static final String DATA_POLICY_VERSION_OUTDATED = "data-policy.version.outdated";

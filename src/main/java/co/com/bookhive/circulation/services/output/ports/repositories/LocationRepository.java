@@ -25,4 +25,8 @@ public interface LocationRepository {
 
 	void clearValues(UUID bookCopy);
 
+	boolean anyBarcodeTaken(List<String> barcodes);
+
+	void addBookCopies(UUID book, UUID branch, List<String> barcodes);
+
 }
