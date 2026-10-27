@@ -93,8 +93,9 @@ class RegistrationAndPersonAdaptersTest {
 
 		assertEquals(new RegistrationEntities.PublicPolicy(1, "Aviso base", null), adapter.defaultPolicy().orElseThrow());
 		assertTrue(new RegistrationRepositoryAdapter(new ScriptedDataSource().dataSource()).defaultPolicy().isEmpty());
-		assertThrows(BookHiveException.class, () -> new RegistrationRepositoryAdapter(
-				new ScriptedDataSource().fails("data-policy.default", "08006").dataSource()).defaultPolicy());
+		final RegistrationRepositoryAdapter failing =
+				new RegistrationRepositoryAdapter(new ScriptedDataSource().fails("data-policy.default", "08006").dataSource());
+		assertThrows(BookHiveException.class, failing::defaultPolicy);
 	}
 
 	@Test

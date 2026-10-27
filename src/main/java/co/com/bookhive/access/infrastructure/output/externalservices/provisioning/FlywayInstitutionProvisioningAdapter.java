@@ -106,8 +106,12 @@ public class FlywayInstitutionProvisioningAdapter implements InstitutionProvisio
 
 	public static String schemaOf(final String domain) {
 		final String base = TextHelper.getDefaultValue(domain).toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]", "_");
-		final String named = Character.isLetter(base.isEmpty() ? '0' : base.charAt(0)) ? base : "i_" + base;
+		final String named = startsWithLetter(base) ? base : "i_" + base;
 		return named.length() > MAX_SCHEMA ? named.substring(0, MAX_SCHEMA) : named;
+	}
+
+	private static boolean startsWithLetter(final String value) {
+		return !value.isEmpty() && Character.isLetter(value.charAt(0));
 	}
 
 	public static String nameOf(final String domain) {
