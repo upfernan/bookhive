@@ -49,12 +49,21 @@
               </div>
               <div class="item__side">
                 <span [class]="card.statusClass">{{ card.status }}</span>
-                @if (card.cancellable) {
-                  <button mat-stroked-button type="button" [disabled]="cancelling() !== ''" (click)="cancel(card)">
+                @if (card.cancellable && confirming() !== card.id) {
+                  <button mat-stroked-button type="button" [disabled]="cancelling() !== ''" (click)="ask(card)">
                     {{ cancelling() === card.id ? messages.cancelling : messages.cancel }}
                   </button>
                 }
               </div>
+              @if (confirming() === card.id) {
+                <div class="confirm" role="alert">
+                  <p class="confirm__text">{{ card.confirmText }}</p>
+                  <div class="confirm__actions">
+                    <button mat-flat-button type="button" (click)="cancel(card)">{{ messages.confirmYes }}</button>
+                    <button mat-stroked-button type="button" (click)="keep()">{{ messages.confirmNo }}</button>
+                  </div>
+                </div>
+              }
             </li>
           }
         </ul>
