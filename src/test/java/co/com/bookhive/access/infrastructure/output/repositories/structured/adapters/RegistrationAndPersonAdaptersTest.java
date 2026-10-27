@@ -62,9 +62,39 @@ class RegistrationAndPersonAdaptersTest {
 		assertEquals(CARLA, registered);
 		assertEquals(1, db.calls("INSERT INTO compartido.persona").size());
 		assertEquals(1, db.calls("INSERT INTO library_user").size());
-		assertEquals(1, db.calls("'LECTOR'").size());
+		assertEquals(List.of("[" + CARLA.id() + ", LECTOR]"), db.calls("INSERT INTO person_role"));
 		assertEquals(List.of("[" + CARLA.id() + ", 1]"), db.calls("INSERT INTO data_policy_acceptance"));
 		assertTrue(db.transactions().contains("commit"));
+	}
+
+	@Test
+	@DisplayName("en una universidad creada por autorregistro el primero queda como ADMINISTRADOR y los demás como LECTOR")
+	void firstPersonOfSelfRegisteredInstitutionAdministers() {
+		final ScriptedDataSource first = new ScriptedDataSource()
+				.rows("coalesce(max(version)", new Object[] { 1 })
+				.rows("alta = 'AUTOREGISTRO'", new Object[] { UCO });
+		final ScriptedDataSource second = new ScriptedDataSource()
+				.rows("coalesce(max(version)", new Object[] { 1 })
+				.rows("alta = 'AUTOREGISTRO'", new Object[] { UCO })
+				.rows("r.name = 'ADMINISTRADOR'", new Object[] { UUID.randomUUID() });
+
+		new RegistrationRepositoryAdapter(first.dataSource()).register(CARLA, INSTITUTION);
+		new RegistrationRepositoryAdapter(second.dataSource()).register(CARLA, INSTITUTION);
+
+		assertEquals(List.of("[" + CARLA.id() + ", ADMINISTRADOR]"), first.calls("INSERT INTO person_role"));
+		assertEquals(List.of("[" + CARLA.id() + ", LECTOR]"), second.calls("INSERT INTO person_role"));
+	}
+
+	@Test
+	@DisplayName("el aviso base sale del catálogo de mensajes como versión 1")
+	void readsDefaultPolicy() {
+		final RegistrationRepositoryAdapter adapter = new RegistrationRepositoryAdapter(
+				new ScriptedDataSource().rows("data-policy.default", new Object[] { "Aviso base" }).dataSource());
+
+		assertEquals(new RegistrationEntities.PublicPolicy(1, "Aviso base", null), adapter.defaultPolicy().orElseThrow());
+		assertTrue(new RegistrationRepositoryAdapter(new ScriptedDataSource().dataSource()).defaultPolicy().isEmpty());
+		assertThrows(BookHiveException.class, () -> new RegistrationRepositoryAdapter(
+				new ScriptedDataSource().fails("data-policy.default", "08006").dataSource()).defaultPolicy());
 	}
 
 	@Test

@@ -1,7 +1,10 @@
 package co.com.bookhive.access.services.usecase.session.registerperson.impl;
 
+import java.util.Optional;
+
 import co.com.bookhive.access.domain.session.registerperson.RegistrationDomain;
 import co.com.bookhive.access.services.output.ports.IdentityProviderPort;
+import co.com.bookhive.access.services.output.ports.InstitutionProvisioningPort;
 import co.com.bookhive.access.services.output.ports.entities.VerifiedIdentityEntity;
 import co.com.bookhive.access.services.output.ports.repositories.RegistrationRepository;
 import co.com.bookhive.access.services.output.ports.repositories.entities.RegistrationEntities;
@@ -16,16 +19,19 @@ public final class RegisterPersonUseCaseImpl implements RegisterPersonUseCase {
 
 	private final IdentityProviderPort identityProvider;
 	private final RegistrationRepository registrations;
+	private final InstitutionProvisioningPort provisioning;
 	private final AuditPort audit;
 
 	public RegisterPersonUseCaseImpl(
 			final IdentityProviderPort identityProvider,
 			final RegistrationRepository registrations,
+			final InstitutionProvisioningPort provisioning,
 			final AuditPort audit) {
 
 		super();
 		this.identityProvider = identityProvider;
 		this.registrations = registrations;
+		this.provisioning = provisioning;
 		this.audit = audit;
 	}
 
@@ -46,9 +52,10 @@ public final class RegisterPersonUseCaseImpl implements RegisterPersonUseCase {
 		}
 
 		final String domain = RegistrationDomain.domainOf(identity.email());
-		final RegistrationEntities.DomainInstitution institution = registrations.institutionOfDomain(domain).orElseThrow(() ->
-				BookHiveException.createNotAllowed(MessageKey.REGISTRATION_DOMAIN_NOT_ALLOWED,
-						"El dominio " + domain + " no pertenece a ninguna institución activa."));
+		final RegistrationEntities.DomainInstitution institution = registrations.institutionOfDomain(domain)
+				.or(() -> provisionIfEducational(domain))
+				.orElseThrow(() -> BookHiveException.createNotAllowed(MessageKey.REGISTRATION_DOMAIN_NOT_ALLOWED,
+						"El dominio " + domain + " no es de una institución activa ni educativo."));
 
 		final RegistrationEntities.NewPerson person = registrations.register(new RegistrationEntities.NewPerson(
 				UUIDHelper.generateNew(), identity.identity(), registration.name(), identity.email(), registration.policyVersion()),
@@ -56,6 +63,15 @@ public final class RegisterPersonUseCaseImpl implements RegisterPersonUseCase {
 
 		audit.record(AuditPort.PERSON_REGISTERED, institution.institution(), person.id(), domain);
 		return new RegistrationDomain.Registered(person.id(), institution.schema(), identity.sessionToken());
+	}
+
+	private Optional<RegistrationEntities.DomainInstitution> provisionIfEducational(final String domain) {
+		if (!RegistrationDomain.isEducational(domain)) {
+			return Optional.empty();
+		}
+		final RegistrationEntities.DomainInstitution created = provisioning.provision(domain);
+		audit.record(AuditPort.INSTITUTION_SELF_REGISTERED, created.institution(), null, domain + " -> " + created.schema());
+		return Optional.of(created);
 	}
 
 }

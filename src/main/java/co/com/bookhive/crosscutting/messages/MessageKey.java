@@ -98,6 +98,7 @@ public final class MessageKey {
 	public static final String REGISTRATION_DOMAIN_NOT_ALLOWED = "registration.domain.not-allowed";
 	public static final String REGISTRATION_ALREADY_REGISTERED = "registration.already-registered";
 	public static final String DATA_POLICY_PUBLIC_NOT_FOUND = "data-policy.public.not-found";
+	public static final String REGISTRATION_INSTITUTION_UNAVAILABLE = "registration.institution.unavailable";
 	public static final String DATA_POLICY_NOT_ACCEPTED = "data-policy.not-accepted";
 	public static final String DATA_POLICY_VERSION_REQUIRED = "data-policy.version.required";
 	public static final String DATA_POLICY_VERSION_OUTDATED = "data-policy.version.outdated";

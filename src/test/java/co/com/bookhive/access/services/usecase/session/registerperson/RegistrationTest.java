@@ -37,6 +37,7 @@ class RegistrationTest {
 
 	private final Registrations registrations = new Registrations();
 	private final List<String> audited = new ArrayList<>();
+	private final List<String> provisioned = new ArrayList<>();
 	private final AuditPort audit = (action, institution, person, detail) -> audited.add(action + " " + detail);
 
 	@Test
@@ -85,7 +86,7 @@ class RegistrationTest {
 	void rejectsUnverifiedForeignOrRepeated() {
 		final RegistrationDomain request = new RegistrationDomain("token", "Carla", 1);
 		final RegisterPersonUseCaseImpl unverified = useCase(identity("carla@uco.edu.co", false));
-		final RegisterPersonUseCaseImpl foreign = useCase(identity("carla@gmail.com", true));
+		final RegisterPersonUseCaseImpl foreign = useCase(identity("carla@empresa.com", true));
 		final RegisterPersonUseCaseImpl repeated = useCase(identity("carla@uco.edu.co", true));
 		registrations.known.add("carla-id");
 
@@ -127,6 +128,40 @@ class RegistrationTest {
 	}
 
 	@Test
+	@DisplayName("un correo de una universidad que aún no existe crea su biblioteca y registra a la persona allí")
+	void provisionsNewEducationalInstitution() {
+		final RegistrationDomain.Registered registered =
+				useCase(identity("ana@upb.edu.co", true)).execute(new RegistrationDomain("token", "Ana", 1));
+
+		assertEquals(List.of("upb.edu.co"), provisioned);
+		assertEquals("upb_edu_co", registered.schema());
+		assertEquals(AuditPort.INSTITUTION_SELF_REGISTERED + " upb.edu.co -> upb_edu_co", audited.get(0));
+		assertEquals(AuditPort.PERSON_REGISTERED + " upb.edu.co", audited.get(1));
+	}
+
+	@Test
+	@DisplayName("solo los dominios educativos crean una biblioteca nueva")
+	void recognizesEducationalDomains() {
+		for (final String domain : new String[] { "upb.edu.co", "eafit.edu.co", "mit.edu", "ox.ac.uk", "unam.edu.mx" }) {
+			assertTrue(RegistrationDomain.isEducational(domain), domain);
+		}
+		for (final String domain : new String[] { "gmail.com", "edu.co", "edu", "empresa.com.co", "uco.net.co", "", "ac.uk" }) {
+			assertTrue(!RegistrationDomain.isEducational(domain), domain);
+		}
+	}
+
+	@Test
+	@DisplayName("una universidad que aún no existe muestra el aviso base; un dominio no educativo no muestra nada")
+	void defaultPolicyForNewUniversities() {
+		final FindPublicDataPolicyUseCaseImpl find = new FindPublicDataPolicyUseCaseImpl(registrations);
+
+		assertEquals("Aviso base", find.execute("eafit.edu.co").content());
+		assertEquals(1, find.execute("eafit.edu.co").version());
+		assertEquals(MessageKey.DATA_POLICY_PUBLIC_NOT_FOUND,
+				assertThrows(BookHiveException.class, () -> find.execute("empresa.com")).getUserMessageKey());
+	}
+
+	@Test
 	@DisplayName("acepta subdominios y rechaza dominios mal escritos")
 	void validatesDomainFormat() {
 		assertEquals("correo.uco.edu.co", PublicDataPolicyDomain.normalizedDomain("Correo.UCO.edu.co"));
@@ -158,7 +193,10 @@ class RegistrationTest {
 				throw new UnsupportedOperationException();
 			}
 
-		}, registrations, audit);
+		}, registrations, domain -> {
+			provisioned.add(domain);
+			return new RegistrationEntities.DomainInstitution(UUID.randomUUID(), domain.replace('.', '_'));
+		}, audit);
 	}
 
 	private static VerifiedIdentityEntity identity(final String email, final boolean verified) {
@@ -186,6 +224,11 @@ class RegistrationTest {
 		@Override
 		public Optional<RegistrationEntities.PublicPolicy> currentPolicyOf(final RegistrationEntities.DomainInstitution institution) {
 			return withoutPolicy ? Optional.empty() : Optional.of(new RegistrationEntities.PublicPolicy(3, "Aviso de la UCO", PUBLISHED));
+		}
+
+		@Override
+		public Optional<RegistrationEntities.PublicPolicy> defaultPolicy() {
+			return Optional.of(new RegistrationEntities.PublicPolicy(1, "Aviso base", null));
 		}
 
 		@Override
