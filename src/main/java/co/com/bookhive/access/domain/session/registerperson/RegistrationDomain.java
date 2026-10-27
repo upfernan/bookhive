@@ -17,7 +17,7 @@ public record RegistrationDomain(String idToken, String name, int policyVersion)
 	}
 
 	public void validate() {
-		if (TextHelper.isDefaultValue(idToken) || TextHelper.isDefaultValue(name) || name.length() > MAX_NAME) {
+		if (idToken.isEmpty() || name.isEmpty() || name.length() > MAX_NAME) {
 			throw BookHiveException.create(MessageKey.REGISTRATION_DATA_INVALID, "Registro sin pase o con un nombre inválido.");
 		}
 		if (policyVersion <= 0) {

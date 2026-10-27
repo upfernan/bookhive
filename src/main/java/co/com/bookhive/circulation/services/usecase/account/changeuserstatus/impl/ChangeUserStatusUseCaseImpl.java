@@ -13,6 +13,8 @@ import co.com.bookhive.shared.services.output.ports.AuditPort;
 
 public final class ChangeUserStatusUseCaseImpl implements ChangeUserStatusUseCase {
 
+	private static final String THE_USER = "El usuario ";
+
 	private final UserLifecycleRepository users;
 	private final PersonAccessPort people;
 	private final SessionContextPort session;
@@ -41,7 +43,7 @@ public final class ChangeUserStatusUseCaseImpl implements ChangeUserStatusUseCas
 				people.anonymize(account.user());
 				return account;
 			}
-			throw BookHiveException.createConflict(MessageKey.USER_PURGED, "El usuario " + account.user() + " ya fue depurado.");
+			throw BookHiveException.createConflict(MessageKey.USER_PURGED, THE_USER + account.user() + " ya fue depurado.");
 		}
 		switch (request.change()) {
 			case DEACTIVATE -> deactivate(account);
@@ -67,10 +69,10 @@ public final class ChangeUserStatusUseCaseImpl implements ChangeUserStatusUseCas
 
 	private void purge(final UserLifecycleDomains.Account account) {
 		if (users.activeLoans(account.user()) > 0) {
-			throw BookHiveException.createConflict(MessageKey.USER_HAS_ACTIVE_LOANS, "El usuario " + account.user() + " tiene préstamos.");
+			throw BookHiveException.createConflict(MessageKey.USER_HAS_ACTIVE_LOANS, THE_USER + account.user() + " tiene préstamos.");
 		}
 		if (users.pendingFines(account.user()) > 0) {
-			throw BookHiveException.createConflict(MessageKey.USER_HAS_PENDING_FINES, "El usuario " + account.user() + " tiene multas.");
+			throw BookHiveException.createConflict(MessageKey.USER_HAS_PENDING_FINES, THE_USER + account.user() + " tiene multas.");
 		}
 		users.anonymize(account.user());
 		people.anonymize(account.user());

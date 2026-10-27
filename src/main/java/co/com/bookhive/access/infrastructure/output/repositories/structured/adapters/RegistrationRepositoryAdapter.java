@@ -78,48 +78,61 @@ public class RegistrationRepositoryAdapter implements RegistrationRepository {
 	@Override
 	public Optional<PublicPolicy> currentPolicyOf(final DomainInstitution institution) {
 		try (Connection connection = dataSource.getConnection()) {
-			connection.setAutoCommit(false);
-			try {
-				enterInstitution(connection, institution.schema());
-				try (PreparedStatement statement = connection.prepareStatement(CURRENT_POLICY_TEXT);
-					 ResultSet result = statement.executeQuery()) {
-					return result.next()
-							? Optional.of(new PublicPolicy(result.getInt(1), result.getString(2),
-									result.getObject(3, OffsetDateTime.class).toInstant()))
-							: Optional.empty();
-				}
-			} finally {
-				connection.rollback();
-				TenantSession.leave(connection);
-			}
+			return policyWithin(connection, institution.schema());
 		} catch (final SQLException exception) {
 			throw failure(exception, "Falló la consulta del aviso de datos de " + institution.schema() + ".");
+		}
+	}
+
+	private static Optional<PublicPolicy> policyWithin(final Connection connection, final String schema) throws SQLException {
+		connection.setAutoCommit(false);
+		try {
+			enterInstitution(connection, schema);
+			return readPolicy(connection);
+		} finally {
+			connection.rollback();
+			TenantSession.leave(connection);
+		}
+	}
+
+	private static Optional<PublicPolicy> readPolicy(final Connection connection) throws SQLException {
+		try (PreparedStatement statement = connection.prepareStatement(CURRENT_POLICY_TEXT);
+			 ResultSet result = statement.executeQuery()) {
+			return result.next()
+					? Optional.of(new PublicPolicy(result.getInt(1), result.getString(2),
+							result.getObject(3, OffsetDateTime.class).toInstant()))
+					: Optional.empty();
 		}
 	}
 
 	@Override
 	public NewPerson register(final NewPerson person, final DomainInstitution institution) {
 		try (Connection connection = dataSource.getConnection()) {
-			connection.setAutoCommit(false);
-			try {
-				final NewPerson registered = insert(connection, person, institution);
-				connection.commit();
-				return registered;
-			} catch (final SQLException exception) {
-				connection.rollback();
-				if (UNIQUE_VIOLATION.equals(exception.getSQLState())) {
-					throw BookHiveException.createConflict(MessageKey.REGISTRATION_ALREADY_REGISTERED,
-							"La identidad o el correo ya estaban registrados en " + institution.schema() + ".");
-				}
-				throw exception;
-			} catch (final RuntimeException exception) {
-				connection.rollback();
-				throw exception;
-			} finally {
-				TenantSession.leave(connection);
-			}
+			return registerWithin(connection, person, institution);
 		} catch (final SQLException exception) {
 			throw failure(exception, "Falló el registro de una persona en " + institution.schema() + ".");
+		}
+	}
+
+	private static NewPerson registerWithin(
+			final Connection connection, final NewPerson person, final DomainInstitution institution) throws SQLException {
+		connection.setAutoCommit(false);
+		try {
+			final NewPerson registered = insert(connection, person, institution);
+			connection.commit();
+			return registered;
+		} catch (final SQLException exception) {
+			connection.rollback();
+			if (UNIQUE_VIOLATION.equals(exception.getSQLState())) {
+				throw BookHiveException.createConflict(MessageKey.REGISTRATION_ALREADY_REGISTERED,
+						"La identidad o el correo ya estaban registrados en " + institution.schema() + ".");
+			}
+			throw exception;
+		} catch (final RuntimeException exception) {
+			connection.rollback();
+			throw exception;
+		} finally {
+			TenantSession.leave(connection);
 		}
 	}
 
