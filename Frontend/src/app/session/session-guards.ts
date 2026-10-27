@@ -3,6 +3,7 @@ import { CanMatchFn, Router } from '@angular/router';
 import { CurrentSession } from './current-session';
 import { DataPolicy } from './data-policy';
 import { PermissionCode } from './permission-code';
+import { Session } from './session';
 
 const LOGIN_PATH = '/ingresar';
 const HOME_PATH = '/inicio';
@@ -31,6 +32,9 @@ export const requireAcceptedDataPolicy: CanMatchFn = async () => {
   const target = navigation ? router.serializeUrl(navigation.extractedUrl) : HOME_PATH;
   return router.createUrlTree([DATA_POLICY_PATH], { queryParams: { [RETURN_PARAMETER]: target } });
 };
+
+export const requirePendingRegistration: CanMatchFn = () =>
+  inject(Session).pendingAccount() !== null || inject(Router).parseUrl(LOGIN_PATH);
 
 export function requirePermission(permission: PermissionCode): CanMatchFn {
   return () => inject(CurrentSession).allows(permission) || inject(Router).parseUrl(HOME_PATH);

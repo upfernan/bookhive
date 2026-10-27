@@ -1,6 +1,11 @@
 import { Routes } from '@angular/router';
 import { PermissionCode } from './session/permission-code';
-import { requireAcceptedDataPolicy, requirePermission, requireSession } from './session/session-guards';
+import {
+  requireAcceptedDataPolicy,
+  requirePendingRegistration,
+  requirePermission,
+  requireSession,
+} from './session/session-guards';
 
 export const routes: Routes = [
   {
@@ -13,6 +18,18 @@ export const routes: Routes = [
     title: 'Recuperar contraseña · BookHive',
     loadComponent: () =>
       import('./session/password-reset/password-reset').then((m) => m.PasswordReset),
+  },
+  {
+    path: 'crear-cuenta',
+    title: 'Crear cuenta · BookHive',
+    loadComponent: () => import('./session/sign-up/sign-up').then((m) => m.SignUp),
+  },
+  {
+    path: 'completar-registro',
+    title: 'Termine de crear su cuenta · BookHive',
+    canMatch: [requirePendingRegistration],
+    loadComponent: () =>
+      import('./session/complete-registration/complete-registration').then((m) => m.CompleteRegistration),
   },
   {
     path: 'politica-datos',

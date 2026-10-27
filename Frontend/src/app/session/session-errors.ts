@@ -24,6 +24,24 @@ export function describeSessionError(error: unknown, fallback: string): string {
   return describeIdentityProviderError(code, fallback);
 }
 
+export function describeSignUpError(error: unknown): string {
+  if (error instanceof HttpErrorResponse) {
+    return describeBackendError(error, messages.signUp.failed);
+  }
+
+  const code = identityProviderCodeOf(error);
+
+  if (code === 'auth/weak-password') {
+    return messages.signUp.weakPassword;
+  }
+
+  if (code === 'auth/invalid-email') {
+    return messages.session.emailInvalid;
+  }
+
+  return describeIdentityProviderError(code, messages.signUp.failed);
+}
+
 export function describePasswordResetError(error: unknown): string {
   const code = identityProviderCodeOf(error);
 
