@@ -10,6 +10,7 @@ import co.com.bookhive.circulation.services.input.adapters.ExpireReservationsInp
 import co.com.bookhive.circulation.services.input.adapters.FindBookCopyInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.FindUserContactInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.FindUserInputAdapter;
+import co.com.bookhive.circulation.services.input.adapters.SearchReadersInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.FindUserReservationsInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.LendBookInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.RemindDueLoansInputAdapter;
@@ -25,6 +26,7 @@ import co.com.bookhive.circulation.services.input.ports.ExpireReservationsInputP
 import co.com.bookhive.circulation.services.input.ports.FindBookCopyInputPort;
 import co.com.bookhive.circulation.services.input.ports.FindUserContactInputPort;
 import co.com.bookhive.circulation.services.input.ports.FindUserInputPort;
+import co.com.bookhive.circulation.services.input.ports.SearchReadersInputPort;
 import co.com.bookhive.circulation.services.input.ports.FindUserReservationsInputPort;
 import co.com.bookhive.circulation.services.input.adapters.FindUserAccountInputAdapter;
 import co.com.bookhive.circulation.services.input.ports.FindUserAccountInputPort;
@@ -70,6 +72,8 @@ import co.com.bookhive.circulation.services.usecase.reservation.handoverbookcopy
 import co.com.bookhive.circulation.services.usecase.reservation.reservebook.ReserveBookUseCase;
 import co.com.bookhive.circulation.services.usecase.reservation.reservebook.impl.ReserveBookUseCaseImpl;
 import co.com.bookhive.circulation.services.usecase.user.finduser.FindUserUseCase;
+import co.com.bookhive.circulation.services.usecase.user.searchreaders.SearchReadersUseCase;
+import co.com.bookhive.circulation.services.usecase.user.searchreaders.impl.SearchReadersUseCaseImpl;
 import co.com.bookhive.circulation.services.usecase.user.finduser.impl.FindUserUseCaseImpl;
 import co.com.bookhive.circulation.services.usecase.user.findusercontact.FindUserContactUseCase;
 import co.com.bookhive.circulation.services.usecase.user.findusercontact.impl.FindUserContactUseCaseImpl;
@@ -141,6 +145,20 @@ public class CirculationConfiguration {
 	@Bean
 	FindUserInputPort findUserInputPort(final FindUserUseCase findUserUseCase) {
 		return new FindUserInputAdapter(findUserUseCase, new FindUserMapperImpl());
+	}
+
+	@Bean
+	SearchReadersUseCase searchReadersUseCase(
+			final UserRepository userRepository,
+			final SessionContextPort sessionContext,
+			final AuditPort audit) {
+
+		return new SearchReadersUseCaseImpl(userRepository, sessionContext, audit);
+	}
+
+	@Bean
+	SearchReadersInputPort searchReadersInputPort(final SearchReadersUseCase searchReadersUseCase) {
+		return new SearchReadersInputAdapter(searchReadersUseCase);
 	}
 
 	@Bean

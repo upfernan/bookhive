@@ -107,7 +107,6 @@ public class CatalogConfiguration {
 	FindBookTitleInputPort findBookTitleInputPort(final FindBookTitleUseCase findBookTitleUseCase) {
 		return new FindBookTitleInputAdapter(findBookTitleUseCase);
 	}
-
 	@Bean
 	ListMyReservationsUseCase listMyReservationsUseCase(
 			final UserReservationsPort userReservations,

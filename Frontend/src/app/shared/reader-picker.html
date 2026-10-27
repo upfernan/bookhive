@@ -1,0 +1,35 @@
+<mat-form-field class="picker" appearance="outline" subscriptSizing="dynamic">
+  <mat-label>{{ label() }}</mat-label>
+  <input
+    #readerInput
+    matInput
+    type="search"
+    autocomplete="off"
+    spellcheck="false"
+    [maxlength]="maxLength"
+    [formControl]="control"
+    [matAutocomplete]="readerOptions"
+  />
+  @if (hint()) {
+    <mat-hint>{{ hint() }}</mat-hint>
+  }
+  <mat-autocomplete
+    #readerOptions="matAutocomplete"
+    autoActiveFirstOption
+    [displayWith]="showName"
+    (optionSelected)="choose($event)"
+  >
+    @for (reader of readers(); track reader.id) {
+      <mat-option class="picker__option" [value]="reader">
+        <span class="picker__name">{{ reader.name }}</span>
+        <span class="picker__email">{{ reader.email }}</span>
+      </mat-option>
+    }
+  </mat-autocomplete>
+</mat-form-field>
+
+<p class="picker__status" aria-live="polite">{{ state() === 'found' ? hint() : '' }}</p>
+
+@if (problem()) {
+  <p class="picker__problem" role="alert">{{ problem() }}</p>
+}

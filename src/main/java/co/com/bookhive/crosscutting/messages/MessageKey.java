@@ -55,6 +55,7 @@ public final class MessageKey {
 	public static final String USER_HAS_ACTIVE_LOANS = "user.has-active-loans";
 	public static final String USER_HAS_PENDING_FINES = "user.has-pending-fines";
 	public static final String USER_RETENTION_INVALID = "user.retention.invalid";
+	public static final String USER_SEARCH_TEXT_INVALID = "user.search.text.invalid";
 
 	public static final String RESERVATION_BOOK_REQUIRED = "reservation.book.required";
 	public static final String RESERVATION_USER_NOT_FOUND = "reservation.user.not-found";

@@ -12,8 +12,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import co.com.bookhive.circulation.services.input.dto.request.FindUserRequestDTO;
+import co.com.bookhive.circulation.services.input.dto.request.SearchReadersRequestDTO;
 import co.com.bookhive.circulation.services.input.dto.response.FindUserResponseDTO;
+import co.com.bookhive.circulation.services.input.dto.response.FoundReaderResponseDTO;
 import co.com.bookhive.circulation.services.input.ports.FindUserInputPort;
+import co.com.bookhive.circulation.services.input.ports.SearchReadersInputPort;
 import co.com.bookhive.crosscutting.security.PermissionCode;
 import co.com.bookhive.crosscutting.security.RequiredPermission;
 import co.com.bookhive.shared.services.input.dto.request.ResolveMessageRequestDTO;
@@ -26,15 +29,33 @@ public class UserController {
 	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
 	private final FindUserInputPort findUserInputPort;
+	private final SearchReadersInputPort searchReadersInputPort;
 	private final ResolveMessageInputPort resolveMessageInputPort;
 
 	public UserController(
 			final FindUserInputPort findUserInputPort,
+			final SearchReadersInputPort searchReadersInputPort,
 			final ResolveMessageInputPort resolveMessageInputPort) {
 
 		super();
 		this.findUserInputPort = findUserInputPort;
+		this.searchReadersInputPort = searchReadersInputPort;
 		this.resolveMessageInputPort = resolveMessageInputPort;
+	}
+
+	@RequiredPermission(PermissionCode.LEND_BOOK)
+	@Transactional(readOnly = true)
+	@GetMapping("/busqueda")
+	public ResponseEntity<List<FoundReaderResponseDTO>> search(
+			@RequestParam(name = "texto", required = false) final String text) {
+
+		logger.info("Inicia la búsqueda de lectores para atenderlos en el mostrador.");
+
+		final List<FoundReaderResponseDTO> found = searchReadersInputPort.execute(new SearchReadersRequestDTO(text));
+
+		logger.info("Búsqueda de lectores atendida con {} resultado(s).", found.size());
+
+		return ResponseEntity.ok(found);
 	}
 
 	@RequiredPermission(PermissionCode.LEND_BOOK)

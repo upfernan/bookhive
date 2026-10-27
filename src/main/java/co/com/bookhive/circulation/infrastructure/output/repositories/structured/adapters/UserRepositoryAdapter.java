@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +21,11 @@ import co.com.bookhive.shared.services.output.ports.repositories.criteria.PageCr
 
 @Component
 public class UserRepositoryAdapter implements UserRepository {
+
+	private static final String NAME = "name";
+	private static final String EMAIL = "email";
+	private static final String STATUS = "status";
+	private static final char LIKE_ESCAPE = '\\';
 
 	private final UserJpaRepository repository;
 	private final EntityMapper<UserEntity, UserJpaEntity> mapper;
@@ -55,17 +61,44 @@ public class UserRepositoryAdapter implements UserRepository {
 	@Override
 	public List<UserEntity> findByCriteria(final UserCriteria criteria) {
 
-		if (ObjectHelper.isNull(criteria) || !criteria.filtersByEmail()) {
+		if (ObjectHelper.isNull(criteria)) {
 			return List.of();
 		}
 
-		return repository.findAll(specificationOf(criteria))
-				.stream().map(mapper::toEntity).toList();
+		if (criteria.filtersByEmail()) {
+			return repository.findAll(specificationOf(criteria))
+					.stream().map(mapper::toEntity).toList();
+		}
+
+		if (criteria.filtersByText()) {
+			return repository.findAll(notPurgedMatching(criteria.getText()),
+					PageRequest.of(0, criteria.getLimit(), Sort.by(NAME, EMAIL)))
+					.stream().map(mapper::toEntity).toList();
+		}
+
+		return List.of();
 	}
 
 	private static Specification<UserJpaEntity> specificationOf(final UserCriteria criteria) {
 		return (root, query, builder) -> builder.equal(
-				builder.lower(root.<String>get("email")), criteria.getEmail());
+				builder.lower(root.<String>get(EMAIL)), criteria.getEmail());
+	}
+
+	private static Specification<UserJpaEntity> notPurgedMatching(final String text) {
+		final String pattern = "%" + escapeLike(text) + "%";
+		return (root, query, builder) -> builder.and(
+				builder.notEqual(root.get(STATUS), UserJpaEntity.STATUS_PURGED),
+				builder.or(
+						builder.like(builder.function("translate", String.class, builder.lower(root.<String>get(NAME)),
+								builder.literal("áéíóúüñ"), builder.literal("aeiouun")), pattern, LIKE_ESCAPE),
+						builder.like(builder.lower(root.<String>get(EMAIL)), pattern, LIKE_ESCAPE)));
+	}
+
+	static String escapeLike(final String text) {
+		return text
+				.replace(String.valueOf(LIKE_ESCAPE), String.valueOf(LIKE_ESCAPE) + LIKE_ESCAPE)
+				.replace("%", LIKE_ESCAPE + "%")
+				.replace("_", LIKE_ESCAPE + "_");
 	}
 
 }

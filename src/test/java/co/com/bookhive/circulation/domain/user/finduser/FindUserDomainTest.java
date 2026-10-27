@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -16,7 +17,9 @@ import org.junit.jupiter.api.Test;
 
 import co.com.bookhive.circulation.domain.institution.CurrentInstitution;
 import co.com.bookhive.circulation.domain.loan.lendbook.LendBookDomain;
+import co.com.bookhive.circulation.domain.loan.returnbook.DailyRateFinePolicy;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.ReservationEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.UserEntity;
 import co.com.bookhive.circulation.testdata.FakeRepositories;
@@ -32,6 +35,7 @@ class FindUserDomainTest {
 	private static final String EMAIL = "ana.gomez@uco.edu.co";
 	private static final int LOAN_DAYS = 15;
 	private static final int MAX_LOANS = 3;
+	private static final BigDecimal DAILY_FINE = new BigDecimal("1500");
 
 	private FakeRepositories.Users users;
 	private FakeRepositories.Fines fines;
@@ -95,6 +99,38 @@ class FindUserDomainTest {
 		reservations.with(reservation);
 
 		assertEquals("", search(EMAIL).find().readyReservations().get(0).barcode());
+	}
+
+	@Test
+	@DisplayName("lista los préstamos abiertos con su código, sus días de atraso y la multa que llevan, el que vence primero arriba")
+	void listsOpenLoans() {
+		parameters = new FakeRepositories.Parameters().with(LOAN_DAYS, MAX_LOANS, DAILY_FINE);
+		final LocalDate today = CurrentInstitution.today(CurrentInstitution.parameters(parameters));
+		final LoanEntity onTime = openLoan("BH-0010", today.minusDays(5), today.plusDays(3));
+		final LoanEntity late = openLoan("BH-0011", today.minusDays(20), today.minusDays(2));
+
+		final FoundUserDomain found = search(EMAIL).find();
+
+		assertEquals(2, found.activeLoans());
+		assertEquals(List.of(
+				new OpenLoanDomain(late.getId(), late.getBookCopy().getId(), "BH-0011", late.getBookCopy().getBook(),
+						late.getLoanDate(), late.getDueDate(), 2, new DailyRateFinePolicy(DAILY_FINE).amountFor(2)),
+				new OpenLoanDomain(onTime.getId(), onTime.getBookCopy().getId(), "BH-0010", onTime.getBookCopy().getBook(),
+						onTime.getLoanDate(), onTime.getDueDate(), 0, new DailyRateFinePolicy(DAILY_FINE).amountFor(0))),
+				found.openLoans());
+	}
+
+	@Test
+	@DisplayName("los préstamos abiertos no cambian los bloqueos: quien debe libros igual puede devolverlos")
+	void openLoansDoNotAddBlocks() {
+		parameters = new FakeRepositories.Parameters().with(LOAN_DAYS, MAX_LOANS, DAILY_FINE);
+		final LocalDate today = CurrentInstitution.today(CurrentInstitution.parameters(parameters));
+		openLoan("BH-0012", today.minusDays(30), today.minusDays(10));
+
+		final FoundUserDomain found = search(EMAIL).find();
+
+		assertEquals(1, found.openLoans().size());
+		assertTrue(found.blocks().isEmpty());
 	}
 
 	@Test
@@ -279,6 +315,18 @@ class FindUserDomainTest {
 		return new FindUserDomain(email)
 				.withRepositories(users, fines, loans, parameters)
 				.withReservations(reservations, bookCopies);
+	}
+
+	private LoanEntity openLoan(final String barcode, final LocalDate loanDate, final LocalDate dueDate) {
+		final BookCopyEntity copy = FakeRepositories.bookCopyOf(UUIDHelper.generateNew(), BookCopyEntity.STATUS_LENT);
+		copy.setBarcode(barcode);
+		final LoanEntity loan = new LoanEntity();
+		loan.setId(UUIDHelper.generateNew());
+		loan.setBookCopy(copy);
+		loan.setLoanDate(loanDate);
+		loan.setDueDate(dueDate);
+		loans.withActive(loan);
+		return loan;
 	}
 
 	private ReservationEntity assignedReservation(final UUID user, final String barcode, final LocalDate deadline) {

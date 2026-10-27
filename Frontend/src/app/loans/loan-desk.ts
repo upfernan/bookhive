@@ -15,6 +15,17 @@ export interface ReadyReservation {
   readonly pickupDeadline: string;
 }
 
+export interface OpenLoan {
+  readonly loan: string;
+  readonly bookCopy: string;
+  readonly barcode: string;
+  readonly book: string;
+  readonly loanDate: string;
+  readonly dueDate: string;
+  readonly overdueDays: number;
+  readonly accruedFine: number;
+}
+
 export interface Borrower {
   readonly id: string;
   readonly name: string;
@@ -24,6 +35,7 @@ export interface Borrower {
   readonly pendingFines: number;
   readonly blocks: readonly string[];
   readonly readyReservations: readonly ReadyReservation[];
+  readonly openLoans: readonly OpenLoan[];
 }
 
 export interface BookCopy {
@@ -52,7 +64,7 @@ export class LoanDesk {
     return firstValueFrom(this.http.get<Borrower>(USERS_PATH, { params }));
   }
 
-  findBookCopy(barcode: string, borrower: string): Promise<BookCopy> {
+  findBookCopy(barcode: string, borrower = ''): Promise<BookCopy> {
     let params = new HttpParams().set('codigo', barcode.trim());
     if (borrower !== '') {
       params = params.set('usuario', borrower);
@@ -60,13 +72,11 @@ export class LoanDesk {
     return firstValueFrom(this.http.get<BookCopy>(BOOK_COPIES_PATH, { params }));
   }
 
-  async lend(borrower: Borrower, bookCopy: BookCopy): Promise<RegisteredLoan> {
+  async lend(borrower: string, bookCopy: string): Promise<RegisteredLoan> {
     if (this.csrfToken.getToken() === null) {
       await firstValueFrom(this.http.get(CSRF_TOKEN_SOURCE_PATH));
     }
 
-    return firstValueFrom(
-      this.http.post<RegisteredLoan>(LOANS_PATH, { user: borrower.id, bookCopy: bookCopy.id }),
-    );
+    return firstValueFrom(this.http.post<RegisteredLoan>(LOANS_PATH, { user: borrower, bookCopy }));
   }
 }

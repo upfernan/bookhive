@@ -15,7 +15,8 @@ public record FoundUserDomain(
 		int maxLoans,
 		int pendingFines,
 		List<String> blocks,
-		List<ReadyReservationDomain> readyReservations) {
+		List<ReadyReservationDomain> readyReservations,
+		List<OpenLoanDomain> openLoans) {
 
 	public FoundUserDomain {
 		id = UUIDHelper.getDefaultValue(id);
@@ -26,6 +27,7 @@ public record FoundUserDomain(
 		pendingFines = Math.max(pendingFines, 0);
 		blocks = List.copyOf(ObjectHelper.getDefaultValue(blocks, List.of()));
 		readyReservations = List.copyOf(ObjectHelper.getDefaultValue(readyReservations, List.of()));
+		openLoans = List.copyOf(ObjectHelper.getDefaultValue(openLoans, List.of()));
 	}
 
 }
