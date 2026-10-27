@@ -17,6 +17,7 @@ interface ReservationCard {
   readonly statusClass: string;
   readonly note: string;
   readonly cancellable: boolean;
+  readonly confirmText: string;
 }
 
 @Component({
@@ -34,6 +35,7 @@ export class Reservations {
   protected readonly loading = signal(false);
   protected readonly problem = signal<RequestProblem | null>(null);
   protected readonly cancelling = signal('');
+  protected readonly confirming = signal('');
   protected readonly notice = signal('');
   protected readonly cancelError = signal('');
 
@@ -61,11 +63,26 @@ export class Reservations {
     }
   }
 
-  protected async cancel(card: ReservationCard): Promise<void> {
+  protected ask(card: ReservationCard): void {
     if (this.cancelling() !== '') {
       return;
     }
 
+    this.notice.set('');
+    this.cancelError.set('');
+    this.confirming.set(card.id);
+  }
+
+  protected keep(): void {
+    this.confirming.set('');
+  }
+
+  protected async cancel(card: ReservationCard): Promise<void> {
+    if (this.cancelling() !== '' || this.confirming() !== card.id) {
+      return;
+    }
+
+    this.confirming.set('');
     this.cancelling.set(card.id);
     this.notice.set('');
     this.cancelError.set('');
@@ -102,6 +119,10 @@ export class Reservations {
             ? ''
             : fillTemplate(this.messages.requestedOn, { date: requested }),
       cancellable: waiting || assigned,
+      confirmText: fillTemplate(waiting ? this.messages.confirmWaiting : this.messages.confirmAssigned, {
+        title: item.title === '' ? this.messages.untitled : item.title,
+        position: String(item.position),
+      }),
     };
   }
 }
