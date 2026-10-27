@@ -23,6 +23,7 @@ import co.com.bookhive.circulation.services.input.dto.response.CancelReservation
 import co.com.bookhive.circulation.services.input.dto.response.ReserveBookResponseDTO;
 import co.com.bookhive.circulation.services.input.dto.response.UserReservationResponseDTO;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
+import co.com.bookhive.crosscutting.helper.DateHelper;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;
 
@@ -32,17 +33,18 @@ class ReservationInputAdaptersTest {
 	private static final UUID RESERVATION = UUID.randomUUID();
 
 	@Test
-	@DisplayName("reservar arma el dominio sin usuario y devuelve el puesto en la fila")
+	@DisplayName("reservar arma el dominio sin usuario y devuelve el estado, el puesto y el plazo para recoger")
 	void reserveMapsRequestAndResult() {
+		final LocalDate deadline = LocalDate.of(2026, 10, 29);
 		final List<ReserveBookDomain> received = new ArrayList<>();
 		final ReserveBookInputAdapter adapter = new ReserveBookInputAdapter(domain -> {
 			received.add(domain);
-			return new ReservedBookDomain(RESERVATION, domain.getBook(), "EN_ESPERA", 3);
+			return new ReservedBookDomain(RESERVATION, domain.getBook(), "ASIGNADA", 0, deadline);
 		});
 
 		final ReserveBookResponseDTO response = adapter.execute(new ReserveBookRequestDTO(BOOK));
 
-		assertEquals(new ReserveBookResponseDTO(RESERVATION, BOOK, "EN_ESPERA", 3), response);
+		assertEquals(new ReserveBookResponseDTO(RESERVATION, BOOK, "ASIGNADA", 0, deadline), response);
 		assertEquals(BOOK, received.get(0).getBook());
 		assertEquals(UUIDHelper.getDefaultValue(), received.get(0).getUser());
 	}
@@ -102,16 +104,18 @@ class ReservationInputAdaptersTest {
 	@DisplayName("los registros de reservas convierten los nulos y los puestos negativos en valores por defecto")
 	void recordsReplaceNulls() {
 		final UserReservationResponseDTO empty = new UserReservationResponseDTO(null, null, null, -2, null, null);
-		final ReserveBookResponseDTO reserved = new ReserveBookResponseDTO(null, null, null, -1);
+		final ReserveBookResponseDTO reserved = new ReserveBookResponseDTO(null, null, null, -1, null);
 
 		assertEquals(UUIDHelper.getDefaultValue(), empty.reservation());
 		assertEquals("", empty.status());
 		assertEquals(0, empty.position());
 		assertEquals(0, reserved.position());
+		assertEquals(DateHelper.getDefaultValue(), reserved.pickupDeadline());
 		assertEquals(UUIDHelper.getDefaultValue(), new CancelReservationRequestDTO(null).reservation());
 		assertEquals(UUIDHelper.getDefaultValue(), new ReserveBookRequestDTO(null).book());
 		assertEquals("", new CancelReservationResponseDTO(null, null, null).status());
-		assertEquals(0, new ReservedBookDomain(null, null, null, -5).position());
+		assertEquals(0, new ReservedBookDomain(null, null, null, -5, null).position());
+		assertEquals(DateHelper.getDefaultValue(), new ReservedBookDomain(null, null, null, 0, null).pickupDeadline());
 		assertEquals("", new CancelledReservationDomain(null, null, null).status());
 		assertEquals(0, new UserReservationDomain(null, null, null, -1, null, null).position());
 	}

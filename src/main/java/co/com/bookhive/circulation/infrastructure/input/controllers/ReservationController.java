@@ -47,8 +47,8 @@ public class ReservationController {
 	public ResponseEntity<ReserveBookResponseDTO> reserve(@RequestBody final ReserveBookRequestDTO request) {
 		logger.info("Inicia el registro de una reserva.");
 		final ReserveBookResponseDTO response = reserveBookInputPort.execute(request);
-		final int position = response.position();
-		logger.info("Reserva registrada en el puesto {} de la fila.", position);
+		final String status = response.status();
+		logger.info("Reserva registrada en estado {}.", status);
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 

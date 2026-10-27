@@ -53,14 +53,29 @@ class LendBookUseCaseImplTest {
 	@BeforeEach
 	void prepare() {
 		users = new FakeRepositories.Users().with(FakeRepositories.user(USER, "Ana Gómez", "ana.gomez@uco.edu.co"));
-		bookCopies = new FakeRepositories.BookCopies()
-				.with(FakeRepositories.bookCopy(BOOK_COPY, BookCopyEntity.STATUS_AVAILABLE, true));
+		reserveCopyFor(USER);
 		fines = new FakeRepositories.Fines();
 		loans = new FakeRepositories.Loans();
 		parameters = new FakeRepositories.Parameters().with(LOAN_DAYS, 3);
-		reservations = new FakeRepositories.Reservations();
 		audited = new ArrayList<>();
 		notices = new ArrayList<>();
+	}
+
+	@Test
+	@DisplayName("un ejemplar disponible sin reserva no se presta y no se guarda nada")
+	void availableCopyWithoutReservationIsNotLent() {
+		bookCopies = new FakeRepositories.BookCopies()
+				.with(FakeRepositories.bookCopy(BOOK_COPY, BookCopyEntity.STATUS_AVAILABLE, true));
+		reservations = new FakeRepositories.Reservations();
+		final LendBookUseCaseImpl useCase = useCase();
+		final LendBookDomain request = request();
+
+		final BookHiveException exception = assertThrows(BookHiveException.class, () -> useCase.execute(request));
+
+		assertEquals(MessageKey.BOOK_COPY_NOT_RESERVED_FOR_USER, exception.getUserMessageKey());
+		assertTrue(bookCopies.statusChanges().isEmpty());
+		assertTrue(loans.created().isEmpty());
+		assertTrue(notices.isEmpty());
 	}
 
 	@Test
@@ -100,11 +115,11 @@ class LendBookUseCaseImplTest {
 	}
 
 	@Test
-	@DisplayName("marca el ejemplar como prestado solo si sigue disponible, en una sola instrucción")
+	@DisplayName("marca el ejemplar como prestado solo si sigue apartado, en una sola instrucción")
 	void marksBookCopyAsLent() {
 		useCase().execute(request());
 
-		assertEquals(List.of(BOOK_COPY + ":DISPONIBLE->PRESTADO"), bookCopies.statusChanges());
+		assertEquals(List.of(BOOK_COPY + ":RESERVADO->PRESTADO"), bookCopies.statusChanges());
 		assertTrue(bookCopies.updated().isEmpty());
 	}
 
@@ -143,7 +158,7 @@ class LendBookUseCaseImplTest {
 	@DisplayName("pide el correo de préstamo registrado con el usuario, el libro y la fecha de entrega")
 	void requestsLoanRegisteredNotice() {
 		final UUID book = UUIDHelper.generateNew();
-		final BookCopyEntity copy = FakeRepositories.bookCopy(BOOK_COPY, BookCopyEntity.STATUS_AVAILABLE, true);
+		final BookCopyEntity copy = FakeRepositories.bookCopy(BOOK_COPY, BookCopyEntity.STATUS_RESERVED, true);
 		copy.setBook(book);
 		bookCopies = new FakeRepositories.BookCopies().with(copy);
 
@@ -254,7 +269,7 @@ class LendBookUseCaseImplTest {
 		final ReservationEntity held = FakeRepositories.reservation(
 				UUIDHelper.generateNew(), holder, ReservationEntity.STATUS_ASSIGNED, Instant.now());
 		held.setBookCopy(BOOK_COPY);
-		reservations.with(held);
+		reservations = new FakeRepositories.Reservations().with(held);
 		return held;
 	}
 

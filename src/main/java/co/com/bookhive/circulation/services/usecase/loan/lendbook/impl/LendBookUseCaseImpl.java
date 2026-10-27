@@ -79,18 +79,15 @@ public final class LendBookUseCaseImpl implements LendBookUseCase {
 
 		final BookCopyEntity lentCopy = bookCopyRepository.findById(loan.getBookCopy())
 				.orElseGet(BookCopyEntity::new);
-		final boolean reserved = BookCopyEntity.STATUS_RESERVED.equals(lentCopy.getStatus());
 
-		if (reserved) {
-			pickUpReservation(loan);
-		}
+		pickUpReservation(loan);
 
-		final String expectedStatus = reserved ? BookCopyEntity.STATUS_RESERVED : BookCopyEntity.STATUS_AVAILABLE;
-		if (!bookCopyRepository.changeStatus(loan.getBookCopy(), expectedStatus, BookCopyEntity.STATUS_LENT)) {
+		if (!bookCopyRepository.changeStatus(
+				loan.getBookCopy(), BookCopyEntity.STATUS_RESERVED, BookCopyEntity.STATUS_LENT)) {
 			throw BookHiveException.createConflict(
 					MessageKey.BOOK_COPY_NOT_AVAILABLE,
-					"Otro préstamo del ejemplar " + loan.getBookCopy()
-							+ " se registró al mismo tiempo; el ejemplar ya no estaba " + expectedStatus + " (RT-01).");
+					"Otro préstamo del ejemplar " + loan.getBookCopy() + " se registró al mismo tiempo; el ejemplar ya no"
+							+ " estaba " + BookCopyEntity.STATUS_RESERVED + " (RT-01).");
 		}
 
 		final LocalDate dueDate = loan.calculateDueDate();

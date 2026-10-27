@@ -7,6 +7,14 @@ const USERS_PATH = '/api/v1/usuarios';
 const BOOK_COPIES_PATH = '/api/v1/ejemplares';
 const LOANS_PATH = '/api/v1/prestamos';
 
+export interface ReadyReservation {
+  readonly reservation: string;
+  readonly book: string;
+  readonly bookCopy: string;
+  readonly barcode: string;
+  readonly pickupDeadline: string;
+}
+
 export interface Borrower {
   readonly id: string;
   readonly name: string;
@@ -15,6 +23,7 @@ export interface Borrower {
   readonly maxLoans: number;
   readonly pendingFines: number;
   readonly blocks: readonly string[];
+  readonly readyReservations: readonly ReadyReservation[];
 }
 
 export interface BookCopy {

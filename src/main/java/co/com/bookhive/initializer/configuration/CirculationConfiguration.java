@@ -125,13 +125,17 @@ public class CirculationConfiguration {
 			final UserRepository userRepository,
 			final FineRepository fineRepository,
 			final LoanRepository loanRepository,
-			final InstitutionParametersRepository institutionParametersRepository) {
+			final InstitutionParametersRepository institutionParametersRepository,
+			final ReservationRepository reservationRepository,
+			final BookCopyRepository bookCopyRepository) {
 
 		return new FindUserUseCaseImpl(
 				userRepository,
 				fineRepository,
 				loanRepository,
-				institutionParametersRepository);
+				institutionParametersRepository,
+				reservationRepository,
+				bookCopyRepository);
 	}
 
 	@Bean
@@ -265,7 +269,8 @@ public class CirculationConfiguration {
 			final FineRepository fineRepository,
 			final ReservationRepository reservationRepository,
 			final SessionContextPort sessionContext,
-			final AuditPort audit) {
+			final AuditPort audit,
+			final HandOverBookCopyUseCase handOverBookCopyUseCase) {
 
 		return new ReserveBookUseCaseImpl(
 				userRepository,
@@ -273,7 +278,8 @@ public class CirculationConfiguration {
 				fineRepository,
 				reservationRepository,
 				sessionContext,
-				audit);
+				audit,
+				handOverBookCopyUseCase);
 	}
 
 	@Bean
@@ -284,10 +290,17 @@ public class CirculationConfiguration {
 	@Bean
 	CancelReservationUseCase cancelReservationUseCase(
 			final ReservationRepository reservationRepository,
+			final BookCopyRepository bookCopyRepository,
 			final SessionContextPort sessionContext,
-			final AuditPort audit) {
+			final AuditPort audit,
+			final HandOverBookCopyUseCase handOverBookCopyUseCase) {
 
-		return new CancelReservationUseCaseImpl(reservationRepository, sessionContext, audit);
+		return new CancelReservationUseCaseImpl(
+				reservationRepository,
+				bookCopyRepository,
+				sessionContext,
+				audit,
+				handOverBookCopyUseCase);
 	}
 
 	@Bean

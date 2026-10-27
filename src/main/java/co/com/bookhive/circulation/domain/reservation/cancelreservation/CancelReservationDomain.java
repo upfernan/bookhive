@@ -59,7 +59,7 @@ public final class CancelReservationDomain {
 						MessageKey.RESERVATION_NOT_FOUND,
 						"La reserva " + reservation + " no existe o no es del usuario " + user + "."));
 
-		if (!found.isWaiting()) {
+		if (!found.isWaiting() && !found.isAssigned()) {
 			throw notCancellable(found.getStatus());
 		}
 
@@ -69,8 +69,8 @@ public final class CancelReservationDomain {
 	public BookHiveException notCancellable(final String status) {
 		return BookHiveException.createConflict(
 				MessageKey.RESERVATION_NOT_CANCELLABLE,
-				"La reserva " + reservation + " está en estado " + status
-						+ " y solo se cancela en estado " + ReservationEntity.STATUS_WAITING + ".");
+				"La reserva " + reservation + " está en estado " + status + " y solo se cancela en estado "
+						+ ReservationEntity.STATUS_WAITING + " o " + ReservationEntity.STATUS_ASSIGNED + ".");
 	}
 
 	public UUID getReservation() {

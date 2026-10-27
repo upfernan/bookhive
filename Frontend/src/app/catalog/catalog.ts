@@ -15,7 +15,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { RouterLink } from '@angular/router';
 import { messages } from '../messages';
-import { ReservationDesk } from '../reservations/reservation-desk';
+import { ReservationDesk, ReservationStatus, ReservedBook } from '../reservations/reservation-desk';
 import { CurrentSession } from '../session/current-session';
 import { PermissionCode } from '../session/permission-code';
 import { fillTemplate } from '../shared/fill-template';
@@ -26,6 +26,8 @@ const PAGE_SIZE = 20;
 const MAX_PAGE = 100;
 const DIGITAL_FORMAT = 'DIGITAL';
 const NUMBER_FORMAT = new Intl.NumberFormat('es-CO');
+const PICKUP_DATE_FORMAT = new Intl.DateTimeFormat('es-CO', { weekday: 'long', day: 'numeric', month: 'long' });
+const DEFAULT_YEAR = 1900;
 const NO_FILTERS: SearchFilters = { text: '', author: '', category: '', publisher: '' };
 
 interface FilterOption {
@@ -182,16 +184,36 @@ export class Catalog {
 
     try {
       const reserved = await this.reservationDesk.reserve(book);
-      this.setReservation(book, {
-        status: 'reserved',
-        message: fillTemplate(this.messages.reserved, { position: String(reserved.position) }),
-      });
+      this.setReservation(book, { status: 'reserved', message: this.reservedMessage(reserved) });
+      if (reserved.status === ReservationStatus.assigned) {
+        this.takeOneAvailableCopy(book);
+      }
     } catch (error) {
       this.setReservation(book, {
         status: 'failed',
         message: describeRequestProblem(error, this.messages.reserveFailed).message,
       });
     }
+  }
+
+  private reservedMessage(reserved: ReservedBook): string {
+    const deadline = pickupDateOf(reserved.pickupDeadline);
+    return reserved.status === ReservationStatus.assigned && deadline !== ''
+      ? fillTemplate(this.messages.reservedReady, { date: deadline })
+      : fillTemplate(this.messages.reservedWaiting, { position: String(reserved.position) });
+  }
+
+  private takeOneAvailableCopy(book: string): void {
+    this.result.update((current) =>
+      current === null
+        ? current
+        : {
+            ...current,
+            books: current.books.map((found) =>
+              found.id === book ? { ...found, availableCopies: Math.max(found.availableCopies - 1, 0) } : found,
+            ),
+          },
+    );
   }
 
   private setReservation(book: string, reservation: CardReservation): void {
@@ -218,10 +240,20 @@ export class Catalog {
               total: String(book.totalCopies),
             }),
       availabilityClass: `chip book__availability chip--${tone}`,
-      reservable: this.canReserve() && book.totalCopies > 0 && book.availableCopies === 0,
+      reservable: this.canReserve() && book.totalCopies > 0,
       reservation,
     };
   }
+}
+
+function pickupDateOf(isoDate: string): string {
+  const [year, month, day] = (isoDate ?? '').split('-').map(Number);
+
+  if (!year || !month || !day || year <= DEFAULT_YEAR) {
+    return '';
+  }
+
+  return PICKUP_DATE_FORMAT.format(new Date(year, month - 1, day));
 }
 
 function optionsOf(facet: readonly FacetValue[], selected: string): readonly FilterOption[] {

@@ -2,6 +2,7 @@ package co.com.bookhive.circulation.infrastructure.input.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -22,9 +23,10 @@ class ReservationControllerTest {
 	private static final UUID RESERVATION = UUID.randomUUID();
 
 	@Test
-	@DisplayName("reservar responde 201 con el puesto en la fila")
+	@DisplayName("reservar responde 201 con el estado de la reserva")
 	void reserveRespondsCreated() {
-		final ReserveBookResponseDTO answer = new ReserveBookResponseDTO(RESERVATION, BOOK, "EN_ESPERA", 1);
+		final ReserveBookResponseDTO answer =
+				new ReserveBookResponseDTO(RESERVATION, BOOK, "ASIGNADA", 0, LocalDate.of(2026, 10, 29));
 		final ReservationController controller = new ReservationController(request -> answer, request -> null);
 
 		final ResponseEntity<ReserveBookResponseDTO> response = controller.reserve(new ReserveBookRequestDTO(BOOK));

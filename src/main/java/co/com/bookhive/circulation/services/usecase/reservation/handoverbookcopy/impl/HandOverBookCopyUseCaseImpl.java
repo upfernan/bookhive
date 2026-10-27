@@ -2,6 +2,7 @@ package co.com.bookhive.circulation.services.usecase.reservation.handoverbookcop
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 
 import co.com.bookhive.circulation.domain.institution.CurrentInstitution;
 import co.com.bookhive.circulation.domain.reservation.ReservationQueue;
@@ -56,16 +57,21 @@ public final class HandOverBookCopyUseCaseImpl implements HandOverBookCopyUseCas
 		final HandOverBookCopyDomain handOver = ObjectHelper.getDefaultValue(domain, new HandOverBookCopyDomain(null, null));
 		handOver.validate();
 
+		final List<ReservationEntity> queue = ReservationQueue.inArrivalOrder(
+				reservationRepository.findByCriteria(ReservationCriteria.waitingForBook(handOver.book())));
+
+		if (queue.isEmpty() || !setAside(handOver)) {
+			return HandedOverBookCopyDomain.nobody();
+		}
+
 		final LocalDate pickupDeadline = CurrentInstitution
 				.today(CurrentInstitution.parameters(institutionParametersRepository))
 				.plusDays(pickupDays);
 		final Instant assignedAt = Instant.now();
 
-		for (final ReservationEntity next : ReservationQueue.inArrivalOrder(
-				reservationRepository.findByCriteria(ReservationCriteria.waitingForBook(handOver.book())))) {
+		for (final ReservationEntity next : queue) {
 
 			if (reservationRepository.assign(next.getId(), handOver.bookCopy(), assignedAt, pickupDeadline)) {
-				setAside(handOver);
 				notificationRequests.request(new NotificationRequestEntity(
 						HandOverBookCopyDomain.NOTICE_KIND,
 						next.getUser(),
@@ -76,17 +82,18 @@ public final class HandOverBookCopyUseCaseImpl implements HandOverBookCopyUseCas
 			}
 		}
 
+		putBack(handOver);
 		return HandedOverBookCopyDomain.nobody();
 	}
 
-	private void setAside(final HandOverBookCopyDomain handOver) {
-		if (!bookCopyRepository.changeStatus(
-				handOver.bookCopy(), BookCopyEntity.STATUS_AVAILABLE, BookCopyEntity.STATUS_RESERVED)) {
-			throw BookHiveException.createUnexpected(
-					MessageKey.REQUEST_UNEXPECTED,
-					"El ejemplar " + handOver.bookCopy() + " se asignó a una reserva pero ya no estaba "
-							+ BookCopyEntity.STATUS_AVAILABLE + "; se deshace la asignación.");
-		}
+	private boolean setAside(final HandOverBookCopyDomain handOver) {
+		return bookCopyRepository.changeStatus(
+				handOver.bookCopy(), BookCopyEntity.STATUS_AVAILABLE, BookCopyEntity.STATUS_RESERVED);
+	}
+
+	private void putBack(final HandOverBookCopyDomain handOver) {
+		bookCopyRepository.changeStatus(
+				handOver.bookCopy(), BookCopyEntity.STATUS_RESERVED, BookCopyEntity.STATUS_AVAILABLE);
 	}
 
 	private String nameOf(final ReservationEntity reservation) {

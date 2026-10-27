@@ -14,17 +14,20 @@ public record FindUserResponseDTO(
 		int activeLoans,
 		int maxLoans,
 		int pendingFines,
-		List<String> blocks) {
+		List<String> blocks,
+		List<ReadyReservationResponseDTO> readyReservations) {
 
 	public FindUserResponseDTO {
 		id = UUIDHelper.getDefaultValue(id);
 		name = TextHelper.getDefaultValue(name);
 		email = TextHelper.getDefaultValue(email);
 		blocks = List.copyOf(ObjectHelper.getDefaultValue(blocks, List.of()));
+		readyReservations = List.copyOf(ObjectHelper.getDefaultValue(readyReservations, List.of()));
 	}
 
 	public FindUserResponseDTO withBlocks(final List<String> newBlocks) {
-		return new FindUserResponseDTO(id, name, email, activeLoans, maxLoans, pendingFines, newBlocks);
+		return new FindUserResponseDTO(
+				id, name, email, activeLoans, maxLoans, pendingFines, newBlocks, readyReservations);
 	}
 
 }

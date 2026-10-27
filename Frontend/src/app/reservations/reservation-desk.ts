@@ -15,6 +15,7 @@ export interface ReservedBook {
   readonly book: string;
   readonly status: string;
   readonly position: number;
+  readonly pickupDeadline: string;
 }
 
 export interface MyReservation {

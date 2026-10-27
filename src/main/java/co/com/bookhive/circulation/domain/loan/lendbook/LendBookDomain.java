@@ -237,8 +237,8 @@ public final class LendBookDomain {
 			throw BookHiveException.createConflict(
 					block.get(),
 					"El ejemplar " + bookCopy + " está en estado " + found.getStatus()
-							+ " y para prestarse debe estar " + BookCopyEntity.STATUS_AVAILABLE
-							+ ", o " + BookCopyEntity.STATUS_RESERVED + " para el usuario " + user + ".");
+							+ " y solo se presta sobre una reserva: debe estar " + BookCopyEntity.STATUS_RESERVED
+							+ " para el usuario " + user + ".");
 		}
 	}
 

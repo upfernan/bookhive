@@ -1,8 +1,12 @@
 package co.com.bookhive.circulation.services.usecase.reservation.reservebook.impl;
 
 import java.time.Instant;
+import java.util.Optional;
+import java.util.UUID;
 
 import co.com.bookhive.circulation.domain.reservation.ReservationQueue;
+import co.com.bookhive.circulation.domain.reservation.handoverbookcopy.HandOverBookCopyDomain;
+import co.com.bookhive.circulation.domain.reservation.handoverbookcopy.HandedOverBookCopyDomain;
 import co.com.bookhive.circulation.domain.reservation.reservebook.ReserveBookDomain;
 import co.com.bookhive.circulation.domain.reservation.reservebook.ReservedBookDomain;
 import co.com.bookhive.circulation.services.output.ports.SessionContextPort;
@@ -12,6 +16,7 @@ import co.com.bookhive.circulation.services.output.ports.repositories.Reservatio
 import co.com.bookhive.circulation.services.output.ports.repositories.UserRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.ReservationCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.ReservationEntity;
+import co.com.bookhive.circulation.services.usecase.reservation.handoverbookcopy.HandOverBookCopyUseCase;
 import co.com.bookhive.circulation.services.usecase.reservation.reservebook.ReserveBookUseCase;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
@@ -27,6 +32,7 @@ public final class ReserveBookUseCaseImpl implements ReserveBookUseCase {
 	private final ReservationRepository reservationRepository;
 	private final SessionContextPort sessionContext;
 	private final AuditPort audit;
+	private final HandOverBookCopyUseCase handOverBookCopy;
 
 	public ReserveBookUseCaseImpl(
 			final UserRepository userRepository,
@@ -34,7 +40,8 @@ public final class ReserveBookUseCaseImpl implements ReserveBookUseCase {
 			final FineRepository fineRepository,
 			final ReservationRepository reservationRepository,
 			final SessionContextPort sessionContext,
-			final AuditPort audit) {
+			final AuditPort audit,
+			final HandOverBookCopyUseCase handOverBookCopy) {
 
 		super();
 		this.userRepository = requireDependency(userRepository, "el repositorio de usuarios");
@@ -43,6 +50,7 @@ public final class ReserveBookUseCaseImpl implements ReserveBookUseCase {
 		this.reservationRepository = requireDependency(reservationRepository, "el repositorio de reservas");
 		this.sessionContext = requireDependency(sessionContext, "el contexto de la sesión");
 		this.audit = requireDependency(audit, "la auditoría");
+		this.handOverBookCopy = requireDependency(handOverBookCopy, "la entrega del ejemplar a la fila de reservas");
 	}
 
 	@Override
@@ -68,11 +76,41 @@ public final class ReserveBookUseCaseImpl implements ReserveBookUseCase {
 				reserving.getUser(),
 				reservation.getId() + " libro " + reserving.getBook());
 
-		final int position = ReservationQueue.positionOf(
-				reservation.getId(),
-				reservationRepository.findByCriteria(ReservationCriteria.waitingForBook(reserving.getBook())));
+		return setAsideAFreeCopy(reserving, reservation.getId())
+				.map(handedOver -> new ReservedBookDomain(
+						reservation.getId(),
+						reservation.getBook(),
+						ReservationEntity.STATUS_ASSIGNED,
+						0,
+						handedOver.pickupDeadline()))
+				.orElseGet(() -> new ReservedBookDomain(
+						reservation.getId(),
+						reservation.getBook(),
+						ReservationEntity.STATUS_WAITING,
+						positionInQueue(reservation),
+						null));
+	}
 
-		return new ReservedBookDomain(reservation.getId(), reservation.getBook(), reservation.getStatus(), position);
+	private Optional<HandedOverBookCopyDomain> setAsideAFreeCopy(
+			final ReserveBookDomain reserving,
+			final UUID reservation) {
+
+		for (final UUID bookCopy : reserving.copiesToSetAside()) {
+			final HandedOverBookCopyDomain handedOver = handOverBookCopy
+					.execute(new HandOverBookCopyDomain(bookCopy, reserving.getBook()));
+
+			if (reservation.equals(handedOver.reservation())) {
+				return Optional.of(handedOver);
+			}
+		}
+
+		return Optional.empty();
+	}
+
+	private int positionInQueue(final ReservationEntity reservation) {
+		return ReservationQueue.positionOf(
+				reservation.getId(),
+				reservationRepository.findByCriteria(ReservationCriteria.waitingForBook(reservation.getBook())));
 	}
 
 	private static ReserveBookDomain requireData(final ReserveBookDomain domain) {
