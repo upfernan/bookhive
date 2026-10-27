@@ -7,12 +7,10 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.BookCopyJpaEntity;
 
-@Repository
 public interface BookCopyJpaRepository
 		extends JpaRepository<BookCopyJpaEntity, UUID>,
 		JpaSpecificationExecutor<BookCopyJpaEntity> {

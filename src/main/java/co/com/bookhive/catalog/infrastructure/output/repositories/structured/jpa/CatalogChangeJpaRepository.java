@@ -8,12 +8,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import co.com.bookhive.catalog.infrastructure.output.repositories.structured.jpa.entities.CatalogChangeJpaEntity;
 
-@Repository
+
 public interface CatalogChangeJpaRepository extends JpaRepository<CatalogChangeJpaEntity, UUID> {
 
 	@Query(value = "SELECT id, book_id, changed_at FROM catalog_change WHERE sent_at IS NULL"
