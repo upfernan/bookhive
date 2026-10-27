@@ -7,12 +7,10 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import co.com.bookhive.payment.infrastructure.output.repositories.structured.jpa.entities.FinePaymentEventJpaEntity;
 
-@Repository
 public interface FinePaymentEventJpaRepository
 		extends JpaRepository<FinePaymentEventJpaEntity, UUID>,
 		JpaSpecificationExecutor<FinePaymentEventJpaEntity> {

@@ -1,11 +1,11 @@
 {
   "/api": {
-    "target": "https://136.81.95.29.nip.io",
+    "target": "https://bookhive.site",
     "secure": true,
     "changeOrigin": true
   },
   "/actuator": {
-    "target": "https://136.81.95.29.nip.io",
+    "target": "https://bookhive.site",
     "secure": true,
     "changeOrigin": true
   }

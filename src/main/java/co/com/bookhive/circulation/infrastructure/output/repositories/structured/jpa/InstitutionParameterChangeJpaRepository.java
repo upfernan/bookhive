@@ -3,10 +3,9 @@ package co.com.bookhive.circulation.infrastructure.output.repositories.structure
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.InstitutionParameterChangeJpaEntity;
 
-@Repository
+
 public interface InstitutionParameterChangeJpaRepository extends JpaRepository<InstitutionParameterChangeJpaEntity, UUID> {
 }

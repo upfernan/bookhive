@@ -17,7 +17,7 @@ npm install
 npm start
 ```
 
-La aplicación queda en `http://localhost:4200/`. Las rutas `/api` y `/actuator` se envían al balanceador de cargas (`https://136.81.95.29.nip.io`), según `proxy.conf.json`. El balanceador las pasa al API Gateway y este al backend; ni el gateway ni el backend se pueden llamar directamente.
+La aplicación queda en `http://localhost:4200/`. Las rutas `/api` y `/actuator` se envían al balanceador de cargas (`https://bookhive.site`), según `proxy.conf.json`. El balanceador las pasa al API Gateway y este al backend; ni el gateway ni el backend se pueden llamar directamente.
 
 ## Compilación
 
