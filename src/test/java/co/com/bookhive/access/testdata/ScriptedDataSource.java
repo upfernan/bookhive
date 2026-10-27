@@ -29,6 +29,11 @@ public final class ScriptedDataSource {
 		return this;
 	}
 
+	public ScriptedDataSource answer(final String fragment, final Function<List<Object>, Object[][]> rows) {
+		rules.add(0, new Rule(fragment, values -> List.of(rows.apply(values))));
+		return this;
+	}
+
 	public ScriptedDataSource fails(final String fragment, final String sqlState) {
 		rules.add(0, new Rule(fragment, values -> new SQLException("falla simulada", sqlState)));
 		return this;

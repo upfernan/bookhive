@@ -34,7 +34,15 @@ public class RegistrationRepositoryAdapter implements RegistrationRepository {
 			"INSERT INTO compartido.persona (id, identidad, institucion_id, estado) VALUES (?, ?, ?, 'ACTIVA')";
 	private static final String INSERT_USER = "INSERT INTO library_user (id, name, email, status) VALUES (?, ?, ?, 'ACTIVO')";
 	private static final String INSERT_ROLE = "INSERT INTO person_role (person_id, role_id)"
-			+ " SELECT ?, id FROM role WHERE name = 'LECTOR' ON CONFLICT DO NOTHING";
+			+ " SELECT ?, id FROM role WHERE name = ? ON CONFLICT DO NOTHING";
+	private static final String SELF_REGISTERED =
+			"SELECT id FROM compartido.institucion WHERE id = ? AND alta = 'AUTOREGISTRO'";
+	private static final String ANY_ADMINISTRATOR = "SELECT pr.person_id FROM person_role pr JOIN role r ON r.id = pr.role_id"
+			+ " WHERE r.name = 'ADMINISTRADOR' LIMIT 1";
+	private static final String DEFAULT_POLICY = "SELECT texto FROM compartido.mensaje WHERE codigo = 'data-policy.default'";
+	private static final String READER = "LECTOR";
+	private static final String ADMINISTRATOR = "ADMINISTRADOR";
+	private static final int DEFAULT_POLICY_VERSION = 1;
 	private static final String CURRENT_POLICY = "SELECT coalesce(max(version), 0) FROM data_policy";
 	private static final String CURRENT_POLICY_TEXT =
 			"SELECT version, content, published_at FROM data_policy ORDER BY version DESC LIMIT 1";
@@ -106,6 +114,19 @@ public class RegistrationRepositoryAdapter implements RegistrationRepository {
 	}
 
 	@Override
+	public Optional<PublicPolicy> defaultPolicy() {
+		try (Connection connection = dataSource.getConnection();
+			 PreparedStatement statement = connection.prepareStatement(DEFAULT_POLICY);
+			 ResultSet result = statement.executeQuery()) {
+			return result.next()
+					? Optional.of(new PublicPolicy(DEFAULT_POLICY_VERSION, result.getString(1), null))
+					: Optional.empty();
+		} catch (final SQLException exception) {
+			throw failure(exception, "Falló la consulta del aviso de datos base.");
+		}
+	}
+
+	@Override
 	public NewPerson register(final NewPerson person, final DomainInstitution institution) {
 		try (Connection connection = dataSource.getConnection()) {
 			return registerWithin(connection, person, institution);
@@ -149,13 +170,15 @@ public class RegistrationRepositoryAdapter implements RegistrationRepository {
 			throw BookHiveException.createConflict(MessageKey.REGISTRATION_ALREADY_REGISTERED,
 					"El correo de la persona " + id + " ya tiene una cuenta.");
 		}
+		final boolean selfRegistered = exists(connection, SELF_REGISTERED, institution.institution());
 		update(connection, INSERT_PERSON, id, person.identity(), institution.institution());
 
 		enterInstitution(connection, institution.schema());
 		if (existingUser.isEmpty()) {
 			update(connection, INSERT_USER, id, person.name(), person.email());
 		}
-		update(connection, INSERT_ROLE, id);
+		final boolean firstAdministrator = selfRegistered && !exists(connection, ANY_ADMINISTRATOR, null);
+		update(connection, INSERT_ROLE, id, firstAdministrator ? ADMINISTRATOR : READER);
 		update(connection, INSERT_ACCEPTANCE, id, person.policyVersion());
 		return new NewPerson(id, person.identity(), person.name(), person.email(), person.policyVersion());
 	}
@@ -187,7 +210,9 @@ public class RegistrationRepositoryAdapter implements RegistrationRepository {
 
 	private static Optional<UUID> first(final Connection connection, final String sql, final Object value) throws SQLException {
 		try (PreparedStatement statement = connection.prepareStatement(sql)) {
-			statement.setObject(1, value);
+			if (value != null) {
+				statement.setObject(1, value);
+			}
 			try (ResultSet result = statement.executeQuery()) {
 				return result.next() ? Optional.of(result.getObject(1, UUID.class)) : Optional.empty();
 			}

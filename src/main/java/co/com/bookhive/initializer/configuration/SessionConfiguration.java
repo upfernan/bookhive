@@ -35,6 +35,7 @@ import co.com.bookhive.access.services.input.ports.ListActiveSchemasInputPort;
 import co.com.bookhive.access.services.input.ports.OpenSessionInputPort;
 import co.com.bookhive.access.services.input.ports.ResolveSchemaInputPort;
 import co.com.bookhive.access.services.output.ports.IdentityProviderPort;
+import co.com.bookhive.access.services.output.ports.InstitutionProvisioningPort;
 import co.com.bookhive.access.services.output.ports.SessionIdentityPort;
 import co.com.bookhive.access.services.output.ports.repositories.DataPolicyAcceptanceRepository;
 import co.com.bookhive.access.services.output.ports.repositories.DataPolicyRepository;
@@ -139,9 +140,11 @@ public class SessionConfiguration {
 	RegisterPersonInputPort registerPersonInputPort(
 			final IdentityProviderPort identityProvider,
 			final RegistrationRepository registrationRepository,
+			final InstitutionProvisioningPort institutionProvisioning,
 			final AuditPort audit) {
 
-		return new RegisterPersonInputAdapter(new RegisterPersonUseCaseImpl(identityProvider, registrationRepository, audit));
+		return new RegisterPersonInputAdapter(new RegisterPersonUseCaseImpl(
+				identityProvider, registrationRepository, institutionProvisioning, audit));
 	}
 
 	@Bean

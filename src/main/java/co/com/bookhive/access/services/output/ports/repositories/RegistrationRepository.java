@@ -14,6 +14,8 @@ public interface RegistrationRepository {
 
 	Optional<PublicPolicy> currentPolicyOf(DomainInstitution institution);
 
+	Optional<PublicPolicy> defaultPolicy();
+
 	NewPerson register(NewPerson person, DomainInstitution institution);
 
 }
