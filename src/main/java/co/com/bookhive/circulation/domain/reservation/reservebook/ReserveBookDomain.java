@@ -61,8 +61,17 @@ public final class ReserveBookDomain {
 		BorrowerChecks.requireActive(found);
 		BorrowerChecks.requireWithoutPendingFines(fineRepository, user);
 
-		validateCopiesAreTaken();
+		validateBookIsLendable();
 		validateNoActiveReservation();
+	}
+
+	public List<UUID> copiesToSetAside() {
+		requireRepositories();
+
+		return lendableCopies().stream()
+				.filter(copy -> BookCopyEntity.STATUS_AVAILABLE.equals(copy.getStatus()))
+				.map(BookCopyEntity::getId)
+				.toList();
 	}
 
 	public UUID getBook() {
@@ -89,23 +98,19 @@ public final class ReserveBookDomain {
 		}
 	}
 
-	private void validateCopiesAreTaken() {
-		final List<BookCopyEntity> lendable = bookCopyRepository
-				.findByCriteria(BookCopyCriteria.inService(List.of(book))).stream()
-				.filter(BookCopyEntity::isLendable)
-				.toList();
-
-		if (lendable.isEmpty()) {
+	private void validateBookIsLendable() {
+		if (lendableCopies().isEmpty()) {
 			throw BookHiveException.createConflict(
 					MessageKey.RESERVATION_BOOK_NOT_RESERVABLE,
 					"El libro " + book + " no tiene ejemplares en servicio que se presten a domicilio.");
 		}
+	}
 
-		if (lendable.stream().anyMatch(copy -> BookCopyEntity.STATUS_AVAILABLE.equals(copy.getStatus()))) {
-			throw BookHiveException.createConflict(
-					MessageKey.RESERVATION_COPIES_AVAILABLE,
-					"El libro " + book + " tiene ejemplares disponibles; se presta, no se reserva.");
-		}
+	private List<BookCopyEntity> lendableCopies() {
+		return bookCopyRepository
+				.findByCriteria(BookCopyCriteria.inService(List.of(book))).stream()
+				.filter(BookCopyEntity::isLendable)
+				.toList();
 	}
 
 	private void validateNoActiveReservation() {

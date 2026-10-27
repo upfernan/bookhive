@@ -102,6 +102,35 @@
         <h2 id="step-copy" class="step__title">{{ messages.copyStep }}</h2>
       </div>
 
+      @if (borrower()) {
+        <section class="ready" aria-labelledby="ready-title">
+          <h3 id="ready-title" class="ready__title">{{ messages.readyTitle }}</h3>
+          @if (readyCards().length === 0) {
+            <p class="ready__empty">{{ messages.readyEmpty }}</p>
+          } @else {
+            <ul class="ready__list">
+              @for (card of readyCards(); track card.reservation) {
+                <li class="ready__item" [class.ready__item--chosen]="isChosen(card)">
+                  <div class="ready__text">
+                    <p class="ready__book">{{ card.title }}</p>
+                    <p class="ready__details">{{ card.details }}</p>
+                  </div>
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    [disabled]="!card.copy || isChosen(card)"
+                    [attr.aria-pressed]="isChosen(card)"
+                    (click)="choose(card)"
+                  >
+                    {{ isChosen(card) ? messages.readyChosen : messages.readyChoose }}
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      }
+
       <form class="step__search" [formGroup]="copyForm" (ngSubmit)="searchBookCopy()" novalidate>
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>{{ messages.copyLabel }}</mat-label>

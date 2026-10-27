@@ -15,7 +15,10 @@ import org.junit.jupiter.api.Test;
 
 import co.com.bookhive.circulation.domain.reservation.cancelreservation.CancelReservationDomain;
 import co.com.bookhive.circulation.domain.reservation.cancelreservation.CancelledReservationDomain;
+import co.com.bookhive.circulation.domain.reservation.handoverbookcopy.HandOverBookCopyDomain;
+import co.com.bookhive.circulation.domain.reservation.handoverbookcopy.HandedOverBookCopyDomain;
 import co.com.bookhive.circulation.services.output.ports.SessionContextPort;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.ReservationEntity;
 import co.com.bookhive.circulation.testdata.FakeRepositories;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
@@ -29,15 +32,19 @@ class CancelReservationUseCaseImplTest {
 	private static final UUID INSTITUTION = UUID.randomUUID();
 
 	private FakeRepositories.Reservations reservations;
+	private FakeRepositories.BookCopies bookCopies;
 	private ReservationEntity waiting;
 	private List<String> audited;
+	private List<HandOverBookCopyDomain> handedOver;
 	private UUID sessionUser;
 
 	@BeforeEach
 	void prepare() {
 		waiting = FakeRepositories.reservation(BOOK, READER, ReservationEntity.STATUS_WAITING, Instant.now());
 		reservations = new FakeRepositories.Reservations().with(waiting);
+		bookCopies = new FakeRepositories.BookCopies();
 		audited = new ArrayList<>();
+		handedOver = new ArrayList<>();
 		sessionUser = READER;
 	}
 
@@ -52,6 +59,32 @@ class CancelReservationUseCaseImplTest {
 		assertEquals(ReservationEntity.STATUS_CANCELLED, waiting.getStatus());
 		assertEquals(List.of(AuditPort.RESERVATION_CANCELLED + " " + INSTITUTION + " " + READER + " " + waiting.getId()),
 				audited);
+		assertTrue(handedOver.isEmpty());
+	}
+
+	@Test
+	@DisplayName("cancela la reserva con ejemplar apartado, libera el ejemplar y se lo pasa a la fila")
+	void cancelsAssignedReservationAndReleasesTheCopy() {
+		final ReservationEntity assigned = assignedWithCopy(BookCopyEntity.STATUS_RESERVED);
+
+		final CancelledReservationDomain cancelled = useCase().execute(request(assigned.getId()));
+
+		assertEquals(ReservationEntity.STATUS_CANCELLED, cancelled.status());
+		assertEquals(ReservationEntity.STATUS_CANCELLED, assigned.getStatus());
+		assertEquals(List.of(assigned.getBookCopy() + ":RESERVADO->DISPONIBLE"), bookCopies.statusChanges());
+		assertEquals(List.of(new HandOverBookCopyDomain(assigned.getBookCopy(), BOOK)), handedOver);
+	}
+
+	@Test
+	@DisplayName("si el ejemplar apartado ya no estaba reservado, cancela sin pasarlo a la fila")
+	void cancelsAssignedReservationWhoseCopyChanged() {
+		final ReservationEntity assigned = assignedWithCopy(BookCopyEntity.STATUS_LENT);
+
+		useCase().execute(request(assigned.getId()));
+
+		assertEquals(ReservationEntity.STATUS_CANCELLED, assigned.getStatus());
+		assertTrue(bookCopies.statusChanges().isEmpty());
+		assertTrue(handedOver.isEmpty());
 	}
 
 	@Test
@@ -67,13 +100,13 @@ class CancelReservationUseCaseImplTest {
 	}
 
 	@Test
-	@DisplayName("una reserva que ya no está en espera no se cancela")
-	void onlyWaitingReservationsAreCancelled() {
-		waiting.setStatus(ReservationEntity.STATUS_ASSIGNED);
+	@DisplayName("una reserva ya retirada, vencida o cancelada no se cancela")
+	void onlyActiveReservationsAreCancelled() {
+		waiting.setStatus(ReservationEntity.STATUS_PICKED_UP);
 
 		final BookHiveException exception = assertRejected(waiting.getId(), MessageKey.RESERVATION_NOT_CANCELLABLE);
 
-		assertTrue(exception.getTechnicalMessage().contains(ReservationEntity.STATUS_ASSIGNED));
+		assertTrue(exception.getTechnicalMessage().contains(ReservationEntity.STATUS_PICKED_UP));
 	}
 
 	@Test
@@ -115,7 +148,27 @@ class CancelReservationUseCaseImplTest {
 				assertThrows(BookHiveException.class, withoutPorts::validate).getKind());
 		assertEquals(BookHiveException.Kind.UNEXPECTED,
 				assertThrows(BookHiveException.class, withoutPorts::findCancellable).getKind());
-		assertThrows(BookHiveException.class, () -> new CancelReservationUseCaseImpl(null, session, this::audit));
+		assertThrows(BookHiveException.class,
+				() -> new CancelReservationUseCaseImpl(null, bookCopies, session, this::audit, this::handOver));
+		assertThrows(BookHiveException.class,
+				() -> new CancelReservationUseCaseImpl(reservations, null, session, this::audit, this::handOver));
+		assertThrows(BookHiveException.class,
+				() -> new CancelReservationUseCaseImpl(reservations, bookCopies, session, this::audit, null));
+	}
+
+	private ReservationEntity assignedWithCopy(final String copyStatus) {
+		final BookCopyEntity copy = FakeRepositories.bookCopyOf(BOOK, copyStatus);
+		bookCopies.with(copy);
+		final ReservationEntity assigned =
+				FakeRepositories.reservation(BOOK, READER, ReservationEntity.STATUS_ASSIGNED, Instant.now());
+		assigned.setBookCopy(copy.getId());
+		reservations.with(assigned);
+		return assigned;
+	}
+
+	private HandedOverBookCopyDomain handOver(final HandOverBookCopyDomain domain) {
+		handedOver.add(domain);
+		return HandedOverBookCopyDomain.nobody();
 	}
 
 	private BookHiveException assertRejected(final UUID reservation, final String messageKey) {
@@ -135,7 +188,7 @@ class CancelReservationUseCaseImplTest {
 	}
 
 	private CancelReservationUseCaseImpl useCase() {
-		return new CancelReservationUseCaseImpl(reservations, new FakeSession(), this::audit);
+		return new CancelReservationUseCaseImpl(reservations, bookCopies, new FakeSession(), this::audit, this::handOver);
 	}
 
 	private void audit(final String action, final UUID institution, final UUID person, final String detail) {

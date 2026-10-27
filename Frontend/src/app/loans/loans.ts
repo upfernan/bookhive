@@ -18,6 +18,15 @@ import { fillTemplate } from '../shared/fill-template';
 import { RequestProblem, describeRequestProblem } from '../shared/request-errors';
 import { BookCopy, Borrower, LoanDesk } from './loan-desk';
 
+interface ReadyCard {
+  readonly reservation: string;
+  readonly bookCopy: string;
+  readonly barcode: string;
+  readonly title: string;
+  readonly details: string;
+  readonly copy: BookCopy | null;
+}
+
 interface AttentionLoan {
   readonly loan: string;
   readonly title: string;
@@ -72,8 +81,31 @@ export class Loans {
   protected readonly registerProblem = signal<RequestProblem | null>(null);
   protected readonly confirmation = signal<Confirmation | null>(null);
   protected readonly attention = signal<readonly AttentionLoan[]>([]);
+  private readonly readyCopies = signal<ReadonlyMap<string, BookCopy>>(new Map());
 
   protected readonly initials = computed(() => initialsOf(this.borrower()?.name ?? ''));
+
+  protected readonly readyCards = computed<readonly ReadyCard[]>(() => {
+    const copies = this.readyCopies();
+    return (this.borrower()?.readyReservations ?? []).map((ready) => {
+      const copy = copies.get(ready.bookCopy) ?? null;
+      const pickup = formatDueDate(ready.pickupDeadline);
+      return {
+        reservation: ready.reservation,
+        bookCopy: ready.bookCopy,
+        barcode: ready.barcode,
+        title: copy?.title || this.messages.readyUntitled,
+        details: [
+          `${this.messages.barcode}: ${ready.barcode}`,
+          copy?.branch ? `${this.messages.branch}: ${copy.branch}` : '',
+          fillTemplate(this.messages.readyPickup, { date: pickup }),
+        ]
+          .filter((part) => part !== '')
+          .join(' · '),
+        copy,
+      };
+    });
+  });
 
   protected readonly loansSummary = computed(() => {
     const borrower = this.borrower();
@@ -120,9 +152,11 @@ export class Loans {
     this.startAttention();
 
     try {
-      this.borrower.set(await this.desk.findBorrower(this.borrowerForm.controls.email.value));
+      const borrower = await this.desk.findBorrower(this.borrowerForm.controls.email.value);
+      this.borrower.set(borrower);
       this.copyForm.enable();
       this.focus(this.copyInput);
+      void this.loadReadyCopies(borrower);
     } catch (error) {
       this.borrowerProblem.set(describeRequestProblem(error, this.messages.borrowerNotFound).message);
     } finally {
@@ -200,6 +234,21 @@ export class Loans {
     }
   }
 
+  protected choose(card: ReadyCard): void {
+    if (!card.copy) {
+      return;
+    }
+
+    this.clearOutcome();
+    this.copyProblem.set('');
+    this.copyForm.controls.barcode.setValue(card.barcode);
+    this.bookCopy.set(card.copy);
+  }
+
+  protected isChosen(card: ReadyCard): boolean {
+    return this.bookCopy()?.id === card.bookCopy && this.confirmation() === null;
+  }
+
   protected lendAnother(): void {
     this.clearOutcome();
     this.bookCopy.set(null);
@@ -219,6 +268,7 @@ export class Loans {
   private startAttention(): void {
     this.clearOutcome();
     this.attention.set([]);
+    this.readyCopies.set(new Map());
     this.bookCopy.set(null);
     this.copyProblem.set('');
     this.copyForm.reset();
@@ -233,10 +283,32 @@ export class Loans {
 
   private async refreshBorrower(email: string): Promise<void> {
     try {
-      this.borrower.set(await this.desk.findBorrower(email));
+      const borrower = await this.desk.findBorrower(email);
+      this.borrower.set(borrower);
+      await this.loadReadyCopies(borrower);
     } catch {
       return;
     }
+  }
+
+  private async loadReadyCopies(borrower: Borrower): Promise<void> {
+    const found = await Promise.allSettled(
+      (borrower.readyReservations ?? [])
+        .filter((ready) => ready.barcode !== '')
+        .map((ready) => this.desk.findBookCopy(ready.barcode, borrower.id)),
+    );
+
+    if (this.borrower()?.id !== borrower.id) {
+      return;
+    }
+
+    this.readyCopies.set(
+      new Map(
+        found
+          .filter((result): result is PromiseFulfilledResult<BookCopy> => result.status === 'fulfilled')
+          .map((result) => [result.value.id, result.value]),
+      ),
+    );
   }
 
   private focus(input: Signal<ElementRef<HTMLInputElement> | undefined>): void {

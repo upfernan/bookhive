@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -13,14 +14,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import co.com.bookhive.circulation.domain.institution.CurrentInstitution;
+import co.com.bookhive.circulation.domain.reservation.handoverbookcopy.HandOverBookCopyDomain;
+import co.com.bookhive.circulation.domain.reservation.handoverbookcopy.HandedOverBookCopyDomain;
 import co.com.bookhive.circulation.domain.reservation.reservebook.ReserveBookDomain;
 import co.com.bookhive.circulation.domain.reservation.reservebook.ReservedBookDomain;
 import co.com.bookhive.circulation.services.output.ports.SessionContextPort;
+import co.com.bookhive.circulation.services.output.ports.entities.NotificationRequestEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.ReservationEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.UserEntity;
+import co.com.bookhive.circulation.services.usecase.reservation.handoverbookcopy.impl.HandOverBookCopyUseCaseImpl;
 import co.com.bookhive.circulation.testdata.FakeRepositories;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
+import co.com.bookhive.crosscutting.helper.DateHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;
 import co.com.bookhive.shared.services.output.ports.AuditPort;
 
@@ -29,12 +36,15 @@ class ReserveBookUseCaseImplTest {
 	private static final UUID BOOK = UUID.randomUUID();
 	private static final UUID READER = UUID.randomUUID();
 	private static final UUID INSTITUTION = UUID.randomUUID();
+	private static final int PICKUP_DAYS = 2;
 
 	private FakeRepositories.Users users;
 	private FakeRepositories.BookCopies bookCopies;
 	private FakeRepositories.Fines fines;
 	private FakeRepositories.Reservations reservations;
+	private FakeRepositories.Parameters parameters;
 	private List<String> audited;
+	private List<NotificationRequestEntity> notices;
 	private UUID sessionUser;
 
 	@BeforeEach
@@ -45,8 +55,47 @@ class ReserveBookUseCaseImplTest {
 				.with(FakeRepositories.bookCopyOf(BOOK, BookCopyEntity.STATUS_RESERVED));
 		fines = new FakeRepositories.Fines();
 		reservations = new FakeRepositories.Reservations();
+		parameters = new FakeRepositories.Parameters().with(15, 3);
 		audited = new ArrayList<>();
+		notices = new ArrayList<>();
 		sessionUser = READER;
+	}
+
+	@Test
+	@DisplayName("con un ejemplar libre lo aparta de una vez, con plazo para recogerlo, y le avisa al lector")
+	void setsAsideAFreeCopyRightAway() {
+		final BookCopyEntity free = FakeRepositories.bookCopyOf(BOOK, BookCopyEntity.STATUS_AVAILABLE);
+		bookCopies.with(free);
+		final LocalDate deadline = today().plusDays(PICKUP_DAYS);
+
+		final ReservedBookDomain reserved = useCase().execute(new ReserveBookDomain(BOOK, null));
+
+		final ReservationEntity created = reservations.created().get(0);
+		assertEquals(ReservationEntity.STATUS_ASSIGNED, created.getStatus());
+		assertEquals(free.getId(), created.getBookCopy());
+		assertEquals(BookCopyEntity.STATUS_RESERVED, free.getStatus());
+		assertEquals(new ReservedBookDomain(created.getId(), BOOK, ReservationEntity.STATUS_ASSIGNED, 0, deadline),
+				reserved);
+		assertEquals(List.of(new NotificationRequestEntity(
+				HandOverBookCopyDomain.NOTICE_KIND, READER, BOOK, created.getId(), deadline)), notices);
+	}
+
+	@Test
+	@DisplayName("la respuesta sale de lo que apartó la entrega a la fila, sin volver a leer la reserva")
+	void answerComesFromTheHandOver() {
+		bookCopies.with(FakeRepositories.bookCopyOf(BOOK, BookCopyEntity.STATUS_AVAILABLE));
+		final LocalDate deadline = LocalDate.of(2026, 10, 29);
+		final ReserveBookUseCaseImpl useCase = new ReserveBookUseCaseImpl(
+				users, bookCopies, fines, reservations, new FakeSession(), this::audit,
+				handOver -> new HandedOverBookCopyDomain(
+						reservations.created().get(0).getId(), READER, "Ana Pérez", deadline));
+
+		final ReservedBookDomain reserved = useCase.execute(new ReserveBookDomain(BOOK, null));
+
+		assertEquals(ReservationEntity.STATUS_WAITING, reservations.created().get(0).getStatus());
+		assertEquals(ReservationEntity.STATUS_ASSIGNED, reserved.status());
+		assertEquals(0, reserved.position());
+		assertEquals(deadline, reserved.pickupDeadline());
 	}
 
 	@Test
@@ -65,16 +114,39 @@ class ReserveBookUseCaseImplTest {
 		assertEquals(BOOK, reserved.book());
 		assertEquals(ReservationEntity.STATUS_WAITING, reserved.status());
 		assertEquals(2, reserved.position());
+		assertEquals(DateHelper.getDefaultValue(), reserved.pickupDeadline());
+		assertTrue(notices.isEmpty());
 		assertEquals(List.of(AuditPort.RESERVATION_CREATED + " " + INSTITUTION + " " + READER + " "
 				+ created.getId() + " libro " + BOOK), audited);
 	}
 
 	@Test
-	@DisplayName("si hay un ejemplar disponible se presta, no se reserva")
-	void rejectsWhenACopyIsAvailable() {
-		bookCopies.with(FakeRepositories.bookCopyOf(BOOK, BookCopyEntity.STATUS_AVAILABLE));
+	@DisplayName("si alguien ya esperaba en la fila, el ejemplar libre es para esa persona y la nueva reserva espera")
+	void freeCopyGoesFirstToWhoWasWaiting() {
+		final ReservationEntity earlier = FakeRepositories.reservation(
+				BOOK, UUID.randomUUID(), ReservationEntity.STATUS_WAITING, Instant.parse("2026-10-20T10:00:00Z"));
+		reservations.with(earlier);
+		final BookCopyEntity free = FakeRepositories.bookCopyOf(BOOK, BookCopyEntity.STATUS_AVAILABLE);
+		bookCopies.with(free);
 
-		assertRejected(MessageKey.RESERVATION_COPIES_AVAILABLE);
+		final ReservedBookDomain reserved = useCase().execute(new ReserveBookDomain(BOOK, null));
+
+		assertEquals(ReservationEntity.STATUS_ASSIGNED, earlier.getStatus());
+		assertEquals(free.getId(), earlier.getBookCopy());
+		assertEquals(ReservationEntity.STATUS_WAITING, reserved.status());
+		assertEquals(1, reserved.position());
+	}
+
+	@Test
+	@DisplayName("si otra petición se llevó el ejemplar libre, la reserva queda en espera sin fallar")
+	void copyTakenByOtherRequestLeavesTheReservationWaiting() {
+		bookCopies.with(FakeRepositories.bookCopyOf(BOOK, BookCopyEntity.STATUS_AVAILABLE)).changedByOtherRequest();
+
+		final ReservedBookDomain reserved = useCase().execute(new ReserveBookDomain(BOOK, null));
+
+		assertEquals(ReservationEntity.STATUS_WAITING, reserved.status());
+		assertEquals(1, reserved.position());
+		assertTrue(notices.isEmpty());
 	}
 
 	@Test
@@ -86,11 +158,16 @@ class ReserveBookUseCaseImplTest {
 	}
 
 	@Test
-	@DisplayName("un ejemplar de consulta en sala disponible no cuenta como disponible para llevar")
-	void referenceCopyDoesNotBlockTheReservation() {
-		bookCopies.with(referenceCopy());
+	@DisplayName("un ejemplar de consulta en sala disponible no se aparta para llevar")
+	void referenceCopyIsNotSetAside() {
+		final BookCopyEntity reference = referenceCopy();
+		bookCopies.with(reference);
 
-		assertEquals(1, useCase().execute(new ReserveBookDomain(BOOK, null)).position());
+		final ReservedBookDomain reserved = useCase().execute(new ReserveBookDomain(BOOK, null));
+
+		assertEquals(ReservationEntity.STATUS_WAITING, reserved.status());
+		assertEquals(1, reserved.position());
+		assertEquals(BookCopyEntity.STATUS_AVAILABLE, reference.getStatus());
 	}
 
 	@Test
@@ -149,9 +226,21 @@ class ReserveBookUseCaseImplTest {
 	@DisplayName("se rechaza crear el caso de uso sin una dependencia")
 	void rejectsMissingDependency() {
 		final FakeSession session = new FakeSession();
+		final HandOverBookCopyUseCaseImpl handOver = handOver();
 
 		assertThrows(BookHiveException.class, () -> new ReserveBookUseCaseImpl(
-				users, bookCopies, fines, null, session, this::audit));
+				users, bookCopies, fines, null, session, this::audit, handOver));
+		assertThrows(BookHiveException.class, () -> new ReserveBookUseCaseImpl(
+				users, bookCopies, fines, reservations, session, this::audit, null));
+	}
+
+	@Test
+	@DisplayName("el dominio sin repositorios no sabe qué ejemplares apartar")
+	void domainWithoutRepositoriesCannotListCopies() {
+		final ReserveBookDomain withoutPorts = new ReserveBookDomain(BOOK, READER);
+
+		assertEquals(BookHiveException.Kind.UNEXPECTED,
+				assertThrows(BookHiveException.class, withoutPorts::copiesToSetAside).getKind());
 	}
 
 	private void assertRejected(final String messageKey) {
@@ -177,8 +266,17 @@ class ReserveBookUseCaseImplTest {
 		return user;
 	}
 
+	private LocalDate today() {
+		return CurrentInstitution.today(CurrentInstitution.parameters(parameters));
+	}
+
+	private HandOverBookCopyUseCaseImpl handOver() {
+		return new HandOverBookCopyUseCaseImpl(reservations, bookCopies, users, parameters, notices::add, PICKUP_DAYS);
+	}
+
 	private ReserveBookUseCaseImpl useCase() {
-		return new ReserveBookUseCaseImpl(users, bookCopies, fines, reservations, new FakeSession(), this::audit);
+		return new ReserveBookUseCaseImpl(
+				users, bookCopies, fines, reservations, new FakeSession(), this::audit, handOver());
 	}
 
 	private void audit(final String action, final UUID institution, final UUID person, final String detail) {

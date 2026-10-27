@@ -101,7 +101,7 @@ export class Reservations {
           : requested === ''
             ? ''
             : fillTemplate(this.messages.requestedOn, { date: requested }),
-      cancellable: waiting,
+      cancellable: waiting || assigned,
     };
   }
 }

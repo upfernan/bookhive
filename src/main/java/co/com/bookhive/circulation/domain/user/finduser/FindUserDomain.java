@@ -1,17 +1,24 @@
 package co.com.bookhive.circulation.domain.user.finduser;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
+import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.FineRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionParametersRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.LoanRepository;
+import co.com.bookhive.circulation.services.output.ports.repositories.ReservationRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.UserRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.FineCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.LoanCriteria;
+import co.com.bookhive.circulation.services.output.ports.repositories.criteria.ReservationCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.UserCriteria;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.InstitutionParametersEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.ReservationEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.UserEntity;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
@@ -29,6 +36,8 @@ public final class FindUserDomain {
 	private FineRepository fineRepository;
 	private LoanRepository loanRepository;
 	private InstitutionParametersRepository institutionParametersRepository;
+	private ReservationRepository reservationRepository;
+	private BookCopyRepository bookCopyRepository;
 
 	public FindUserDomain(final String email) {
 		super();
@@ -46,6 +55,23 @@ public final class FindUserDomain {
 		withPorts.fineRepository = fineRepository;
 		withPorts.loanRepository = loanRepository;
 		withPorts.institutionParametersRepository = institutionParametersRepository;
+		withPorts.reservationRepository = reservationRepository;
+		withPorts.bookCopyRepository = bookCopyRepository;
+
+		return withPorts;
+	}
+
+	public FindUserDomain withReservations(
+			final ReservationRepository reservations,
+			final BookCopyRepository bookCopies) {
+
+		final FindUserDomain withPorts = withRepositories(
+				userRepository,
+				fineRepository,
+				loanRepository,
+				institutionParametersRepository);
+		withPorts.reservationRepository = reservations;
+		withPorts.bookCopyRepository = bookCopies;
 
 		return withPorts;
 	}
@@ -76,7 +102,8 @@ public final class FindUserDomain {
 				activeLoans,
 				maxLoans,
 				pendingFines,
-				blocksOf(user.getStatus(), activeLoans, maxLoans, pendingFines));
+				blocksOf(user.getStatus(), activeLoans, maxLoans, pendingFines),
+				readyReservationsOf(user.getId()));
 	}
 
 	public String getEmail() {
@@ -139,6 +166,27 @@ public final class FindUserDomain {
 		throw userNotFound(matches.size());
 	}
 
+	private List<ReadyReservationDomain> readyReservationsOf(final UUID user) {
+
+		return reservationRepository.findByCriteria(ReservationCriteria.activeOfUser(user)).stream()
+				.filter(ReservationEntity::isAssigned)
+				.map(reservation -> new ReadyReservationDomain(
+						reservation.getId(),
+						reservation.getBook(),
+						reservation.getBookCopy(),
+						barcodeOf(reservation.getBookCopy()),
+						reservation.getPickupDeadline()))
+				.sorted(Comparator.comparing(ReadyReservationDomain::pickupDeadline))
+				.toList();
+	}
+
+	private String barcodeOf(final UUID bookCopy) {
+
+		return bookCopyRepository.findById(bookCopy)
+				.map(BookCopyEntity::getBarcode)
+				.orElse(TextHelper.getDefaultValue());
+	}
+
 	private static BookHiveException userNotFound(final int matches) {
 
 		if (matches == 0) {
@@ -183,7 +231,9 @@ public final class FindUserDomain {
 		if (ObjectHelper.isNull(userRepository)
 				|| ObjectHelper.isNull(fineRepository)
 				|| ObjectHelper.isNull(loanRepository)
-				|| ObjectHelper.isNull(institutionParametersRepository)) {
+				|| ObjectHelper.isNull(institutionParametersRepository)
+				|| ObjectHelper.isNull(reservationRepository)
+				|| ObjectHelper.isNull(bookCopyRepository)) {
 
 			throw BookHiveException.createUnexpected(
 					MessageKey.REQUEST_UNEXPECTED,

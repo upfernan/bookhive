@@ -116,15 +116,28 @@ class HandOverBookCopyUseCaseImplTest {
 	}
 
 	@Test
-	@DisplayName("si el ejemplar dejó de estar disponible a mitad del proceso, falla para que todo se deshaga")
-	void copyNoLongerAvailableIsUnexpected() {
+	@DisplayName("si otra petición ya se llevó el ejemplar, no lo aparta para nadie ni toca la fila")
+	void copyTakenByOtherRequestGoesToNobody() {
 		bookCopies.changedByOtherRequest();
-		final HandOverBookCopyUseCaseImpl useCase = useCase(2);
-		final HandOverBookCopyDomain request = new HandOverBookCopyDomain(BOOK_COPY, BOOK);
 
-		final BookHiveException exception = assertThrows(BookHiveException.class, () -> useCase.execute(request));
+		final HandedOverBookCopyDomain handedOver = useCase(2).execute(new HandOverBookCopyDomain(BOOK_COPY, BOOK));
 
-		assertEquals(BookHiveException.Kind.UNEXPECTED, exception.getKind());
+		assertFalse(handedOver.isHandedOver());
+		assertEquals(ReservationEntity.STATUS_WAITING, first.getStatus());
+		assertEquals(ReservationEntity.STATUS_WAITING, second.getStatus());
+		assertTrue(notices.isEmpty());
+	}
+
+	@Test
+	@DisplayName("si otras peticiones tomaron a todos los de la fila, el ejemplar vuelve a quedar disponible")
+	void copyGoesBackWhenNobodyCanTakeIt() {
+		reservations.takenByOtherRequest(first.getId()).takenByOtherRequest(second.getId());
+
+		final HandedOverBookCopyDomain handedOver = useCase(2).execute(new HandOverBookCopyDomain(BOOK_COPY, BOOK));
+
+		assertFalse(handedOver.isHandedOver());
+		assertEquals(List.of(BOOK_COPY + ":DISPONIBLE->RESERVADO", BOOK_COPY + ":RESERVADO->DISPONIBLE"),
+				bookCopies.statusChanges());
 		assertTrue(notices.isEmpty());
 	}
 

@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import co.com.bookhive.circulation.domain.institution.CurrentInstitution;
 import co.com.bookhive.circulation.domain.loan.lendbook.LendBookDomain;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.ReservationEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.UserEntity;
 import co.com.bookhive.circulation.testdata.FakeRepositories;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
@@ -34,6 +37,8 @@ class FindUserDomainTest {
 	private FakeRepositories.Fines fines;
 	private FakeRepositories.Loans loans;
 	private FakeRepositories.Parameters parameters;
+	private FakeRepositories.Reservations reservations;
+	private FakeRepositories.BookCopies bookCopies;
 
 	@BeforeEach
 	void prepare() {
@@ -41,6 +46,8 @@ class FindUserDomainTest {
 		fines = new FakeRepositories.Fines();
 		loans = new FakeRepositories.Loans();
 		parameters = new FakeRepositories.Parameters().with(LOAN_DAYS, MAX_LOANS);
+		reservations = new FakeRepositories.Reservations();
+		bookCopies = new FakeRepositories.BookCopies();
 	}
 
 	@Test
@@ -57,6 +64,37 @@ class FindUserDomainTest {
 		assertEquals(MAX_LOANS, found.maxLoans());
 		assertEquals(0, found.pendingFines());
 		assertTrue(found.blocks().isEmpty());
+		assertTrue(found.readyReservations().isEmpty());
+	}
+
+	@Test
+	@DisplayName("lista las reservas con ejemplar apartado, con su código y la que vence primero arriba")
+	void listsReadyReservations() {
+		final ReservationEntity later = assignedReservation(USER, "BH-0002", LocalDate.of(2026, 10, 30));
+		final ReservationEntity sooner = assignedReservation(USER, "BH-0001", LocalDate.of(2026, 10, 28));
+		assignedReservation(UUIDHelper.generateNew(), "BH-0003", LocalDate.of(2026, 10, 27));
+		reservations.with(FakeRepositories.reservation(
+				UUIDHelper.generateNew(), USER, ReservationEntity.STATUS_WAITING, Instant.now()));
+
+		final List<ReadyReservationDomain> ready = search(EMAIL).find().readyReservations();
+
+		assertEquals(List.of(
+				new ReadyReservationDomain(sooner.getId(), sooner.getBook(), sooner.getBookCopy(), "BH-0001",
+						sooner.getPickupDeadline()),
+				new ReadyReservationDomain(later.getId(), later.getBook(), later.getBookCopy(), "BH-0002",
+						later.getPickupDeadline())),
+				ready);
+	}
+
+	@Test
+	@DisplayName("si el ejemplar apartado ya no existe, la reserva sale sin código")
+	void readyReservationWithoutCopyHasNoBarcode() {
+		final ReservationEntity reservation = FakeRepositories.reservation(
+				UUIDHelper.generateNew(), USER, ReservationEntity.STATUS_ASSIGNED, Instant.now());
+		reservation.setBookCopy(UUIDHelper.generateNew());
+		reservations.with(reservation);
+
+		assertEquals("", search(EMAIL).find().readyReservations().get(0).barcode());
 	}
 
 	@Test
@@ -226,21 +264,43 @@ class FindUserDomainTest {
 	@DisplayName("sin repositorios no puede buscar")
 	void requiresRepositories() {
 		final FindUserDomain search = new FindUserDomain(EMAIL);
+		final FindUserDomain withoutReservations = new FindUserDomain(EMAIL)
+				.withRepositories(users, fines, loans, parameters);
 
 		final BookHiveException exception = assertThrows(BookHiveException.class, search::find);
 
 		assertEquals(MessageKey.REQUEST_UNEXPECTED, exception.getUserMessageKey());
 		assertEquals(BookHiveException.Kind.UNEXPECTED, exception.getKind());
+		assertEquals(BookHiveException.Kind.UNEXPECTED,
+				assertThrows(BookHiveException.class, withoutReservations::find).getKind());
 	}
 
 	private FindUserDomain search(final String email) {
-		return new FindUserDomain(email).withRepositories(users, fines, loans, parameters);
+		return new FindUserDomain(email)
+				.withRepositories(users, fines, loans, parameters)
+				.withReservations(reservations, bookCopies);
+	}
+
+	private ReservationEntity assignedReservation(final UUID user, final String barcode, final LocalDate deadline) {
+		final BookCopyEntity copy = FakeRepositories.bookCopy(UUIDHelper.generateNew(), BookCopyEntity.STATUS_RESERVED, true);
+		copy.setBarcode(barcode);
+		bookCopies.with(copy);
+
+		final ReservationEntity reservation = FakeRepositories.reservation(
+				UUIDHelper.generateNew(), user, ReservationEntity.STATUS_ASSIGNED, Instant.now());
+		reservation.setBookCopy(copy.getId());
+		reservation.setPickupDeadline(deadline);
+		reservations.with(reservation);
+		return reservation;
 	}
 
 	private String rejectionOfLending() {
 		final UUID bookCopy = UUIDHelper.generateNew();
-		final FakeRepositories.BookCopies bookCopies = new FakeRepositories.BookCopies()
-				.with(FakeRepositories.bookCopy(bookCopy, BookCopyEntity.STATUS_AVAILABLE, true));
+		final FakeRepositories.BookCopies heldCopies = new FakeRepositories.BookCopies()
+				.with(FakeRepositories.bookCopy(bookCopy, BookCopyEntity.STATUS_RESERVED, true));
+		final ReservationEntity held = FakeRepositories.reservation(
+				UUIDHelper.generateNew(), USER, ReservationEntity.STATUS_ASSIGNED, Instant.now());
+		held.setBookCopy(bookCopy);
 
 		final LendBookDomain loan = new LendBookDomain(
 				UUIDHelper.getDefaultValue(),
@@ -250,7 +310,8 @@ class FindUserDomainTest {
 				UUIDHelper.generateNew(),
 				CurrentInstitution.today(CurrentInstitution.parameters(parameters)),
 				DateHelper.getDefaultValue())
-				.withRepositories(users, bookCopies, fines, loans, parameters);
+				.withRepositories(users, heldCopies, fines, loans, parameters)
+				.withReservations(new FakeRepositories.Reservations().with(held));
 
 		return assertThrows(BookHiveException.class, loan::validate).getUserMessageKey();
 	}

@@ -41,6 +41,10 @@ public class ReservationEntity {
 		return STATUS_WAITING.equals(status);
 	}
 
+	public boolean isAssigned() {
+		return STATUS_ASSIGNED.equals(status);
+	}
+
 	public UUID getId() {
 		return id;
 	}

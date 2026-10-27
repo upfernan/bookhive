@@ -25,7 +25,7 @@ public final class BookCopyLendingRule {
 		final String status = bookCopy.getStatus();
 
 		if (BookCopyEntity.STATUS_AVAILABLE.equals(status)) {
-			return Optional.empty();
+			return Optional.of(MessageKey.BOOK_COPY_NOT_RESERVED_FOR_USER);
 		}
 
 		if (BookCopyEntity.STATUS_RESERVED.equals(status)) {

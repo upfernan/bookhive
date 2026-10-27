@@ -30,16 +30,25 @@ class FindBookCopyDomainTest {
 	private static final String BARCODE = "UCO-0001";
 
 	@Test
-	@DisplayName("entrega el ejemplar disponible y prestable a domicilio sin bloqueos")
-	void findsLendableBookCopy() {
+	@DisplayName("un ejemplar disponible sin reserva se encuentra, pero queda bloqueado: solo se presta sobre una reserva")
+	void blocksAvailableBookCopyWithoutReservation() {
 		final FoundBookCopyDomain found = search(" UCO-0001 ", BookCopyEntity.STATUS_AVAILABLE, true).find();
 
 		assertEquals(BOOK_COPY, found.id());
 		assertEquals(BOOK, found.book());
 		assertEquals(BARCODE, found.barcode());
-		assertTrue(found.available());
+		assertFalse(found.available());
 		assertTrue(found.lendable());
-		assertTrue(found.blocks().isEmpty());
+		assertEquals(List.of(MessageKey.BOOK_COPY_NOT_RESERVED_FOR_USER), found.blocks());
+	}
+
+	@Test
+	@DisplayName("bloquea el ejemplar sin reserva igual que lo rechaza el registro del préstamo")
+	void blocksAvailableCopyLikeLending() {
+		final FakeRepositories.BookCopies bookCopies = bookCopies(BookCopyEntity.STATUS_AVAILABLE, true);
+
+		assertEquals(rejectionOfLending(bookCopies),
+				new FindBookCopyDomain(BARCODE).withRepositories(bookCopies).find().blocks().get(0));
 	}
 
 	@Test
@@ -52,9 +61,13 @@ class FindBookCopyDomainTest {
 	}
 
 	@Test
-	@DisplayName("un ejemplar de consulta en sala queda bloqueado aunque esté disponible")
+	@DisplayName("un ejemplar de consulta en sala queda bloqueado aunque esté apartado para quien lo pide")
 	void blocksReferenceOnlyBookCopy() {
-		final FoundBookCopyDomain found = search(BARCODE, BookCopyEntity.STATUS_AVAILABLE, false).find();
+		final UUID borrower = UUIDHelper.generateNew();
+
+		final FoundBookCopyDomain found = new FindBookCopyDomain(BARCODE, borrower)
+				.withRepositories(bookCopies(BookCopyEntity.STATUS_RESERVED, false), heldFor(borrower))
+				.find();
 
 		assertFalse(found.lendable());
 		assertEquals(List.of(MessageKey.BOOK_COPY_REFERENCE_ONLY), found.blocks());
@@ -110,10 +123,16 @@ class FindBookCopyDomainTest {
 	@Test
 	@DisplayName("bloquea por consulta en sala igual que lo rechaza el registro del préstamo")
 	void blocksReferenceOnlyLikeLending() {
-		final FakeRepositories.BookCopies bookCopies = bookCopies(BookCopyEntity.STATUS_AVAILABLE, false);
+		final FakeRepositories.BookCopies bookCopies = bookCopies(BookCopyEntity.STATUS_RESERVED, false);
+		final UUID borrower = UUIDHelper.generateNew();
+		final FakeRepositories.Reservations reservations = heldFor(borrower);
 
-		assertEquals(rejectionOfLending(bookCopies),
-				new FindBookCopyDomain(BARCODE).withRepositories(bookCopies).find().blocks().get(0));
+		final String lending = assertThrows(BookHiveException.class,
+				lending(bookCopies, borrower).withReservations(reservations)::validate).getUserMessageKey();
+
+		assertEquals(MessageKey.BOOK_COPY_REFERENCE_ONLY, lending);
+		assertEquals(List.of(lending), new FindBookCopyDomain(BARCODE, borrower)
+				.withRepositories(bookCopies, reservations).find().blocks());
 	}
 
 	@Test

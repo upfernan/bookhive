@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.function.Executable;
 
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.InstitutionParametersEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.ReservationEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.UserEntity;
 import co.com.bookhive.circulation.testdata.FakeRepositories;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
@@ -37,24 +39,43 @@ class LendBookDomainTest {
 	private FakeRepositories.Fines fines;
 	private FakeRepositories.Loans loans;
 	private FakeRepositories.Parameters parameters;
+	private FakeRepositories.Reservations reservations;
 
 	@BeforeEach
 	void prepare() {
 		users = usersWith(UserEntity.STATUS_ACTIVE);
 		bookCopies = new FakeRepositories.BookCopies()
-				.with(FakeRepositories.bookCopy(BOOK_COPY, BookCopyEntity.STATUS_AVAILABLE, true));
+				.with(FakeRepositories.bookCopy(BOOK_COPY, BookCopyEntity.STATUS_RESERVED, true));
 		fines = new FakeRepositories.Fines();
 		loans = new FakeRepositories.Loans();
 		parameters = new FakeRepositories.Parameters().with(LOAN_DAYS, MAX_LOANS);
+		reservations = new FakeRepositories.Reservations().with(heldFor(USER));
 	}
 
 	@Test
-	@DisplayName("acepta un préstamo válido y calcula la fecha de entrega con los días de la institución")
+	@DisplayName("acepta el préstamo del ejemplar apartado para el usuario y calcula la fecha de entrega")
 	void acceptsValidLoan() {
 		final LendBookDomain loan = loan(BOOK_COPY, USER, today());
 
 		assertDoesNotThrow(loan::validate);
 		assertEquals(today().plusDays(LOAN_DAYS), loan.calculateDueDate());
+	}
+
+	@Test
+	@DisplayName("rechaza prestar un ejemplar disponible: el préstamo solo sale de una reserva")
+	void rejectsBookCopyWithoutReservation() {
+		bookCopies = new FakeRepositories.BookCopies()
+				.with(FakeRepositories.bookCopy(BOOK_COPY, BookCopyEntity.STATUS_AVAILABLE, true));
+
+		assertRejected(MessageKey.BOOK_COPY_NOT_RESERVED_FOR_USER, loan(BOOK_COPY, USER, today())::validate);
+	}
+
+	@Test
+	@DisplayName("rechaza prestar un ejemplar apartado para otra persona")
+	void rejectsBookCopyHeldForSomeoneElse() {
+		reservations = new FakeRepositories.Reservations().with(heldFor(UUIDHelper.generateNew()));
+
+		assertRejected(MessageKey.BOOK_COPY_RESERVED, loan(BOOK_COPY, USER, today())::validate);
 	}
 
 	@Test
@@ -126,7 +147,7 @@ class LendBookDomainTest {
 	@DisplayName("rechaza el préstamo si el ejemplar es solo de consulta en sala")
 	void rejectsReferenceOnlyBookCopy() {
 		bookCopies = new FakeRepositories.BookCopies()
-				.with(FakeRepositories.bookCopy(BOOK_COPY, BookCopyEntity.STATUS_AVAILABLE, false));
+				.with(FakeRepositories.bookCopy(BOOK_COPY, BookCopyEntity.STATUS_RESERVED, false));
 
 		assertRejected(MessageKey.BOOK_COPY_REFERENCE_ONLY, loan(BOOK_COPY, USER, today())::validate);
 	}
@@ -209,7 +230,15 @@ class LendBookDomainTest {
 
 	private LendBookDomain loan(final UUID bookCopy, final UUID user, final LocalDate loanDate) {
 		return new LendBookDomain(null, bookCopy, user, INSTITUTION, LIBRARIAN, loanDate, null)
-				.withRepositories(users, bookCopies, fines, loans, parameters);
+				.withRepositories(users, bookCopies, fines, loans, parameters)
+				.withReservations(reservations);
+	}
+
+	private static ReservationEntity heldFor(final UUID user) {
+		final ReservationEntity held = FakeRepositories.reservation(
+				UUIDHelper.generateNew(), user, ReservationEntity.STATUS_ASSIGNED, Instant.now());
+		held.setBookCopy(BOOK_COPY);
+		return held;
 	}
 
 	private static FakeRepositories.Users usersWith(final String status) {

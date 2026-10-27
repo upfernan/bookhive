@@ -23,11 +23,12 @@ class BookCopyLendingRuleTest {
 	private static final UUID HOLDER = UUID.randomUUID();
 
 	@Test
-	@DisplayName("un ejemplar disponible se presta a cualquiera, sin mirar las reservas")
-	void availableCopyHasNoBlock() {
+	@DisplayName("un ejemplar disponible no se presta: el préstamo solo sale de una reserva")
+	void availableCopyNeedsAReservation() {
 		final BookCopyEntity copy = FakeRepositories.bookCopy(BOOK_COPY, BookCopyEntity.STATUS_AVAILABLE, true);
 
-		assertTrue(BookCopyLendingRule.blockFor(copy, HOLDER, null).isEmpty());
+		assertEquals(Optional.of(MessageKey.BOOK_COPY_NOT_RESERVED_FOR_USER),
+				BookCopyLendingRule.blockFor(copy, HOLDER, null));
 	}
 
 	@Test

@@ -59,15 +59,23 @@ class FindUserUseCaseImplTest {
 	@Test
 	@DisplayName("no se deja crear sin alguno de sus repositorios")
 	void requiresEveryRepository() {
+		final FakeRepositories.Reservations reservations = new FakeRepositories.Reservations();
+		final FakeRepositories.BookCopies bookCopies = new FakeRepositories.BookCopies();
+
 		final BookHiveException exception = assertThrows(BookHiveException.class,
-				() -> new FindUserUseCaseImpl(users, fines, null, parameters));
+				() -> new FindUserUseCaseImpl(users, fines, null, parameters, reservations, bookCopies));
 
 		assertEquals(MessageKey.REQUEST_UNEXPECTED, exception.getUserMessageKey());
 		assertEquals(BookHiveException.Kind.UNEXPECTED, exception.getKind());
+		assertThrows(BookHiveException.class,
+				() -> new FindUserUseCaseImpl(users, fines, loans, parameters, null, bookCopies));
+		assertThrows(BookHiveException.class,
+				() -> new FindUserUseCaseImpl(users, fines, loans, parameters, reservations, null));
 	}
 
 	private FindUserUseCaseImpl useCase() {
-		return new FindUserUseCaseImpl(users, fines, loans, parameters);
+		return new FindUserUseCaseImpl(
+				users, fines, loans, parameters, new FakeRepositories.Reservations(), new FakeRepositories.BookCopies());
 	}
 
 }

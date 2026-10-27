@@ -57,7 +57,7 @@ class FindUserInputAdapterTest {
 		public FoundUserDomain execute(final FindUserDomain input) {
 			received = input;
 			return new FoundUserDomain(USER, "Ana Gómez", input.getEmail(), 3, 3, 0,
-					List.of(MessageKey.USER_AT_LOAN_LIMIT));
+					List.of(MessageKey.USER_AT_LOAN_LIMIT), List.of());
 		}
 
 	}

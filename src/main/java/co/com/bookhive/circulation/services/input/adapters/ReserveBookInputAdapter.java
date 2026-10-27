@@ -41,7 +41,8 @@ public final class ReserveBookInputAdapter implements ReserveBookInputPort {
 				reserved.reservation(),
 				reserved.book(),
 				reserved.status(),
-				reserved.position());
+				reserved.position(),
+				reserved.pickupDeadline());
 	}
 
 }
