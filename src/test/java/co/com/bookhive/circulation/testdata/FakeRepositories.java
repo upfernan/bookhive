@@ -1,6 +1,7 @@
 package co.com.bookhive.circulation.testdata;
 
 import java.math.BigDecimal;
+import java.text.Normalizer;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import co.com.bookhive.circulation.domain.account.manageuser.UserLifecycleDomains;
 import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.FineRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.FineSettlementRepository;
@@ -86,6 +88,14 @@ public final class FakeRepositories {
 
 		@Override
 		public List<UserEntity> findByCriteria(final UserCriteria criteria) {
+			if (criteria.filtersByText()) {
+				return stored.stream()
+						.filter(user -> !UserLifecycleDomains.PURGED.equals(user.getStatus()))
+						.filter(user -> Normalizer.normalize(user.getName().toLowerCase(Locale.ROOT), Normalizer.Form.NFD)
+								.replaceAll("\\p{M}", "").contains(criteria.getText())
+								|| user.getEmail().toLowerCase(Locale.ROOT).contains(criteria.getText()))
+						.toList();
+			}
 			return stored.stream()
 					.filter(user -> user.getEmail().toLowerCase(Locale.ROOT).equals(criteria.getEmail()))
 					.toList();

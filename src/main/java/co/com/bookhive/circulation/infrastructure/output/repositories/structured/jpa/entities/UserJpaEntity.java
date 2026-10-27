@@ -18,6 +18,7 @@ public class UserJpaEntity {
 	public static final String STATUS_ACTIVE = "ACTIVO";
 	public static final String STATUS_SUSPENDED = "SUSPENDIDO";
 	public static final String STATUS_RETIRED = "RETIRADO";
+	public static final String STATUS_PURGED = "DEPURADO";
 
 	@Id
 	@Column(name = "id", updatable = false)

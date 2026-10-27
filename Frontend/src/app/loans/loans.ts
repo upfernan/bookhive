@@ -1,20 +1,9 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  Signal,
-  afterNextRender,
-  computed,
-  inject,
-  signal,
-  viewChild,
-} from '@angular/core';
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, afterNextRender, computed, inject, signal, viewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { messages } from '../messages';
 import { fillTemplate } from '../shared/fill-template';
+import { FoundReader } from '../shared/reader-directory';
+import { ReaderPicker } from '../shared/reader-picker';
 import { RequestProblem, describeRequestProblem } from '../shared/request-errors';
 import { BookCopy, Borrower, LoanDesk } from './loan-desk';
 
@@ -23,8 +12,10 @@ interface ReadyCard {
   readonly bookCopy: string;
   readonly barcode: string;
   readonly title: string;
+  readonly authors: string;
   readonly details: string;
-  readonly copy: BookCopy | null;
+  readonly blocks: readonly string[];
+  readonly registerLabel: string;
 }
 
 interface AttentionLoan {
@@ -49,60 +40,52 @@ const DUE_DATE_FORMAT = new Intl.DateTimeFormat('es-CO', {
 
 @Component({
   selector: 'app-loans',
-  imports: [ReactiveFormsModule, MatButtonModule, MatFormFieldModule, MatInputModule],
+  imports: [MatButtonModule, ReaderPicker],
   templateUrl: './loans.html',
   styleUrls: ['../shell/section-page.css', '../shared/feedback.css', './loans.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Loans {
   private readonly desk = inject(LoanDesk);
-  private readonly formBuilder = inject(NonNullableFormBuilder);
-  private readonly borrowerInput = viewChild<ElementRef<HTMLInputElement>>('borrowerInput');
-  private readonly copyInput = viewChild<ElementRef<HTMLInputElement>>('copyInput');
+  private readonly picker = viewChild.required(ReaderPicker);
+  private readonly readyCopies = signal<ReadonlyMap<string, BookCopy>>(new Map());
 
   protected readonly messages = messages.loans;
 
-  protected readonly borrowerForm = this.formBuilder.group({
-    email: ['', [Validators.required, Validators.email]],
-  });
-
-  protected readonly copyForm = this.formBuilder.group({
-    barcode: [{ value: '', disabled: true }, Validators.required],
-  });
-
   protected readonly borrower = signal<Borrower | null>(null);
-  protected readonly bookCopy = signal<BookCopy | null>(null);
-  protected readonly searchingBorrower = signal(false);
-  protected readonly searchingCopy = signal(false);
-  protected readonly registering = signal(false);
+  protected readonly loadingBorrower = signal(false);
+  protected readonly copiesLoaded = signal(false);
+  protected readonly lending = signal('');
   protected readonly borrowerProblem = signal('');
-  protected readonly copyProblem = signal('');
-  protected readonly actionHint = signal('');
   protected readonly registerProblem = signal<RequestProblem | null>(null);
   protected readonly confirmation = signal<Confirmation | null>(null);
   protected readonly attention = signal<readonly AttentionLoan[]>([]);
-  private readonly readyCopies = signal<ReadonlyMap<string, BookCopy>>(new Map());
 
   protected readonly initials = computed(() => initialsOf(this.borrower()?.name ?? ''));
 
+  protected readonly blocked = computed(() => (this.borrower()?.blocks.length ?? 0) > 0);
+
   protected readonly readyCards = computed<readonly ReadyCard[]>(() => {
     const copies = this.readyCopies();
+    const loaded = this.copiesLoaded();
     return (this.borrower()?.readyReservations ?? []).map((ready) => {
       const copy = copies.get(ready.bookCopy) ?? null;
-      const pickup = formatDueDate(ready.pickupDeadline);
+      const title = copy?.title || (loaded ? this.messages.readyUntitled : this.messages.readyLoading);
       return {
         reservation: ready.reservation,
         bookCopy: ready.bookCopy,
         barcode: ready.barcode,
-        title: copy?.title || this.messages.readyUntitled,
+        title,
+        authors: copy?.authors ?? '',
         details: [
-          `${this.messages.barcode}: ${ready.barcode}`,
+          ready.barcode ? `${this.messages.barcode}: ${ready.barcode}` : '',
           copy?.branch ? `${this.messages.branch}: ${copy.branch}` : '',
-          fillTemplate(this.messages.readyPickup, { date: pickup }),
+          fillTemplate(this.messages.readyPickup, { date: formatDueDate(ready.pickupDeadline) }),
         ]
           .filter((part) => part !== '')
           .join(' · '),
-        copy,
+        blocks: copy?.blocks ?? [],
+        registerLabel: fillTemplate(this.messages.registerLabel, { title }),
       };
     });
   });
@@ -134,149 +117,71 @@ export class Loans {
   });
 
   constructor() {
-    afterNextRender(() => this.borrowerInput()?.nativeElement.focus());
+    afterNextRender(() => this.picker().focus());
   }
 
-  protected async searchBorrower(): Promise<void> {
-    if (this.searchingBorrower()) {
-      return;
-    }
-
-    if (this.borrowerForm.invalid) {
-      this.borrowerForm.markAllAsTouched();
-      return;
-    }
-
-    this.searchingBorrower.set(true);
-    this.borrowerProblem.set('');
+  protected async pick(reader: FoundReader): Promise<void> {
     this.startAttention();
+    this.borrower.set(null);
+    this.borrowerProblem.set('');
+    this.loadingBorrower.set(true);
 
     try {
-      const borrower = await this.desk.findBorrower(this.borrowerForm.controls.email.value);
+      const borrower = await this.desk.findBorrower(reader.email);
       this.borrower.set(borrower);
-      this.copyForm.enable();
-      this.focus(this.copyInput);
       void this.loadReadyCopies(borrower);
     } catch (error) {
       this.borrowerProblem.set(describeRequestProblem(error, this.messages.borrowerNotFound).message);
     } finally {
-      this.searchingBorrower.set(false);
+      this.loadingBorrower.set(false);
     }
   }
 
-  protected async searchBookCopy(): Promise<void> {
-    if (this.searchingCopy()) {
-      return;
-    }
-
-    if (this.copyForm.invalid) {
-      this.copyForm.markAllAsTouched();
-      return;
-    }
-
-    this.searchingCopy.set(true);
-    this.copyProblem.set('');
-    this.clearOutcome();
-    this.bookCopy.set(null);
-
-    try {
-      this.bookCopy.set(
-        await this.desk.findBookCopy(this.copyForm.controls.barcode.value, this.borrower()?.id ?? ''),
-      );
-    } catch (error) {
-      this.copyProblem.set(describeRequestProblem(error, this.messages.copyNotFound).message);
-    } finally {
-      this.searchingCopy.set(false);
-    }
+  protected canRegister(card: ReadyCard): boolean {
+    return !this.blocked() && this.copiesLoaded() && card.blocks.length === 0 && this.lending() === '';
   }
 
-  protected async register(): Promise<void> {
-    if (this.registering()) {
-      return;
-    }
-
+  protected async register(card: ReadyCard): Promise<void> {
     const borrower = this.borrower();
-    const bookCopy = this.bookCopy();
+
+    if (!borrower || !this.canRegister(card)) {
+      return;
+    }
+
     this.clearOutcome();
-
-    if (!borrower) {
-      this.actionHint.set(this.messages.missingBorrower);
-      this.focus(this.borrowerInput);
-      return;
-    }
-
-    if (!bookCopy) {
-      this.actionHint.set(this.messages.missingCopy);
-      this.focus(this.copyInput);
-      return;
-    }
-
-    if (borrower.blocks.length > 0 || bookCopy.blocks.length > 0) {
-      this.actionHint.set(this.messages.blocked);
-      return;
-    }
-
-    this.registering.set(true);
+    this.lending.set(card.bookCopy);
 
     try {
-      const registered = await this.desk.lend(borrower, bookCopy);
+      const registered = await this.desk.lend(borrower.id, card.bookCopy);
       const dueDate = formatDueDate(registered.dueDate);
-      this.confirmation.set({ title: bookCopy.title, name: borrower.name, dueDate });
+      this.confirmation.set({ title: card.title, name: borrower.name, dueDate });
       this.attention.update((loans) => [
-        { loan: registered.loan, title: bookCopy.title, barcode: bookCopy.barcode, dueDate },
+        { loan: registered.loan, title: card.title, barcode: card.barcode, dueDate },
         ...loans,
       ]);
-      void this.refreshBorrower(borrower.email);
+      await this.refreshBorrower(borrower.email);
     } catch (error) {
       this.registerProblem.set(describeRequestProblem(error, this.messages.registerFailed));
     } finally {
-      this.registering.set(false);
+      this.lending.set('');
     }
-  }
-
-  protected choose(card: ReadyCard): void {
-    if (!card.copy) {
-      return;
-    }
-
-    this.clearOutcome();
-    this.copyProblem.set('');
-    this.copyForm.controls.barcode.setValue(card.barcode);
-    this.bookCopy.set(card.copy);
-  }
-
-  protected isChosen(card: ReadyCard): boolean {
-    return this.bookCopy()?.id === card.bookCopy && this.confirmation() === null;
-  }
-
-  protected lendAnother(): void {
-    this.clearOutcome();
-    this.bookCopy.set(null);
-    this.copyProblem.set('');
-    this.copyForm.reset();
-    this.focus(this.copyInput);
   }
 
   protected endAttention(): void {
     this.startAttention();
     this.borrower.set(null);
     this.borrowerProblem.set('');
-    this.borrowerForm.reset();
-    this.focus(this.borrowerInput);
+    this.picker().clear();
   }
 
   private startAttention(): void {
     this.clearOutcome();
     this.attention.set([]);
     this.readyCopies.set(new Map());
-    this.bookCopy.set(null);
-    this.copyProblem.set('');
-    this.copyForm.reset();
-    this.copyForm.disable();
+    this.copiesLoaded.set(false);
   }
 
   private clearOutcome(): void {
-    this.actionHint.set('');
     this.registerProblem.set(null);
     this.confirmation.set(null);
   }
@@ -309,10 +214,7 @@ export class Loans {
           .map((result) => [result.value.id, result.value]),
       ),
     );
-  }
-
-  private focus(input: Signal<ElementRef<HTMLInputElement> | undefined>): void {
-    setTimeout(() => input()?.nativeElement.focus());
+    this.copiesLoaded.set(true);
   }
 }
 

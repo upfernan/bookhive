@@ -41,20 +41,11 @@
         <h2 id="step-borrower" class="step__title">{{ messages.borrowerStep }}</h2>
       </div>
 
-      <form class="step__search" [formGroup]="borrowerForm" (ngSubmit)="searchBorrower()" novalidate>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>{{ messages.borrowerLabel }}</mat-label>
-          <input #borrowerInput matInput type="email" formControlName="email" autocomplete="off" />
-          @if (borrowerForm.controls.email.hasError('required')) {
-            <mat-error>{{ messages.borrowerRequired }}</mat-error>
-          } @else if (borrowerForm.controls.email.hasError('email')) {
-            <mat-error>{{ messages.borrowerInvalid }}</mat-error>
-          }
-        </mat-form-field>
-        <button class="step__button" mat-stroked-button type="submit" [disabled]="searchingBorrower()">
-          {{ searchingBorrower() ? messages.searching : messages.search }}
-        </button>
-      </form>
+      <app-reader-picker [label]="messages.borrowerLabel" (picked)="pick($event)" />
+
+      @if (loadingBorrower()) {
+        <p class="step__note" role="status">{{ messages.loadingBorrower }}</p>
+      }
 
       @if (borrowerProblem()) {
         <p class="step__problem" role="alert">{{ borrowerProblem() }}</p>
@@ -96,131 +87,61 @@
       }
     </section>
 
-    <section class="step" aria-labelledby="step-copy">
+    <section class="step" aria-labelledby="step-ready">
       <div class="step__header">
         <span class="step__number" aria-hidden="true">2</span>
-        <h2 id="step-copy" class="step__title">{{ messages.copyStep }}</h2>
+        <h2 id="step-ready" class="step__title">{{ messages.readyStep }}</h2>
       </div>
 
       @if (borrower()) {
-        <section class="ready" aria-labelledby="ready-title">
-          <h3 id="ready-title" class="ready__title">{{ messages.readyTitle }}</h3>
-          @if (readyCards().length === 0) {
-            <p class="ready__empty">{{ messages.readyEmpty }}</p>
-          } @else {
-            <ul class="ready__list">
-              @for (card of readyCards(); track card.reservation) {
-                <li class="ready__item" [class.ready__item--chosen]="isChosen(card)">
-                  <div class="ready__text">
-                    <p class="ready__book">{{ card.title }}</p>
-                    <p class="ready__details">{{ card.details }}</p>
-                  </div>
-                  <button
-                    mat-stroked-button
-                    type="button"
-                    [disabled]="!card.copy || isChosen(card)"
-                    [attr.aria-pressed]="isChosen(card)"
-                    (click)="choose(card)"
-                  >
-                    {{ isChosen(card) ? messages.readyChosen : messages.readyChoose }}
-                  </button>
-                </li>
-              }
-            </ul>
+        @if (readyCards().length === 0) {
+          <p class="ready__empty">{{ messages.readyEmpty }}</p>
+        } @else {
+          @if (blocked()) {
+            <p class="step__problem">{{ messages.blocked }}</p>
           }
-        </section>
-      }
-
-      <form class="step__search" [formGroup]="copyForm" (ngSubmit)="searchBookCopy()" novalidate>
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>{{ messages.copyLabel }}</mat-label>
-          <input #copyInput matInput type="text" formControlName="barcode" autocomplete="off" />
-          @if (!borrower()) {
-            <mat-hint>{{ messages.copyNeedsBorrower }}</mat-hint>
-          }
-          @if (copyForm.controls.barcode.hasError('required')) {
-            <mat-error>{{ messages.copyRequired }}</mat-error>
-          }
-        </mat-form-field>
-        <button class="step__button" mat-stroked-button type="submit" [disabled]="!borrower() || searchingCopy()">
-          {{ searchingCopy() ? messages.searching : messages.add }}
-        </button>
-      </form>
-
-      @if (copyProblem()) {
-        <p class="step__problem" role="alert">{{ copyProblem() }}</p>
-      }
-
-      @if (bookCopy(); as copy) {
-        <div class="details details--copy">
-          <div class="cover" aria-hidden="true">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2" />
-              <path d="M19 17H6a2 2 0 0 0-2 2.5" />
-            </svg>
-          </div>
-          <div class="copy">
-            <div>
-              <p class="copy__title">{{ copy.title }}</p>
-              @if (copy.authors) {
-                <p class="copy__authors">{{ copy.authors }}</p>
-              }
-            </div>
-            <dl class="copy__facts">
-              <div><dt>{{ messages.barcode }}</dt><dd>{{ copy.barcode }}</dd></div>
-              @if (copy.branch) {
-                <div><dt>{{ messages.branch }}</dt><dd>{{ copy.branch }}</dd></div>
-              }
-            </dl>
-            <div class="chips">
-              @if (confirmation()) {
-                <span class="chip chip--neutral">{{ messages.lent }}</span>
-              } @else if (copy.available) {
-                <span class="chip chip--success">{{ messages.available }}</span>
-              } @else {
-                <span class="chip chip--error">{{ messages.unavailable }}</span>
-              }
-              <span class="chip chip--neutral">{{ copy.lendable ? messages.homeLoan : messages.roomOnly }}</span>
-            </div>
-            @if (copy.blocks.length > 0) {
-              <ul class="blocks">
-                @for (block of copy.blocks; track block) {
-                  <li class="chip chip--error">{{ block }}</li>
-                }
-              </ul>
+          <ul class="ready__list">
+            @for (card of readyCards(); track card.reservation) {
+              <li class="ready__item">
+                <div class="ready__text">
+                  <p class="ready__book">{{ card.title }}</p>
+                  @if (card.authors) {
+                    <p class="ready__authors">{{ card.authors }}</p>
+                  }
+                  <p class="ready__details">{{ card.details }}</p>
+                  @if (card.blocks.length > 0) {
+                    <ul class="blocks ready__blocks">
+                      @for (block of card.blocks; track block) {
+                        <li class="chip chip--error">{{ block }}</li>
+                      }
+                    </ul>
+                  }
+                </div>
+                <button
+                  class="ready__button"
+                  mat-flat-button
+                  type="button"
+                  [disabled]="!canRegister(card)"
+                  [attr.aria-label]="card.registerLabel"
+                  (click)="register(card)"
+                >
+                  {{ lending() === card.bookCopy ? messages.registering : messages.register }}
+                </button>
+              </li>
             }
-          </div>
-        </div>
+          </ul>
+        }
+      } @else {
+        <p class="ready__empty">{{ messages.readyNeedsBorrower }}</p>
       }
     </section>
   </div>
 
   <div class="actions">
-    <div class="due">
-      @if (confirmation(); as done) {
-        <p class="due__label">{{ messages.dueDateLabel }}</p>
-        <p class="due__date">{{ done.dueDate }}</p>
-      } @else {
-        <p class="due__hint">{{ messages.dueDateHint }}</p>
-      }
-      @if (actionHint()) {
-        <p class="actions__hint" role="alert">{{ actionHint() }}</p>
-      }
-    </div>
-    <div class="actions__buttons">
-      <button class="actions__secondary" mat-stroked-button type="button" (click)="endAttention()">
-        {{ messages.endAttention }}
-      </button>
-      @if (confirmation()) {
-        <button class="actions__primary" mat-flat-button type="button" (click)="lendAnother()">
-          {{ messages.lendAnother }}
-        </button>
-      } @else {
-        <button class="actions__primary" mat-flat-button type="button" [disabled]="registering()" (click)="register()">
-          {{ registering() ? messages.registering : messages.register }}
-        </button>
-      }
-    </div>
+    <p class="due__hint">{{ messages.dueDateHint }}</p>
+    <button class="actions__secondary" mat-stroked-button type="button" (click)="endAttention()">
+      {{ messages.endAttention }}
+    </button>
   </div>
 
   @if (attention().length > 0) {

@@ -4,18 +4,26 @@
     <p class="page__lead">{{ messages.lead }}</p>
   </div>
 
-  <form class="scan" [formGroup]="form" (ngSubmit)="registerReturn()" novalidate>
-    <mat-form-field appearance="outline" subscriptSizing="dynamic">
-      <mat-label>{{ messages.barcodeLabel }}</mat-label>
-      <input #barcodeInput matInput type="text" formControlName="barcode" autocomplete="off" />
-      @if (form.controls.barcode.hasError('required')) {
-        <mat-error>{{ messages.barcodeRequired }}</mat-error>
-      }
-    </mat-form-field>
-    <button class="scan__button" mat-flat-button type="submit" [disabled]="registering()">
-      {{ registering() ? messages.registering : messages.register }}
-    </button>
-  </form>
+  <section class="panel" aria-labelledby="returns-reader">
+    <h2 id="returns-reader" class="panel__title">{{ messages.readerStep }}</h2>
+
+    <app-reader-picker [label]="messages.readerLabel" (picked)="pick($event)" />
+
+    @if (loadingReader() && !reader()) {
+      <p class="panel__note" role="status">{{ messages.loadingReader }}</p>
+    }
+
+    @if (readerProblem()) {
+      <p class="panel__problem" role="alert">{{ readerProblem() }}</p>
+    }
+
+    @if (reader(); as person) {
+      <div class="person">
+        <p class="person__name">{{ person.name }}</p>
+        <p class="person__email">{{ person.email }}</p>
+      </div>
+    }
+  </section>
 
   @if (problem(); as failure) {
     <div class="banner banner--error" role="alert">
@@ -82,4 +90,56 @@
       </dl>
     </section>
   }
+
+  <section class="panel" aria-labelledby="returns-open">
+    <h2 id="returns-open" class="panel__title">{{ messages.openTitle }}</h2>
+
+    @if (reader()) {
+      @if (loanCards().length === 0) {
+        <p class="panel__empty">{{ messages.openEmpty }}</p>
+      } @else {
+        <ul class="loans">
+          @for (card of loanCards(); track card.loan) {
+            <li class="loan" [class.loan--overdue]="card.overdue !== ''">
+              <div class="loan__text">
+                <p class="loan__title">{{ card.title }}</p>
+                @if (card.authors) {
+                  <p class="loan__authors">{{ card.authors }}</p>
+                }
+                <p class="loan__details">{{ card.details }}</p>
+                <div class="chips loan__chips">
+                  @if (card.overdue) {
+                    <span class="chip chip--error">{{ card.overdue }}</span>
+                    @if (card.fineToday) {
+                      <span class="chip chip--neutral">{{ card.fineToday }}</span>
+                    }
+                  } @else {
+                    <span class="chip chip--success">{{ messages.onTimeChip }}</span>
+                  }
+                </div>
+              </div>
+              <button
+                class="loan__button"
+                mat-flat-button
+                type="button"
+                [disabled]="returning() !== ''"
+                [attr.aria-label]="card.registerLabel"
+                (click)="registerReturn(card)"
+              >
+                {{ returning() === card.bookCopy ? messages.registering : messages.register }}
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    } @else {
+      <p class="panel__empty">{{ messages.openNeedsReader }}</p>
+    }
+  </section>
+
+  <div class="actions">
+    <button class="actions__secondary" mat-stroked-button type="button" (click)="endAttention()">
+      {{ messages.endAttention }}
+    </button>
+  </div>
 </div>

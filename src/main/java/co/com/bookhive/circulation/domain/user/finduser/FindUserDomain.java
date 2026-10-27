@@ -1,11 +1,16 @@
 package co.com.bookhive.circulation.domain.user.finduser;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import co.com.bookhive.circulation.domain.account.finduseraccount.UserAccountDomain;
+import co.com.bookhive.circulation.domain.institution.CurrentInstitution;
+import co.com.bookhive.circulation.domain.loan.returnbook.DailyRateFinePolicy;
+import co.com.bookhive.circulation.domain.loan.returnbook.FinePolicy;
 import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.FineRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.InstitutionParametersRepository;
@@ -18,6 +23,7 @@ import co.com.bookhive.circulation.services.output.ports.repositories.criteria.R
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.UserCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.InstitutionParametersEntity;
+import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.ReservationEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.UserEntity;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
@@ -87,11 +93,12 @@ public final class FindUserDomain {
 
 		requireRepositories();
 
-		final int maxLoans = findMaxConcurrentLoans();
+		final InstitutionParametersEntity parameters = findParameters();
+		final int maxLoans = parameters.getMaxConcurrentLoans();
 		final UserEntity user = findUser();
 
-		final int activeLoans = loanRepository.findByCriteria(
-				LoanCriteria.activeByUser(user.getId())).size();
+		final List<LoanEntity> loans = loanRepository.findByCriteria(LoanCriteria.activeByUser(user.getId()));
+		final int activeLoans = loans.size();
 		final int pendingFines = fineRepository.findByCriteria(
 				FineCriteria.pendingByUser(user.getId())).size();
 
@@ -103,7 +110,8 @@ public final class FindUserDomain {
 				maxLoans,
 				pendingFines,
 				blocksOf(user.getStatus(), activeLoans, maxLoans, pendingFines),
-				readyReservationsOf(user.getId()));
+				readyReservationsOf(user.getId()),
+				openLoansOf(loans, parameters));
 	}
 
 	public String getEmail() {
@@ -119,7 +127,7 @@ public final class FindUserDomain {
 		}
 	}
 
-	private int findMaxConcurrentLoans() {
+	private InstitutionParametersEntity findParameters() {
 
 		final InstitutionParametersEntity parameters = institutionParametersRepository
 				.findAll(PageCriteria.of(0, 1)).stream()
@@ -137,7 +145,7 @@ public final class FindUserDomain {
 							+ " puede llevar ejemplares.");
 		}
 
-		return max;
+		return parameters;
 	}
 
 	private UserEntity findUser() {
@@ -185,6 +193,24 @@ public final class FindUserDomain {
 		return bookCopyRepository.findById(bookCopy)
 				.map(BookCopyEntity::getBarcode)
 				.orElse(TextHelper.getDefaultValue());
+	}
+
+	private static List<OpenLoanDomain> openLoansOf(
+			final List<LoanEntity> loans,
+			final InstitutionParametersEntity parameters) {
+
+		final LocalDate today = CurrentInstitution.today(parameters);
+		final FinePolicy policy = new DailyRateFinePolicy(parameters.getDailyFineRate());
+
+		return loans.stream()
+				.map(loan -> {
+					final UserAccountDomain.ActiveLoan active = UserAccountDomain.ActiveLoan.on(
+							loan.getId(), loan.getBookCopy().getBook(), loan.getLoanDate(), loan.getDueDate(), today, policy);
+					return new OpenLoanDomain(active.loan(), loan.getBookCopy().getId(), loan.getBookCopy().getBarcode(),
+							active.book(), active.loanDate(), active.dueDate(), active.overdueDays(), active.accruedFine());
+				})
+				.sorted(Comparator.comparing(OpenLoanDomain::dueDate))
+				.toList();
 	}
 
 	private static BookHiveException userNotFound(final int matches) {

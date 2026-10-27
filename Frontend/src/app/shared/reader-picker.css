@@ -1,0 +1,47 @@
+:host {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.picker {
+  width: 100%;
+}
+
+.picker__option {
+  line-height: 1.25;
+}
+
+.picker__name,
+.picker__email {
+  display: block;
+}
+
+.picker__name {
+  font-weight: 600;
+  color: var(--bh-walnut-dark);
+}
+
+.picker__email {
+  font-size: 13px;
+  color: var(--bh-wood-text);
+  overflow-wrap: anywhere;
+}
+
+.picker__status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.picker__problem {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--bh-brick-tint);
+  color: var(--bh-brick-text);
+}

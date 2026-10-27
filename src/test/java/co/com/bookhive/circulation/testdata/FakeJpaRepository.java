@@ -62,7 +62,9 @@ public final class FakeJpaRepository<T> implements InvocationHandler {
 		return switch (method.getName()) {
 			case "save", "saveAndFlush" -> save((T) arguments[0]);
 			case "findById" -> stored.stream().findFirst();
-			case "findAll" -> findAll(arguments[0]);
+			case "findAll" -> arguments.length == 2 && arguments[1] instanceof Pageable page
+					? findPage(arguments[0], page)
+					: findAll(arguments[0]);
 			case "changeStatus" -> changeStatus(arguments);
 			case "assign" -> assign(arguments);
 			case "settle", "register" -> rowsChangedBy(method.getName(), arguments);
@@ -91,6 +93,12 @@ public final class FakeJpaRepository<T> implements InvocationHandler {
 		filters.add(arguments[0] + ":" + arguments[4] + "->" + arguments[5]
 				+ " ejemplar " + arguments[1] + " hasta " + arguments[3]);
 		return changedRows;
+	}
+
+	private Object findPage(final Object specification, final Pageable page) {
+		pages.add(page);
+		findAll(specification);
+		return new PageImpl<>(stored);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -135,6 +143,9 @@ public final class FakeJpaRepository<T> implements InvocationHandler {
 		if ("disjunction".equals(name)) {
 			filters.add("ninguna");
 		}
+		if ("like".equals(name)) {
+			filters.add(arguments[0] + " like " + arguments[1] + (arguments.length > 2 ? " escape " + arguments[2] : ""));
+		}
 		if ("lessThan".equals(name)) {
 			filters.add(arguments[0] + "<" + arguments[1]);
 		}
@@ -146,6 +157,9 @@ public final class FakeJpaRepository<T> implements InvocationHandler {
 		}
 		if ("not".equals(name)) {
 			filters.add("negada");
+		}
+		if ("function".equals(name)) {
+			return criteria(Expression.class, arguments[0] + "(" + ((Object[]) arguments[2])[0] + ")");
 		}
 		if ("lower".equals(name)) {
 			return criteria(Expression.class, "lower(" + arguments[0] + ")");

@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
-  max-width: 760px;
+  max-width: 820px;
 }
 
 p,
@@ -11,25 +11,111 @@ dd {
   margin: 0;
 }
 
-.scan {
+.panel {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  flex-direction: column;
+  gap: 16px;
   padding: 24px;
   border-radius: 16px;
   border: 1px solid var(--bh-line);
   background: var(--bh-paper);
 }
 
-.scan mat-form-field {
-  flex: 1 1 auto;
+.panel__title {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 600;
+  color: var(--bh-walnut-dark);
+}
+
+.panel__note {
+  color: var(--bh-wood-text);
+}
+
+.panel__problem {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--bh-brick-tint);
+  color: var(--bh-brick-text);
+}
+
+.panel__empty {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--bh-parchment);
+  color: var(--bh-walnut-dark);
+  line-height: 1.45;
+}
+
+.person {
+  padding-top: 14px;
+  border-top: 1px solid var(--bh-line-soft);
+}
+
+.person__name {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--bh-walnut-dark);
+}
+
+.person__email {
+  font-size: 14px;
+  color: var(--bh-wood-text);
+  overflow-wrap: anywhere;
+}
+
+.loans {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.loan {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--bh-line-soft);
+  background: var(--bh-parchment);
+}
+
+.loan--overdue {
+  border-color: var(--bh-brick-line);
+}
+
+.loan__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   min-width: 0;
 }
 
-.scan__button {
+.loan__title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--bh-walnut-dark);
+}
+
+.loan__authors,
+.loan__details {
+  font-size: 14px;
+  color: var(--bh-wood-text);
+  overflow-wrap: anywhere;
+}
+
+.loan__chips {
+  margin-top: 6px;
+}
+
+.loan__button {
   flex: none;
-  min-height: 56px;
-  padding-inline: 24px;
+  min-height: 46px;
+  padding-inline: 20px;
 }
 
 .banner--reserved {
@@ -99,10 +185,28 @@ dd {
   color: var(--bh-brick-text);
 }
 
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.actions__secondary {
+  min-height: 52px;
+  padding-inline: 24px;
+  font-size: 17px;
+}
+
 @media (max-width: 760px) {
-  .scan {
+  .panel {
+    padding: 20px;
+  }
+
+  .loan {
     flex-direction: column;
     align-items: stretch;
-    padding: 20px;
+  }
+
+  .actions__secondary {
+    width: 100%;
   }
 }

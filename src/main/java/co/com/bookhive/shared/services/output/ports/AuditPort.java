@@ -30,6 +30,7 @@ public interface AuditPort {
 	String BOOK_COPY_RELOCATED = "EJEMPLAR_REUBICADO";
 	String BOOK_COPY_WITHDRAWN = "EJEMPLAR_DADO_DE_BAJA";
 	String DATA_POLICY_ACCEPTED = "POLITICA_DATOS_ACEPTADA";
+	String READERS_SEARCHED = "LECTORES_BUSCADOS";
 
 	void record(String action, UUID institution, UUID person, String detail);
 

@@ -4,6 +4,7 @@ import co.com.bookhive.circulation.domain.user.finduser.FindUserDomain;
 import co.com.bookhive.circulation.domain.user.finduser.FoundUserDomain;
 import co.com.bookhive.circulation.services.input.dto.request.FindUserRequestDTO;
 import co.com.bookhive.circulation.services.input.dto.response.FindUserResponseDTO;
+import co.com.bookhive.circulation.services.input.dto.response.OpenLoanResponseDTO;
 import co.com.bookhive.circulation.services.input.dto.response.ReadyReservationResponseDTO;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
@@ -43,6 +44,17 @@ public final class FindUserMapperImpl implements FindUserMapper {
 								ready.bookCopy(),
 								ready.barcode(),
 								ready.pickupDeadline()))
+						.toList(),
+				domain.openLoans().stream()
+						.map(open -> new OpenLoanResponseDTO(
+								open.loan(),
+								open.bookCopy(),
+								open.barcode(),
+								open.book(),
+								open.loanDate(),
+								open.dueDate(),
+								open.overdueDays(),
+								open.accruedFine()))
 						.toList());
 	}
 

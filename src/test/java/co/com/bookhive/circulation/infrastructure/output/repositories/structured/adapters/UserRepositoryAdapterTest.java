@@ -9,6 +9,8 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.UserJpaRepository;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.UserJpaEntity;
@@ -43,6 +45,40 @@ class UserRepositoryAdapterTest {
 
 		assertTrue(adapter(repository).findByCriteria(UserCriteria.byEmail("   ")).isEmpty());
 		assertTrue(adapter(repository).findByCriteria(null).isEmpty());
+		assertTrue(repository.filters().isEmpty());
+	}
+
+	@Test
+	@DisplayName("busca lectores no depurados cuyo nombre o correo contenga el texto, ordenados y con tope")
+	void findsReadersMatchingText() {
+		final FakeJpaRepository<UserJpaEntity> repository = FakeJpaRepository.storing(jpaUser());
+
+		final List<UserEntity> users = adapter(repository).findByCriteria(UserCriteria.matching("Gómez", 10));
+
+		assertEquals(1, users.size());
+		assertEquals(List.of(
+				"status!=" + UserJpaEntity.STATUS_PURGED,
+				"translate(lower(name)) like %gomez% escape \\",
+				"lower(email) like %gomez% escape \\"), repository.filters());
+		assertEquals(PageRequest.of(0, 10, Sort.by("name", "email")), repository.pages().get(0));
+	}
+
+	@Test
+	@DisplayName("los comodines del texto se buscan como letras y no como comodines")
+	void escapesLikeWildcards() {
+		assertEquals("100\\%", UserRepositoryAdapter.escapeLike("100%"));
+		assertEquals("ana\\_g", UserRepositoryAdapter.escapeLike("ana_g"));
+		assertEquals("a\\\\b", UserRepositoryAdapter.escapeLike("a\\b"));
+		assertEquals("ana", UserRepositoryAdapter.escapeLike("ana"));
+	}
+
+	@Test
+	@DisplayName("sin texto o sin tope la búsqueda de lectores no consulta la base")
+	void returnsNothingWithoutText() {
+		final FakeJpaRepository<UserJpaEntity> repository = FakeJpaRepository.storing(jpaUser());
+
+		assertTrue(adapter(repository).findByCriteria(UserCriteria.matching("  ", 10)).isEmpty());
+		assertTrue(adapter(repository).findByCriteria(UserCriteria.matching("ana", 0)).isEmpty());
 		assertTrue(repository.filters().isEmpty());
 	}
 
