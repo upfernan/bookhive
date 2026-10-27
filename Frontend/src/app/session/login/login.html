@@ -60,9 +60,25 @@
       <p class="error" role="alert">{{ errorMessage() }}</p>
     }
 
+    @if (unverified()) {
+      <div class="notice" role="status">
+        <p class="notice__text">{{ resendNotice() || messages.unverified }}</p>
+        @if (!resendNotice()) {
+          <button class="link" type="button" [disabled]="resending()" (click)="resendVerification()">
+            {{ resending() ? messages.resending : messages.resend }}
+          </button>
+        }
+      </div>
+    }
+
     <button mat-flat-button type="submit" [disabled]="submitting()">
       {{ submitting() ? messages.submitting : messages.submit }}
     </button>
+
+    <p class="switch">
+      {{ messages.noAccount }}
+      <a class="link" routerLink="/crear-cuenta">{{ messages.createAccount }}</a>
+    </p>
 
     <app-recaptcha-notice />
   </form>

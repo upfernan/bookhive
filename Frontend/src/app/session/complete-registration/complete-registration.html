@@ -1,0 +1,53 @@
+<app-session-layout>
+  <h1 #heading class="heading" tabindex="-1">{{ messages.title }}</h1>
+  <p class="lead">{{ messages.lead }}</p>
+
+  @if (policy(); as current) {
+    <p class="meta">{{ versionText() }}</p>
+
+    <div class="policy" role="document" tabindex="0" [attr.aria-label]="messages.textLabel">
+      @for (paragraph of paragraphs(); track $index) {
+        <p class="policy__paragraph">{{ paragraph }}</p>
+      }
+    </div>
+
+    <form class="form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ messages.nameLabel }}</mat-label>
+        <input matInput type="text" formControlName="name" autocomplete="name" required />
+        @if (form.controls.name.hasError('required')) {
+          <mat-error>{{ messages.nameRequired }}</mat-error>
+        } @else if (form.controls.name.hasError('maxlength')) {
+          <mat-error>{{ messages.nameTooLong }}</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-checkbox class="consent" formControlName="accepted">{{ messages.acceptLabel }}</mat-checkbox>
+
+      @if (errorMessage()) {
+        <p class="error" role="alert">{{ errorMessage() }}</p>
+      }
+
+      <div class="actions">
+        <button class="actions__primary" mat-flat-button type="submit" [disabled]="registering()">
+          {{ registering() ? messages.submitting : messages.submit }}
+        </button>
+        <button class="link actions__close" type="button" [disabled]="cancelling()" (click)="cancel()">
+          {{ messages.cancel }}
+        </button>
+      </div>
+    </form>
+  } @else if (loading()) {
+    <p class="meta" role="status">{{ messages.loading }}</p>
+  } @else {
+    @if (errorMessage()) {
+      <p class="error" role="alert">{{ errorMessage() }}</p>
+    }
+    <div class="actions">
+      <button class="actions__primary" mat-flat-button type="button" (click)="load()">{{ messages.retry }}</button>
+      <button class="link actions__close" type="button" [disabled]="cancelling()" (click)="cancel()">
+        {{ messages.cancel }}
+      </button>
+    </div>
+  }
+</app-session-layout>

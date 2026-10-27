@@ -33,6 +33,9 @@ export class Login {
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal('');
   protected readonly passwordVisible = signal(false);
+  protected readonly unverified = signal(false);
+  protected readonly resending = signal(false);
+  protected readonly resendNotice = signal('');
 
   protected readonly form = inject(NonNullableFormBuilder).group({
     email: ['', [Validators.required, Validators.email]],
@@ -59,18 +62,45 @@ export class Login {
 
     this.submitting.set(true);
     this.errorMessage.set('');
+    this.unverified.set(false);
+    this.resendNotice.set('');
 
     const { email, password } = this.form.getRawValue();
 
     try {
-      await this.session.open(email.trim(), password);
-      await this.router.navigateByUrl('/inicio');
+      const outcome = await this.session.open(email.trim(), password);
+
+      if (outcome === 'unverified') {
+        this.form.controls.password.reset();
+        this.passwordVisible.set(false);
+        this.unverified.set(true);
+        return;
+      }
+
+      await this.router.navigateByUrl(outcome === 'unregistered' ? '/completar-registro' : '/inicio');
     } catch (error) {
       this.form.controls.password.reset();
       this.passwordVisible.set(false);
       this.errorMessage.set(describeSessionError(error, this.messages.openFailed));
     } finally {
       this.submitting.set(false);
+    }
+  }
+
+  protected async resendVerification(): Promise<void> {
+    if (this.resending()) {
+      return;
+    }
+
+    this.resending.set(true);
+
+    try {
+      await this.session.resendVerification();
+      this.resendNotice.set(this.messages.resent);
+    } catch {
+      this.resendNotice.set(this.messages.resendFailed);
+    } finally {
+      this.resending.set(false);
     }
   }
 }
