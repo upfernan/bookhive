@@ -199,8 +199,8 @@ public final class FindUserDomain {
 			final List<LoanEntity> loans,
 			final InstitutionParametersEntity parameters) {
 
-		final LocalDate today = CurrentInstitution.today(parameters);
 		final FinePolicy policy = new DailyRateFinePolicy(parameters.getDailyFineRate());
+		final LocalDate today = CurrentInstitution.today(parameters);
 
 		return loans.stream()
 				.map(loan -> {
