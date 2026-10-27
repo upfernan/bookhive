@@ -63,6 +63,15 @@ public interface LocationJpaRepository extends Repository<BookCopyJpaEntity, UUI
 	int deleteValues(@Param("copy") UUID copy);
 
 	@Modifying(flushAutomatically = true)
+	@Query(value = "INSERT INTO book_copy (id, book_id, branch_id, barcode, status, lendable)"
+			+ " VALUES (:id, :book, :branch, :barcode, 'DISPONIBLE', true)", nativeQuery = true)
+	int saveBookCopy(@Param("id") UUID id, @Param("book") UUID book, @Param("branch") UUID branch,
+			@Param("barcode") String barcode);
+
+	@Query(value = "SELECT count(*) FROM book_copy WHERE barcode IN (:barcodes)", nativeQuery = true)
+	long countBarcodes(@Param("barcodes") List<String> barcodes);
+
+	@Modifying(flushAutomatically = true)
 	@Query(value = "INSERT INTO book_copy_location (book_copy_id, depth, value) VALUES (:copy, :depth, :value)",
 			nativeQuery = true)
 	int saveValue(@Param("copy") UUID copy, @Param("depth") int depth, @Param("value") String value);

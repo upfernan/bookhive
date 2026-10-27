@@ -73,7 +73,7 @@ public class SessionController {
 				.build();
 	}
 
-	private static String cookie(final String value, final Duration maxAge) {
+	static String cookie(final String value, final Duration maxAge) {
 
 		return ResponseCookie.from(SessionCookieTokenResolver.SESSION_COOKIE, value)
 				.httpOnly(true)

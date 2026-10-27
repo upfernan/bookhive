@@ -16,6 +16,11 @@ public final class PermissionCode {
 	public static final String RELOCATE_BOOK_COPY = "book-copy.relocate";
 	public static final String WITHDRAW_BOOK_COPY = "book-copy.withdraw";
 
+	public static final String MANAGE_CATALOG = "catalog.manage";
+	public static final String MANAGE_CATEGORIES = "category.manage";
+
+	public static final String MANAGE_USERS = "user.manage";
+
 	private PermissionCode() {
 		super();
 	}

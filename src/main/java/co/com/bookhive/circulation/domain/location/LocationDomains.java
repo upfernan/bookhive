@@ -96,6 +96,30 @@ public final class LocationDomains {
 
 	}
 
+	public record NewCopies(UUID book, UUID branch, List<String> barcodes) {
+
+		public static final int MAX_BARCODE = 50;
+
+		public NewCopies {
+			book = UUIDHelper.getDefaultValue(book);
+			branch = UUIDHelper.getDefaultValue(branch);
+			barcodes = ObjectHelper.getDefaultValue(barcodes, List.<String>of()).stream()
+					.map(barcode -> TextHelper.getDefaultValue(barcode).trim())
+					.toList();
+		}
+
+		public void validate() {
+			final boolean valid = !UUIDHelper.isDefaultValue(book) && !UUIDHelper.isDefaultValue(branch)
+					&& !barcodes.isEmpty() && barcodes.stream().distinct().count() == barcodes.size()
+					&& barcodes.stream().allMatch(barcode -> !barcode.isEmpty() && barcode.length() <= MAX_BARCODE);
+			if (!valid) {
+				throw BookHiveException.create(MessageKey.BOOK_TITLE_COPIES_INVALID,
+						"Ejemplares inválidos para el libro " + book + ": " + barcodes + ".");
+			}
+		}
+
+	}
+
 	public record BookCopyLocation(UUID bookCopy, String barcode, String status, Branch branch, List<Spot> spots) {
 
 		public BookCopyLocation {

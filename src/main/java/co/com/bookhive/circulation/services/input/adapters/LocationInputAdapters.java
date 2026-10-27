@@ -4,8 +4,12 @@ import java.util.List;
 
 import co.com.bookhive.circulation.domain.location.LocationDomains;
 import co.com.bookhive.circulation.services.input.dto.request.BranchRequestDTO;
-import co.com.bookhive.circulation.services.input.dto.request.LocationLevelsRequestDTO;
+import co.com.bookhive.circulation.services.input.dto.request.RegisterBookCopiesRequestDTO;
 import co.com.bookhive.circulation.services.input.dto.request.RelocateBookCopyRequestDTO;
+import co.com.bookhive.circulation.services.input.ports.RegisterBookCopiesInputPort;
+import co.com.bookhive.circulation.services.input.ports.RetireBookCopiesInputPort;
+import co.com.bookhive.circulation.services.usecase.location.registerbookcopies.RegisterBookCopiesUseCase;
+import co.com.bookhive.circulation.services.usecase.location.retirebookcopies.RetireBookCopiesUseCase;
 import co.com.bookhive.circulation.services.input.dto.response.LocationResponseDTOs;
 import co.com.bookhive.circulation.services.input.ports.ConfigureLocationLevelsInputPort;
 import co.com.bookhive.circulation.services.input.ports.CreateBranchInputPort;
@@ -60,6 +64,17 @@ public final class LocationInputAdapters {
 
 	public static WithdrawBookCopyInputPort withdraw(final WithdrawBookCopyUseCase useCase) {
 		return barcode -> location(useCase.execute(barcode));
+	}
+
+	public static RegisterBookCopiesInputPort registerCopies(final RegisterBookCopiesUseCase useCase) {
+		return request -> {
+			final RegisterBookCopiesRequestDTO safe = ObjectHelper.getDefaultValue(request, new RegisterBookCopiesRequestDTO(null, null, null));
+			return useCase.execute(new LocationDomains.NewCopies(safe.book(), safe.branch(), safe.barcodes()));
+		};
+	}
+
+	public static RetireBookCopiesInputPort retireCopies(final RetireBookCopiesUseCase useCase) {
+		return useCase::execute;
 	}
 
 	private static List<LocationResponseDTOs.Level> levels(final List<LocationDomains.Level> levels) {

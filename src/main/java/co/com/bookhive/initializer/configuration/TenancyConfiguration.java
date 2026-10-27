@@ -7,8 +7,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import co.com.bookhive.access.infrastructure.input.controllers.PublicDataPolicyController;
+import co.com.bookhive.access.infrastructure.input.controllers.RegistrationController;
 import co.com.bookhive.access.infrastructure.input.controllers.SessionController;
 import co.com.bookhive.access.infrastructure.input.controllers.DataPolicyController;
+import co.com.bookhive.access.infrastructure.input.controllers.SessionProfileController;
 import co.com.bookhive.access.infrastructure.input.interceptors.PermissionInterceptor;
 import co.com.bookhive.access.infrastructure.input.interceptors.TenantInterceptor;
 import co.com.bookhive.access.infrastructure.output.repositories.structured.tenancy.TenantConnectionProvider;
@@ -44,12 +47,15 @@ public class TenancyConfiguration implements WebMvcConfigurer {
 		registry.addInterceptor(tenantInterceptor)
 				.addPathPatterns(TENANTED_PATHS)
 				.excludePathPatterns(SessionController.PATH)
+				.excludePathPatterns(RegistrationController.PATH, PublicDataPolicyController.PATH)
 				.excludePathPatterns(WompiEventsController.PATH)
 				.excludePathPatterns(InternalPaths.all());
 		registry.addInterceptor(permissionInterceptor)
 				.addPathPatterns(TENANTED_PATHS)
 				.excludePathPatterns(SessionController.PATH)
+				.excludePathPatterns(RegistrationController.PATH, PublicDataPolicyController.PATH)
 				.excludePathPatterns(DataPolicyController.PATH, DataPolicyController.PATH + DataPolicyController.ACCEPTANCE)
+				.excludePathPatterns(SessionProfileController.PATH)
 				.excludePathPatterns(WompiEventsController.PATH)
 				.excludePathPatterns(InternalPaths.all());
 	}

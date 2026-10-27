@@ -15,7 +15,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
-import co.com.bookhive.circulation.domain.location.LocationDomains;
 import co.com.bookhive.circulation.infrastructure.input.controllers.LocationController;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.adapters.LocationRepositoryAdapter;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.LocationJpaRepository;
@@ -217,6 +216,7 @@ class LocationUseCasesTest {
 		private final List<LevelEntity> levels = new ArrayList<>();
 		private final Map<UUID, List<ValueEntity>> values = new HashMap<>();
 		private final Map<UUID, UUID> branchOf = new HashMap<>();
+		private final List<String> added = new ArrayList<>();
 
 		@Override
 		public List<BranchEntity> findBranches() {
@@ -258,6 +258,16 @@ class LocationUseCasesTest {
 		@Override
 		public void clearValues(final UUID bookCopy) {
 			values.remove(bookCopy);
+		}
+
+		@Override
+		public boolean anyBarcodeTaken(final List<String> barcodes) {
+			return barcodes.stream().anyMatch(added::contains);
+		}
+
+		@Override
+		public void addBookCopies(final UUID book, final UUID branch, final List<String> barcodes) {
+			added.addAll(barcodes);
 		}
 
 	}

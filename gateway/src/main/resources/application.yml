@@ -60,9 +60,12 @@ bookhive:
         - GET /actuator/health/**
         - POST /api/v1/sesiones
         - DELETE /api/v1/sesiones
+        - POST /api/v1/registro
+        - GET /api/v1/politica-datos/publica
         - /api/v1/pagos/wompi/eventos
       sensitive-actions:
         abrir-sesion: POST /api/v1/sesiones
+        registrarse: POST /api/v1/registro
         prestar: POST /api/v1/prestamos
       administrative-paths:
         - /api/v1/admin/**

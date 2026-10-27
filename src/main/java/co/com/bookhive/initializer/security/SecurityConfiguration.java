@@ -11,6 +11,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
+import co.com.bookhive.access.infrastructure.input.controllers.PublicDataPolicyController;
+import co.com.bookhive.access.infrastructure.input.controllers.RegistrationController;
 import co.com.bookhive.access.infrastructure.input.controllers.SessionController;
 import co.com.bookhive.payment.infrastructure.input.controllers.WompiEventsController;
 import co.com.bookhive.access.infrastructure.input.security.SessionCookieTokenResolver;
@@ -74,6 +76,8 @@ public class SecurityConfiguration {
 		http.authorizeHttpRequests(requests -> requests
 						.requestMatchers(HttpMethod.GET, PUBLIC_HEALTH, PUBLIC_HEALTH_ROOT).permitAll()
 						.requestMatchers(HttpMethod.POST, SessionController.PATH).permitAll()
+						.requestMatchers(HttpMethod.POST, RegistrationController.PATH).permitAll()
+						.requestMatchers(HttpMethod.GET, PublicDataPolicyController.PATH).permitAll()
 						.requestMatchers(HttpMethod.DELETE, SessionController.PATH).permitAll()
 						.anyRequest().authenticated())
 				.oauth2ResourceServer(resourceServer -> resourceServer

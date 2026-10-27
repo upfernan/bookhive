@@ -1,0 +1,15 @@
+INSERT INTO mensaje (codigo, texto) VALUES
+    ('category.name.invalid', 'El nombre de la categoría es obligatorio y puede tener máximo 100 caracteres.'),
+    ('category.name.taken', 'Ya existe una categoría con ese nombre.'),
+    ('category.not-found', 'La categoría indicada no existe.'),
+    ('category.in-use', 'No se puede desactivar la categoría porque tiene títulos activos. Primero páselos a otra categoría.'),
+    ('category.inactive', 'La categoría está desactivada; elija una categoría activa.'),
+    ('book-title.data.invalid', 'Revise los datos del título: el título es obligatorio (máximo 300 caracteres), el tipo debe ser físico o digital, la editorial y al menos un autor son obligatorios, y el ISBN y el año deben ser válidos.'),
+    ('book-title.isbn.taken', 'Ya existe otro título con ese ISBN.'),
+    ('book-title.not-found', 'El título indicado no existe.'),
+    ('book-title.withdrawn', 'Ese título ya fue dado de baja.'),
+    ('book-title.format.locked', 'No se puede cambiar el tipo (físico o digital) de un título ya registrado.'),
+    ('book-title.copies.invalid', 'Revise los ejemplares: un título digital no lleva ejemplares, y cada ejemplar físico necesita la sede y un código de barras distinto de máximo 50 caracteres.'),
+    ('book-copy.barcode.taken', 'Ya existe un ejemplar con alguno de esos códigos de barras.'),
+    ('book-title.copies.in-use', 'No se puede dar de baja el título porque tiene ejemplares prestados o apartados.'),
+    ('book-title.reservations.pending', 'No se puede dar de baja el título porque tiene reservas en espera.');
