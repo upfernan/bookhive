@@ -7,7 +7,6 @@ Descripción breve del proyecto.
 Todos los diagramas están en la carpeta [docs/diagramas](docs/diagramas).
 
 ### Diagrama de componentes
-![Componentes API Gateway](docs/diagramas/componentes/componentes-api-gateway/componentes-bookhive-componentes-api-ga
 
 #### Backend paquetes
 ![Paquetes Backend](docs/diagramas/paquetes/back-end/paquetes-bookhive-vista%20general.drawio.svg)
