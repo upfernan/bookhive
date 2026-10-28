@@ -8,7 +8,7 @@ Todos los diagramas están en la carpeta [docs/diagramas](docs/diagramas).
 
 ### Diagrama de componentes
 
-#### API Gateway
+#### Componentes
 ![Componentes API Gateway](docs/diagramas/componentes/componentes-api-gateway/componentes-bookhive-componentes-api-gateway.drawio.svg)
 
 #### Backend
