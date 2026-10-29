@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +44,7 @@ public final class MigrationsMain {
 
 			migrateInstitutions(url, user, password, placeholders, schemas);
 
-		} catch (final Exception exception) {
+		} catch (final SQLException | RuntimeException exception) {
 			logger.error("Las migraciones fallaron.", exception);
 			System.exit(1);
 		}
@@ -66,7 +67,7 @@ public final class MigrationsMain {
 	}
 
 	private static List<String> readInstitutionSchemas(
-			final String url, final String user, final String password) throws Exception {
+			final String url, final String user, final String password) throws SQLException {
 
 		final List<String> schemas = new ArrayList<>();
 

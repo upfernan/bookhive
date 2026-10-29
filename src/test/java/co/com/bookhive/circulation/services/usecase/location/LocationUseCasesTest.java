@@ -293,10 +293,6 @@ class LocationUseCasesTest {
 				LocationInputAdapters.withdraw(new WithdrawBookCopyUseCaseImpl(copies, locations, session, audit))));
 	}
 
-	private static String keyOf(final Runnable call) {
-		return assertThrows(BookHiveException.class, call::run).getUserMessageKey();
-	}
-
 	private static final class Locations implements LocationRepository {
 
 		private final List<BranchEntity> branches = new ArrayList<>();

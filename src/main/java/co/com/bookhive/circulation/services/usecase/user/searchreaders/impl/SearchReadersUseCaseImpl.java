@@ -39,7 +39,7 @@ public final class SearchReadersUseCaseImpl implements SearchReadersUseCase {
 
 		final List<FoundReaderDomain> found = search.find();
 
-		audit.record(
+		audit.register(
 				AuditPort.READERS_SEARCHED,
 				sessionContext.getInstitution(),
 				sessionContext.getLibrarian(),

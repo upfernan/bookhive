@@ -32,6 +32,6 @@ public interface AuditPort {
 	String DATA_POLICY_ACCEPTED = "POLITICA_DATOS_ACEPTADA";
 	String READERS_SEARCHED = "LECTORES_BUSCADOS";
 
-	void record(String action, UUID institution, UUID person, String detail);
+	void register(String action, UUID institution, UUID person, String detail);
 
 }

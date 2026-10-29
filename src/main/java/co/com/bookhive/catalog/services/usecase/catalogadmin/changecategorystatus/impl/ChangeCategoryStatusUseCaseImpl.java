@@ -35,7 +35,7 @@ public final class ChangeCategoryStatusUseCaseImpl implements ChangeCategoryStat
 		}
 		final String status = change.active() ? CatalogAdminDomains.CATEGORY_ACTIVE : CatalogAdminDomains.CATEGORY_INACTIVE;
 		categories.changeCategoryStatus(category.id(), status);
-		audit.record(AuditPort.CATEGORY_STATUS_CHANGED, session.institution(), session.person(), category.name() + " " + status);
+		audit.register(AuditPort.CATEGORY_STATUS_CHANGED, session.institution(), session.person(), category.name() + " " + status);
 		return FindTitleUseCaseImpl.categoryOf(categories, category.id());
 	}
 

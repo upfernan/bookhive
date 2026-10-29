@@ -47,7 +47,7 @@ class LoggingAuditAdapterTest {
 		TransactionSynchronizationManager.initSynchronization();
 
 		try {
-			adapter.record(AuditPort.LOAN_REGISTERED, INSTITUTION, PERSON, "prestamo-1");
+			adapter.register(AuditPort.LOAN_REGISTERED, INSTITUTION, PERSON, "prestamo-1");
 
 			final List<TransactionSynchronization> pending = TransactionSynchronizationManager.getSynchronizations();
 			assertEquals(1, pending.size());
@@ -60,7 +60,7 @@ class LoggingAuditAdapterTest {
 	@Test
 	@DisplayName("fuera de una transacción el evento se escribe de inmediato")
 	void writesImmediatelyWithoutTransaction() {
-		assertDoesNotThrow(() -> adapter.record(AuditPort.PERMISSION_DENIED, INSTITUTION, PERSON, "loan.lend"));
+		assertDoesNotThrow(() -> adapter.register(AuditPort.PERMISSION_DENIED, INSTITUTION, PERSON, "loan.lend"));
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 	}
 

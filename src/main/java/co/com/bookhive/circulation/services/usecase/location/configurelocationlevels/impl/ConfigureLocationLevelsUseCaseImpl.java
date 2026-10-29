@@ -37,7 +37,7 @@ public final class ConfigureLocationLevelsUseCaseImpl implements ConfigureLocati
 		}
 		locations.replaceLevels(levels.levels().stream()
 				.map(level -> new LocationEntities.LevelEntity(level.depth(), level.name())).toList());
-		audit.record(AuditPort.LOCATION_LEVELS_CONFIGURED, session.getInstitution(), session.getLibrarian(),
+		audit.register(AuditPort.LOCATION_LEVELS_CONFIGURED, session.getInstitution(), session.getLibrarian(),
 				String.join(" / ", levels.names()));
 		return levels.levels();
 	}

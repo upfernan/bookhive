@@ -60,7 +60,7 @@ public final class ApplyPaymentTransactionUseCaseImpl implements ApplyPaymentTra
 		final FinePaymentEntity payment = found.get();
 		final boolean recorded = eventRepository.register(eventOf(payment, transaction));
 		if (recorded) {
-			audit.record(AuditPort.FINE_PAYMENT_UPDATED, payment.institution(), payment.payer(),
+			audit.register(AuditPort.FINE_PAYMENT_UPDATED, payment.institution(), payment.payer(),
 					payment.reference() + " transaccion " + transaction.transaction() + " estado "
 							+ transaction.status() + " origen " + transaction.source());
 		}
@@ -79,7 +79,7 @@ public final class ApplyPaymentTransactionUseCaseImpl implements ApplyPaymentTra
 
 		if (transaction.amountInCents() != payment.amountInCents()) {
 			if (firstTime) {
-				audit.record(AuditPort.FINE_PAYMENT_INCONSISTENT, payment.institution(), payment.payer(),
+				audit.register(AuditPort.FINE_PAYMENT_INCONSISTENT, payment.institution(), payment.payer(),
 						payment.reference() + " aprobado por " + transaction.amountInCents()
 								+ " centavos y se esperaban " + payment.amountInCents());
 			}
@@ -90,10 +90,10 @@ public final class ApplyPaymentTransactionUseCaseImpl implements ApplyPaymentTra
 				payment.fine(), payment.reference(), PaymentAmount.fromCents(payment.amountInCents()));
 
 		if (settled.newlySettled()) {
-			audit.record(AuditPort.FINE_PAID, payment.institution(), payment.payer(),
+			audit.register(AuditPort.FINE_PAID, payment.institution(), payment.payer(),
 					"multa " + payment.fine() + " pago " + payment.reference());
 		} else if (firstTime && !payment.reference().equals(settled.paymentReference())) {
-			audit.record(AuditPort.FINE_PAYMENT_DUPLICATED, payment.institution(), payment.payer(),
+			audit.register(AuditPort.FINE_PAYMENT_DUPLICATED, payment.institution(), payment.payer(),
 					"multa " + payment.fine() + " ya saldada con " + settled.paymentReference()
 							+ "; el pago " + payment.reference() + " debe reversarse");
 		}

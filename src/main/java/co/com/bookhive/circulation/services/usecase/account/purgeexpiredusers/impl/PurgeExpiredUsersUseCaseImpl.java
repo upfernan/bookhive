@@ -34,7 +34,7 @@ public final class PurgeExpiredUsersUseCaseImpl implements PurgeExpiredUsersUseC
 			}
 			users.anonymize(user);
 			people.anonymize(user);
-			audit.record(AuditPort.USER_PURGED, null, user, "plazo de conservación vencido en " + institution);
+			audit.register(AuditPort.USER_PURGED, null, user, "plazo de conservación vencido en " + institution);
 			purged++;
 		}
 		return new UserLifecycleDomains.PurgeRun(institution, purged, skipped);

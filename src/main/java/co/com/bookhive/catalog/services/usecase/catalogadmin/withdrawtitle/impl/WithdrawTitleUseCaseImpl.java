@@ -41,7 +41,7 @@ public final class WithdrawTitleUseCaseImpl implements WithdrawTitleUseCase {
 		if (!titles.withdrawTitle(current.id())) {
 			throw BookHiveException.createConflict(MessageKey.BOOK_TITLE_WITHDRAWN, "El título " + id + " cambió mientras se daba de baja.");
 		}
-		audit.record(AuditPort.TITLE_WITHDRAWN, session.institution(), session.person(),
+		audit.register(AuditPort.TITLE_WITHDRAWN, session.institution(), session.person(),
 				current.id() + " " + current.title() + " y " + copies + " ejemplares");
 		return FindTitleUseCaseImpl.titleOf(titles, current.id());
 	}

@@ -66,7 +66,7 @@ public final class ConfigureInstitutionUseCaseImpl implements ConfigureInstituti
 		changes.forEach(change -> changeRepository.create(new InstitutionParameterChangeEntity(
 				UUIDHelper.generateNew(), change.parameter(), change.previousValue(), change.newValue(), administrator, null)));
 
-		audit.record(AuditPort.INSTITUTION_CONFIGURED, sessionContext.getInstitution(), administrator,
+		audit.register(AuditPort.INSTITUTION_CONFIGURED, sessionContext.getInstitution(), administrator,
 				changes.stream().map(ParameterChange::describe).collect(Collectors.joining(", ")));
 
 		return FindInstitutionSettingsUseCaseImpl.settingsOf(parameters);

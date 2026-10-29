@@ -47,7 +47,7 @@ public final class SaveCategoryUseCaseImpl implements SaveCategoryUseCase {
 		} else {
 			categories.renameCategory(id, requested.name());
 		}
-		audit.record(AuditPort.CATEGORY_SAVED, session.institution(), session.person(), id + " " + requested.name());
+		audit.register(AuditPort.CATEGORY_SAVED, session.institution(), session.person(), id + " " + requested.name());
 		return FindTitleUseCaseImpl.categoryOf(categories, id);
 	}
 

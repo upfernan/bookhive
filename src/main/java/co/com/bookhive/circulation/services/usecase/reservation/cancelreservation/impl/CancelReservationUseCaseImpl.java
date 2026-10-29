@@ -59,7 +59,7 @@ public final class CancelReservationUseCaseImpl implements CancelReservationUseC
 			releaseBookCopy(reservation);
 		}
 
-		audit.record(
+		audit.register(
 				AuditPort.RESERVATION_CANCELLED,
 				sessionContext.getInstitution(),
 				cancelling.getUser(),

@@ -90,7 +90,7 @@ public class LoanEntity {
 	}
 
 	public void setStatus(final String status) {
-		this.status = TextHelper.isDefaultValue(status) ? STATUS_ACTIVE : status.trim();
+		this.status = TextHelper.isDefaultValue(status) ? STATUS_ACTIVE : TextHelper.getDefaultValue(status);
 	}
 
 	public Instant getCreatedAt() {

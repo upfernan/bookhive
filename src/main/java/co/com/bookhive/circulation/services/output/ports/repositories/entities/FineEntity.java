@@ -101,7 +101,7 @@ public class FineEntity {
 	}
 
 	public void setStatus(final String status) {
-		this.status = TextHelper.isDefaultValue(status) ? STATUS_PENDING : status.trim();
+		this.status = TextHelper.isDefaultValue(status) ? STATUS_PENDING : TextHelper.getDefaultValue(status);
 	}
 
 	public Instant getCreatedAt() {

@@ -57,7 +57,7 @@ public final class UpdateTitleUseCaseImpl implements UpdateTitleUseCase {
 		final CatalogAdminDomains.Title title = requested.withId(current.id(), current.status());
 		titles.updateTitle(FindTitleUseCaseImpl.entityOf(title));
 		final int copies = title.barcodes().isEmpty() ? 0 : inventory.register(title.id(), title.branch(), title.barcodes());
-		audit.record(AuditPort.TITLE_UPDATED, session.institution(), session.person(),
+		audit.register(AuditPort.TITLE_UPDATED, session.institution(), session.person(),
 				title.id() + " " + title.title() + (copies > 0 ? " y " + copies + " ejemplares nuevos" : ""));
 		return FindTitleUseCaseImpl.titleOf(titles, title.id());
 	}

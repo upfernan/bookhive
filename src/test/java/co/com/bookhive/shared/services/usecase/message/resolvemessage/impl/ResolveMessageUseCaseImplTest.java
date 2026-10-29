@@ -24,8 +24,8 @@ class ResolveMessageUseCaseImplTest {
 		final ResolveMessageDomain message = useCase.execute(new ResolveMessageDomain("  loan.unexpected  ", ""));
 
 		assertEquals(List.of("loan.unexpected"), askedKeys);
-		assertEquals("loan.unexpected", message.getKey());
-		assertEquals("Texto de loan.unexpected", message.getText());
+		assertEquals("loan.unexpected", message.key());
+		assertEquals("Texto de loan.unexpected", message.text());
 	}
 
 	@Test
@@ -33,7 +33,7 @@ class ResolveMessageUseCaseImplTest {
 	void resolvesMissingMessage() {
 		final ResolveMessageUseCaseImpl useCase = new ResolveMessageUseCaseImpl(key -> "Mensaje general" + key);
 
-		assertEquals("Mensaje general", useCase.execute(null).getText());
+		assertEquals("Mensaje general", useCase.execute(null).text());
 	}
 
 }

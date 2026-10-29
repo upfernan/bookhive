@@ -28,16 +28,18 @@ public class PermissionInterceptor implements HandlerInterceptor {
 			final HttpServletResponse response,
 			final Object handler) {
 
-		if (!(handler instanceof HandlerMethod method)) {
-			return true;
+		if (handler instanceof HandlerMethod method) {
+			authorize(method);
 		}
 
+		return true;
+	}
+
+	private void authorize(final HandlerMethod method) {
 		final RequiredPermission required = method.getMethodAnnotation(RequiredPermission.class);
 		final String permission = ObjectHelper.isNull(required) ? "" : required.value();
 
 		authorizeOperation.execute(new AuthorizeOperationRequestDTO(permission, method.getShortLogMessage()));
-
-		return true;
 	}
 
 }

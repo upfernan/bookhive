@@ -103,7 +103,7 @@ public final class LendBookUseCaseImpl implements LendBookUseCase {
 
 		loanRepository.create(loanDomainMapper.toEntity(registeredLoan));
 
-		audit.record(
+		audit.register(
 				AuditPort.LOAN_REGISTERED,
 				registeredLoan.getInstitution(),
 				registeredLoan.getLibrarian(),

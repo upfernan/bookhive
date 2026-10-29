@@ -58,13 +58,13 @@ public final class ChangeUserStatusUseCaseImpl implements ChangeUserStatusUseCas
 			users.changeStatus(account.user(), UserLifecycleDomains.RETIRED);
 		}
 		people.deactivate(account.user());
-		audit.record(AuditPort.USER_DEACTIVATED, session.getInstitution(), session.getLibrarian(), account.user().toString());
+		audit.register(AuditPort.USER_DEACTIVATED, session.getInstitution(), session.getLibrarian(), account.user().toString());
 	}
 
 	private void reactivate(final UserLifecycleDomains.Account account) {
 		users.changeStatus(account.user(), UserLifecycleDomains.ACTIVE);
 		people.reactivate(account.user());
-		audit.record(AuditPort.USER_REACTIVATED, session.getInstitution(), session.getLibrarian(), account.user().toString());
+		audit.register(AuditPort.USER_REACTIVATED, session.getInstitution(), session.getLibrarian(), account.user().toString());
 	}
 
 	private void purge(final UserLifecycleDomains.Account account) {
@@ -76,7 +76,7 @@ public final class ChangeUserStatusUseCaseImpl implements ChangeUserStatusUseCas
 		}
 		users.anonymize(account.user());
 		people.anonymize(account.user());
-		audit.record(AuditPort.USER_PURGED, session.getInstitution(), session.getLibrarian(), account.user().toString());
+		audit.register(AuditPort.USER_PURGED, session.getInstitution(), session.getLibrarian(), account.user().toString());
 	}
 
 	public static UserLifecycleDomains.Account accountOf(final UserLifecycleEntity entity) {

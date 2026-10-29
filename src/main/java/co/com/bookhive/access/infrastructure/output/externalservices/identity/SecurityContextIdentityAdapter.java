@@ -1,6 +1,7 @@
 package co.com.bookhive.access.infrastructure.output.externalservices.identity;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -12,6 +13,7 @@ import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;
 
 @Service
+@Primary
 @ConditionalOnProperty(
 		name = "bookhive.session.provisional.enabled",
 		havingValue = "false",

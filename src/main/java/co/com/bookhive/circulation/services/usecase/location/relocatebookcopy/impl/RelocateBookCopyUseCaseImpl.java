@@ -58,7 +58,7 @@ public final class RelocateBookCopyUseCaseImpl implements RelocateBookCopyUseCas
 		copy.setBranch(relocation.branch());
 
 		final LocationDomains.BookCopyLocation after = FindBookCopyLocationUseCaseImpl.locationOf(copy, locations);
-		audit.record(AuditPort.BOOK_COPY_RELOCATED, session.getInstitution(), session.getLibrarian(),
+		audit.register(AuditPort.BOOK_COPY_RELOCATED, session.getInstitution(), session.getLibrarian(),
 				copy.getBarcode() + ": " + before + " -> " + after.describe());
 		return after;
 	}
