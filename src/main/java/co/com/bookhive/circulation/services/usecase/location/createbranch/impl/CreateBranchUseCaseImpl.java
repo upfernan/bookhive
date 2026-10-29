@@ -37,7 +37,7 @@ public final class CreateBranchUseCaseImpl implements CreateBranchUseCase {
 		}
 		final LocationDomains.Branch branch = new LocationDomains.Branch(UUIDHelper.generateNew(), requested.name());
 		locations.createBranch(new LocationEntities.BranchEntity(branch.id(), branch.name()));
-		audit.record(AuditPort.BRANCH_CREATED, session.getInstitution(), session.getLibrarian(), branch.name());
+		audit.register(AuditPort.BRANCH_CREATED, session.getInstitution(), session.getLibrarian(), branch.name());
 		return branch;
 	}
 

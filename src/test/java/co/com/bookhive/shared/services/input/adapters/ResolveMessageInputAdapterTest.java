@@ -10,7 +10,7 @@ import co.com.bookhive.shared.services.input.dto.request.ResolveMessageRequestDT
 class ResolveMessageInputAdapterTest {
 
 	private final ResolveMessageInputAdapter adapter =
-			new ResolveMessageInputAdapter(message -> message.withText("Texto de " + message.getKey()));
+			new ResolveMessageInputAdapter(message -> message.withText("Texto de " + message.key()));
 
 	@Test
 	@DisplayName("convierte la petición en dominio y devuelve el texto que resolvió el caso de uso")
@@ -23,7 +23,7 @@ class ResolveMessageInputAdapterTest {
 	@DisplayName("si no llega petición pregunta por la clave vacía")
 	void handlesMissingRequest() {
 		final ResolveMessageInputAdapter general =
-				new ResolveMessageInputAdapter(message -> message.withText("Mensaje general" + message.getKey()));
+				new ResolveMessageInputAdapter(message -> message.withText("Mensaje general" + message.key()));
 
 		assertEquals("Mensaje general", general.execute(null).text());
 	}

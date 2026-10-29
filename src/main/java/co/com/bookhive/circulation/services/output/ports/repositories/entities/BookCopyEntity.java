@@ -71,7 +71,7 @@ public class BookCopyEntity {
 	}
 
 	public void setStatus(final String status) {
-		this.status = TextHelper.isDefaultValue(status) ? STATUS_AVAILABLE : status.trim();
+		this.status = TextHelper.isDefaultValue(status) ? STATUS_AVAILABLE : TextHelper.getDefaultValue(status);
 	}
 
 	public boolean isLendable() {

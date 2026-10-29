@@ -70,7 +70,7 @@ public final class ReserveBookUseCaseImpl implements ReserveBookUseCase {
 		reservation.setRequestedAt(Instant.now());
 		reservationRepository.create(reservation);
 
-		audit.record(
+		audit.register(
 				AuditPort.RESERVATION_CREATED,
 				sessionContext.getInstitution(),
 				reserving.getUser(),

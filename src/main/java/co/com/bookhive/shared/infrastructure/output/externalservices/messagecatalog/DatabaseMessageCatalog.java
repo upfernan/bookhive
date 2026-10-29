@@ -51,17 +51,19 @@ public class DatabaseMessageCatalog implements MessageCatalogPort {
 	@Override
 	public String textOf(final String messageKey) {
 
-		if (TextHelper.isDefaultValue(messageKey)) {
+		final String key = TextHelper.getDefaultValue(messageKey);
+
+		if (key.isEmpty()) {
 			return LAST_RESORT_TEXT;
 		}
 
-		final String fromTable = catalog().get(messageKey.trim());
+		final String fromTable = catalog().get(key);
 
 		if (!TextHelper.isDefaultValue(fromTable)) {
 			return fromTable;
 		}
 
-		return shippedText(messageKey.trim());
+		return shippedText(key);
 	}
 
 	private String shippedText(final String messageKey) {

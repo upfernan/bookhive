@@ -20,7 +20,7 @@ public class LoggingAuditAdapter implements AuditPort {
 	private static final Logger logger = LoggerFactory.getLogger(AUDIT_LOGGER);
 
 	@Override
-	public void record(final String action, final UUID institution, final UUID person, final String detail) {
+	public void register(final String action, final UUID institution, final UUID person, final String detail) {
 
 		final String event = describe(action, institution, person, detail);
 

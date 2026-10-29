@@ -17,7 +17,7 @@ public final class ResolveMessageUseCaseImpl implements ResolveMessageUseCase {
 	@Override
 	public ResolveMessageDomain execute(final ResolveMessageDomain input) {
 		final ResolveMessageDomain message = ObjectHelper.getDefaultValue(input, new ResolveMessageDomain("", ""));
-		return message.withText(messageCatalog.textOf(message.getKey()));
+		return message.withText(messageCatalog.textOf(message.key()));
 	}
 
 }

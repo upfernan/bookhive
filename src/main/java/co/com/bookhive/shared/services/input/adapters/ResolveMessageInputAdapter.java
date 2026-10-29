@@ -20,7 +20,7 @@ public final class ResolveMessageInputAdapter implements ResolveMessageInputPort
 	public ResolveMessageResponseDTO execute(final ResolveMessageRequestDTO input) {
 		final ResolveMessageRequestDTO request = ObjectHelper.getDefaultValue(input, new ResolveMessageRequestDTO(""));
 		final ResolveMessageDomain message = useCase.execute(new ResolveMessageDomain(request.messageKey(), ""));
-		return new ResolveMessageResponseDTO(message.getText());
+		return new ResolveMessageResponseDTO(message.text());
 	}
 
 }

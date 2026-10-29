@@ -42,7 +42,7 @@ public final class ConfigureRetentionUseCaseImpl implements ConfigureRetentionUs
 			users.changeRetention(requested.months());
 			changes.create(new InstitutionParameterChangeEntity(UUIDHelper.generateNew(), PARAMETER,
 					String.valueOf(current), String.valueOf(requested.months()), session.getLibrarian(), null));
-			audit.record(AuditPort.INSTITUTION_CONFIGURED, session.getInstitution(), session.getLibrarian(),
+			audit.register(AuditPort.INSTITUTION_CONFIGURED, session.getInstitution(), session.getLibrarian(),
 					PARAMETER + " " + current + "->" + requested.months());
 		}
 		return requested;

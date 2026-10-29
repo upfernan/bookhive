@@ -120,7 +120,7 @@ public final class StartFinePaymentUseCaseImpl implements StartFinePaymentUseCas
 				now);
 		paymentRepository.create(payment);
 
-		audit.record(AuditPort.FINE_PAYMENT_STARTED, institution, payer,
+		audit.register(AuditPort.FINE_PAYMENT_STARTED, institution, payer,
 				payment.reference() + " multa " + fine.fine() + " por " + amountInCents + " centavos");
 		return payment;
 	}

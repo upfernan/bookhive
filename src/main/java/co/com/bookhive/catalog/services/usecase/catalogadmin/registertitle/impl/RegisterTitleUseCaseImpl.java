@@ -49,7 +49,7 @@ public final class RegisterTitleUseCaseImpl implements RegisterTitleUseCase {
 		final CatalogAdminDomains.Title title = requested.withId(UUIDHelper.generateNew(), CatalogAdminDomains.TITLE_ACTIVE);
 		titles.createTitle(FindTitleUseCaseImpl.entityOf(title));
 		final int copies = title.barcodes().isEmpty() ? 0 : inventory.register(title.id(), title.branch(), title.barcodes());
-		audit.record(AuditPort.TITLE_REGISTERED, session.institution(), session.person(),
+		audit.register(AuditPort.TITLE_REGISTERED, session.institution(), session.person(),
 				title.id() + " " + title.title() + " con " + copies + " ejemplares");
 		return FindTitleUseCaseImpl.titleOf(titles, title.id());
 	}

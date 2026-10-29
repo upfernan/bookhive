@@ -61,7 +61,7 @@ public final class RegisterPersonUseCaseImpl implements RegisterPersonUseCase {
 				UUIDHelper.generateNew(), identity.identity(), registration.name(), identity.email(), registration.policyVersion()),
 				institution);
 
-		audit.record(AuditPort.PERSON_REGISTERED, institution.institution(), person.id(), domain);
+		audit.register(AuditPort.PERSON_REGISTERED, institution.institution(), person.id(), domain);
 		return new RegistrationDomain.Registered(person.id(), institution.schema(), identity.sessionToken());
 	}
 
@@ -70,7 +70,7 @@ public final class RegisterPersonUseCaseImpl implements RegisterPersonUseCase {
 			return Optional.empty();
 		}
 		final RegistrationEntities.DomainInstitution created = provisioning.provision(domain);
-		audit.record(AuditPort.INSTITUTION_SELF_REGISTERED, created.institution(), null, domain + " -> " + created.schema());
+		audit.register(AuditPort.INSTITUTION_SELF_REGISTERED, created.institution(), null, domain + " -> " + created.schema());
 		return Optional.of(created);
 	}
 

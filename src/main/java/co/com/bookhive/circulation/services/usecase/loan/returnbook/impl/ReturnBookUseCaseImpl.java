@@ -103,7 +103,7 @@ public final class ReturnBookUseCaseImpl implements ReturnBookUseCase {
 				? registerFine(loan, returning, overdueDays, returning.finePolicy())
 				: new FineEntity();
 
-		audit.record(
+		audit.register(
 				AuditPort.LOAN_RETURNED,
 				returning.getInstitution(),
 				returning.getLibrarian(),

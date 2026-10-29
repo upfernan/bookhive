@@ -40,7 +40,7 @@ public final class CatalogAdminDomains {
 		public Category {
 			id = UUIDHelper.getDefaultValue(id);
 			name = TextHelper.getDefaultValue(name).trim();
-			status = TextHelper.isDefaultValue(status) ? CATEGORY_ACTIVE : status.trim();
+			status = TextHelper.isDefaultValue(status) ? CATEGORY_ACTIVE : TextHelper.getDefaultValue(status);
 			activeTitles = Math.max(activeTitles, 0);
 		}
 

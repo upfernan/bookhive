@@ -50,7 +50,7 @@ public final class AuthorizeOperationUseCaseImpl implements AuthorizeOperationUs
 		final PermissionCriteria criteria = PermissionCriteria.grantedTo(session.person(), operation.permission());
 
 		if (permissionRepository.findByCriteria(criteria).isEmpty()) {
-			audit.record(AuditPort.PERMISSION_DENIED, session.institution(), session.person(),
+			audit.register(AuditPort.PERMISSION_DENIED, session.institution(), session.person(),
 					operation.permission());
 			throw BookHiveException.createNotAllowed(
 					MessageKey.PERMISSION_DENIED,

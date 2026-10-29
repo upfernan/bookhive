@@ -54,7 +54,7 @@ public final class AcceptDataPolicyUseCaseImpl implements AcceptDataPolicyUseCas
 		if (found.isEmpty()) {
 			acceptances.create(new DataPolicyAcceptanceEntity(session.person(), policy.version(), null));
 			found = acceptances.findByCriteria(criteria);
-			audit.record(AuditPort.DATA_POLICY_ACCEPTED, session.institution(), session.person(),
+			audit.register(AuditPort.DATA_POLICY_ACCEPTED, session.institution(), session.person(),
 					"versión " + policy.version());
 		}
 

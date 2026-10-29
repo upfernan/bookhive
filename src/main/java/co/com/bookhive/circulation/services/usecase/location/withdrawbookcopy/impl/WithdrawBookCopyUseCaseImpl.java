@@ -40,7 +40,7 @@ public final class WithdrawBookCopyUseCaseImpl implements WithdrawBookCopyUseCas
 		}
 		locations.clearValues(copy.getId());
 		copy.setStatus(BookCopyEntity.STATUS_WITHDRAWN);
-		audit.record(AuditPort.BOOK_COPY_WITHDRAWN, session.getInstitution(), session.getLibrarian(),
+		audit.register(AuditPort.BOOK_COPY_WITHDRAWN, session.getInstitution(), session.getLibrarian(),
 				copy.getBarcode() + " estaba en " + before);
 		return FindBookCopyLocationUseCaseImpl.locationOf(copy, locations);
 	}

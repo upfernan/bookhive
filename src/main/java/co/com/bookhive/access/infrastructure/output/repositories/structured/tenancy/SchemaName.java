@@ -27,7 +27,7 @@ public final class SchemaName {
 							+ " entra en una sentencia SQL y no puede ser cualquier texto.");
 		}
 
-		return schema.trim();
+		return TextHelper.getDefaultValue(schema);
 	}
 
 }
