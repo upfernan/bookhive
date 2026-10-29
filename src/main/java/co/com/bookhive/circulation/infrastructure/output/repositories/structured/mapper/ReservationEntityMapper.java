@@ -2,7 +2,6 @@ package co.com.bookhive.circulation.infrastructure.output.repositories.structure
 
 import org.mapstruct.Mapper;
 import org.mapstruct.NullValueMappingStrategy;
-
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.ReservationJpaEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.ReservationEntity;
 

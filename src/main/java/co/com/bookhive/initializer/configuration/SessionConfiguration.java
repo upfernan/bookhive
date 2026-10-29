@@ -2,7 +2,6 @@ package co.com.bookhive.initializer.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import co.com.bookhive.access.services.input.adapters.AcceptDataPolicyInputAdapter;
 import co.com.bookhive.access.services.input.adapters.AuthorizeOperationInputAdapter;
 import co.com.bookhive.access.services.input.adapters.CloseSessionInputAdapter;

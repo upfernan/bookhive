@@ -7,7 +7,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
-
 import co.com.bookhive.circulation.domain.loan.returnbook.FinePolicy;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 

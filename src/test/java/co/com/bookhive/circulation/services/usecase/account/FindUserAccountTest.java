@@ -2,7 +2,6 @@ package co.com.bookhive.circulation.services.usecase.account;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.lang.reflect.Proxy;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -11,11 +10,9 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
-
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.adapters.UserHistoryRepositoryAdapter;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.UserHistoryJpaRepository;
 import co.com.bookhive.circulation.services.input.adapters.FindUserAccountInputAdapter;

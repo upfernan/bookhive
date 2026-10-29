@@ -1,7 +1,6 @@
 package co.com.bookhive.access.infrastructure.output.externalservices.identity;
 
 import java.time.Duration;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,7 +8,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.access.services.output.ports.IdentityProviderPort;
 import co.com.bookhive.access.services.output.ports.entities.VerifiedIdentityEntity;
 import co.com.bookhive.crosscutting.exception.BookHiveException;

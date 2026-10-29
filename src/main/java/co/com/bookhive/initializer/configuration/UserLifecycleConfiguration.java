@@ -2,7 +2,6 @@ package co.com.bookhive.initializer.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import co.com.bookhive.circulation.services.input.adapters.UserLifecycleInputAdapters;
 import co.com.bookhive.circulation.services.input.ports.ChangeUserStatusInputPort;
 import co.com.bookhive.circulation.services.input.ports.ConfigureRetentionInputPort;

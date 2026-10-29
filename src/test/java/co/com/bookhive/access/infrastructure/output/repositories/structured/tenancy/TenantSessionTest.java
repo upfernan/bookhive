@@ -2,10 +2,8 @@ package co.com.bookhive.access.infrastructure.output.repositories.structured.ten
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 
 class TenantSessionTest {

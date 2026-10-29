@@ -2,9 +2,7 @@ package co.com.bookhive.access.infrastructure.input.filters;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-
 import java.util.concurrent.atomic.AtomicReference;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;

@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import co.com.bookhive.catalog.domain.book.searchbooks.FacetValueDomain;
 import co.com.bookhive.catalog.domain.book.searchbooks.FoundBookDomain;
 import co.com.bookhive.catalog.domain.book.searchbooks.FoundBooksDomain;

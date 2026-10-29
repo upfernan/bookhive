@@ -3,12 +3,10 @@ package co.com.bookhive.circulation.infrastructure.output.repositories.structure
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
-
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
-
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.UserJpaEntity;
 
 public interface UserLifecycleJpaRepository extends Repository<UserJpaEntity, UUID> {

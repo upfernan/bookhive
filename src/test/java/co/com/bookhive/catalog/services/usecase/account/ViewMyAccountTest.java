@@ -3,17 +3,14 @@ package co.com.bookhive.catalog.services.usecase.account;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
-
 import co.com.bookhive.catalog.domain.account.viewmyaccount.MyAccountDomain;
 import co.com.bookhive.catalog.domain.reservation.listmyreservations.MyReservationDomain;
 import co.com.bookhive.catalog.infrastructure.input.controllers.MyAccountController;

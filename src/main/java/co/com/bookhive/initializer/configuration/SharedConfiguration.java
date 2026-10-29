@@ -2,7 +2,6 @@ package co.com.bookhive.initializer.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import co.com.bookhive.shared.services.input.adapters.ResolveMessageInputAdapter;
 import co.com.bookhive.shared.services.input.ports.ResolveMessageInputPort;
 import co.com.bookhive.shared.services.output.ports.MessageCatalogPort;

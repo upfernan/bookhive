@@ -1,16 +1,13 @@
 package co.com.bookhive.payment.infrastructure.input.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import co.com.bookhive.payment.services.input.dto.request.ConfirmFinePaymentRequestDTO;
 import co.com.bookhive.payment.services.input.dto.request.StartFinePaymentRequestDTO;
 import co.com.bookhive.payment.services.input.dto.response.FinePaymentCheckoutResponseDTO;

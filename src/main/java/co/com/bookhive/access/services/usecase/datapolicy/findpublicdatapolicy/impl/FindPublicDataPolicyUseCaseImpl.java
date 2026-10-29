@@ -1,7 +1,6 @@
 package co.com.bookhive.access.services.usecase.datapolicy.findpublicdatapolicy.impl;
 
 import java.util.Optional;
-
 import co.com.bookhive.access.domain.datapolicy.findpublicdatapolicy.PublicDataPolicyDomain;
 import co.com.bookhive.access.domain.session.registerperson.RegistrationDomain;
 import co.com.bookhive.access.services.output.ports.repositories.RegistrationRepository;

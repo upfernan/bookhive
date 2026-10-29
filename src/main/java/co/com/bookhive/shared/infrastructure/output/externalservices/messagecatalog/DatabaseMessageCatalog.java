@@ -8,15 +8,13 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-
+import java.util.concurrent.atomic.AtomicReference;
 import javax.sql.DataSource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.shared.services.output.ports.MessageCatalogPort;
 
@@ -35,7 +33,7 @@ public class DatabaseMessageCatalog implements MessageCatalogPort {
 	private final MessageSource shippedMessages;
 	private final Duration refreshEvery;
 
-	private volatile CachedCatalog cached = new CachedCatalog(Map.of(), Instant.EPOCH);
+	private final AtomicReference<CachedCatalog> cached = new AtomicReference<>(new CachedCatalog(Map.of(), Instant.EPOCH));
 
 	public DatabaseMessageCatalog(
 			final DataSource dataSource,
@@ -80,7 +78,7 @@ public class DatabaseMessageCatalog implements MessageCatalogPort {
 
 	private Map<String, String> catalog() {
 
-		final CachedCatalog current = cached;
+		final CachedCatalog current = cached.get();
 
 		if (!current.isOlderThan(refreshEvery)) {
 			return current.texts();
@@ -101,17 +99,18 @@ public class DatabaseMessageCatalog implements MessageCatalogPort {
 				texts.put(result.getString("codigo"), result.getString("texto"));
 			}
 
-			cached = new CachedCatalog(Map.copyOf(texts), Instant.now());
+			final CachedCatalog loaded = new CachedCatalog(Map.copyOf(texts), Instant.now());
+			cached.set(loaded);
 
-			return cached.texts();
+			return loaded.texts();
 
 		} catch (final RuntimeException | java.sql.SQLException exception) {
 			logger.error("No se pudo leer el catálogo de mensajes de la base de datos;"
 					+ " se usan los textos que vienen con la aplicación.", exception);
 
-			cached = new CachedCatalog(current.texts(), Instant.now());
+			cached.set(new CachedCatalog(current.texts(), Instant.now()));
 
-			return current.texts();
+			return cached.get().texts();
 		}
 	}
 

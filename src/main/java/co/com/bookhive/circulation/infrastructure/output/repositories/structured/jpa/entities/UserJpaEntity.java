@@ -2,7 +2,6 @@ package co.com.bookhive.circulation.infrastructure.output.repositories.structure
 
 import java.time.Instant;
 import java.util.UUID;
-
 import co.com.bookhive.crosscutting.helper.DateHelper;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;

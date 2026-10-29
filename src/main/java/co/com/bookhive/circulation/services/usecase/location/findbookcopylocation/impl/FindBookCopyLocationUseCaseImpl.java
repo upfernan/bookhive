@@ -2,12 +2,8 @@ package co.com.bookhive.circulation.services.usecase.location.findbookcopylocati
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import co.com.bookhive.circulation.domain.location.LocationDomains;
-import co.com.bookhive.circulation.services.output.ports.SessionContextPort;
 import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.LocationRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.BookCopyCriteria;
@@ -16,9 +12,7 @@ import co.com.bookhive.circulation.services.output.ports.repositories.entities.L
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.helper.TextHelper;
-import co.com.bookhive.crosscutting.helper.UUIDHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;
-import co.com.bookhive.shared.services.output.ports.AuditPort;
 import co.com.bookhive.circulation.services.usecase.location.findbookcopylocation.FindBookCopyLocationUseCase;
 
 public final class FindBookCopyLocationUseCaseImpl implements FindBookCopyLocationUseCase {

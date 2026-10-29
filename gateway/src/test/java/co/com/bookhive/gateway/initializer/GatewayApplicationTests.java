@@ -1,12 +1,10 @@
 package co.com.bookhive.gateway.initializer;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
 import co.com.bookhive.gateway.infrastructure.input.filters.BackendIdentityFilter;
 import co.com.bookhive.gateway.infrastructure.input.filters.EntryGuardFilter;
 import co.com.bookhive.gateway.services.input.ports.GuardAttemptsInputPort;

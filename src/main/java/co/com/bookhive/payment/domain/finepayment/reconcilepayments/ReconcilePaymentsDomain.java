@@ -2,7 +2,6 @@ package co.com.bookhive.payment.domain.finepayment.reconcilepayments;
 
 import java.time.Duration;
 import java.time.Instant;
-
 import co.com.bookhive.crosscutting.helper.DateHelper;
 
 public record ReconcilePaymentsDomain(Instant now) {

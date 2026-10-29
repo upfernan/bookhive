@@ -1,7 +1,6 @@
 package co.com.bookhive.catalog.services.output.ports.repositories.entities;
 
 import java.util.List;
-
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 
 public record BookSearchPageEntity(

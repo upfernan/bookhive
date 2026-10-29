@@ -3,7 +3,6 @@ package co.com.bookhive.circulation.services.usecase.institution.configureinstit
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
 import co.com.bookhive.circulation.domain.institution.CurrentInstitution;
 import co.com.bookhive.circulation.domain.institution.configureinstitution.InstitutionSettingsDomain;
 import co.com.bookhive.circulation.domain.institution.configureinstitution.ParameterChange;

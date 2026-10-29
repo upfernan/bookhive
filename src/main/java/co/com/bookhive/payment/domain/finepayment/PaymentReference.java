@@ -3,7 +3,6 @@ package co.com.bookhive.payment.domain.finepayment;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
-
 import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
 

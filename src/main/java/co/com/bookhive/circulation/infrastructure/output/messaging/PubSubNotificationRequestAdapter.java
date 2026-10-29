@@ -2,14 +2,12 @@ package co.com.bookhive.circulation.infrastructure.output.messaging;
 
 import java.util.Map;
 import java.util.regex.Pattern;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-
 import co.com.bookhive.circulation.services.output.ports.NotificationRequestPort;
 import co.com.bookhive.circulation.services.output.ports.entities.NotificationRequestEntity;
 import co.com.bookhive.crosscutting.exception.BookHiveException;

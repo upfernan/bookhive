@@ -1,7 +1,6 @@
 package co.com.bookhive.access.infrastructure.output.externalservices.identity;
 
 import java.time.Duration;
-
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 

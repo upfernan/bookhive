@@ -2,7 +2,6 @@ package co.com.bookhive.circulation.domain.user.searchreaders;
 
 import java.util.List;
 import java.util.Optional;
-
 import co.com.bookhive.circulation.services.output.ports.repositories.UserRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.UserCriteria;
 import co.com.bookhive.crosscutting.exception.BookHiveException;

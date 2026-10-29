@@ -3,7 +3,6 @@ package co.com.bookhive.circulation.domain.institution.configureinstitution;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
 import co.com.bookhive.crosscutting.helper.TextHelper;
 
 public record ParameterChange(String parameter, String previousValue, String newValue) {

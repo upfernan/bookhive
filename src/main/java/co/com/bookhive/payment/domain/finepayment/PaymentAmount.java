@@ -2,7 +2,6 @@ package co.com.bookhive.payment.domain.finepayment;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 
 public final class PaymentAmount {

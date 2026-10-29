@@ -2,7 +2,6 @@ package co.com.bookhive.access.domain.session.registerperson;
 
 import java.util.Locale;
 import java.util.UUID;
-
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;

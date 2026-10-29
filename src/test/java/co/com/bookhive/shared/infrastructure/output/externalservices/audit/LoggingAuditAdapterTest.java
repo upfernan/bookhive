@@ -3,15 +3,12 @@ package co.com.bookhive.shared.infrastructure.output.externalservices.audit;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-
 import java.util.List;
 import java.util.UUID;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
 import co.com.bookhive.shared.services.output.ports.AuditPort;
 

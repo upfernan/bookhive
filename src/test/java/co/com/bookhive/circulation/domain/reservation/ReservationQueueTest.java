@@ -1,14 +1,11 @@
 package co.com.bookhive.circulation.domain.reservation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.ReservationEntity;
 import co.com.bookhive.circulation.testdata.FakeRepositories;
 

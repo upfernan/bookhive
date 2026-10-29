@@ -1,7 +1,6 @@
 package co.com.bookhive.gateway.services.usecase.guardattempts;
 
 import java.util.concurrent.CompletionStage;
-
 import co.com.bookhive.gateway.domain.attempt.AttemptRequest;
 import co.com.bookhive.gateway.domain.attempt.GuardVerdict;
 

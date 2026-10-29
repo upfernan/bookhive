@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
-
 import co.com.bookhive.gateway.crosscutting.helper.TextHelper;
 import co.com.bookhive.gateway.infrastructure.input.rules.EntryRules;
 import co.com.bookhive.gateway.infrastructure.input.security.ClientOrigin;

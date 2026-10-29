@@ -1,10 +1,8 @@
 package co.com.bookhive.catalog.infrastructure.output.repositories.structured.jpa.entities;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.time.Instant;
 import java.util.UUID;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -3,9 +3,7 @@ package co.com.bookhive.circulation.infrastructure.output.repositories.structure
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.UserLifecycleJpaRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.UserLifecycleRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.UserLifecycleEntity;

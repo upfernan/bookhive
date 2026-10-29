@@ -2,7 +2,6 @@ package co.com.bookhive.payment.domain.finepayment;
 
 import java.util.Locale;
 import java.util.Set;
-
 import co.com.bookhive.crosscutting.helper.TextHelper;
 
 public final class PaymentStatus {

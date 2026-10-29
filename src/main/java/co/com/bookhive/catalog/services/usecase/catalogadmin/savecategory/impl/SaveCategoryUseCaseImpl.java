@@ -1,7 +1,6 @@
 package co.com.bookhive.catalog.services.usecase.catalogadmin.savecategory.impl;
 
 import java.util.UUID;
-
 import co.com.bookhive.catalog.domain.catalogadmin.CatalogAdminDomains;
 import co.com.bookhive.catalog.services.output.ports.CatalogSessionPort;
 import co.com.bookhive.catalog.services.output.ports.repositories.CategoryRepository;

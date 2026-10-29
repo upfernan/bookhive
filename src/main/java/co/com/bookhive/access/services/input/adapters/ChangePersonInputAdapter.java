@@ -1,7 +1,6 @@
 package co.com.bookhive.access.services.input.adapters;
 
 import java.util.Arrays;
-
 import co.com.bookhive.access.domain.session.changeperson.PersonChangeDomain;
 import co.com.bookhive.access.services.input.dto.request.ChangePersonRequestDTO;
 import co.com.bookhive.access.services.input.ports.ChangePersonInputPort;

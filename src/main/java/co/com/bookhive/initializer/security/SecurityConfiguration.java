@@ -10,7 +10,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-
 import co.com.bookhive.access.infrastructure.input.controllers.PublicDataPolicyController;
 import co.com.bookhive.access.infrastructure.input.controllers.RegistrationController;
 import co.com.bookhive.access.infrastructure.input.controllers.SessionController;

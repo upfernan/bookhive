@@ -1,9 +1,7 @@
 package co.com.bookhive.catalog.infrastructure.output.externalservices.circulation;
 
 import java.util.UUID;
-
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.catalog.services.output.ports.BookCopyStatusPort;
 import co.com.bookhive.catalog.services.output.ports.entities.BookCopyStatusEntity;
 import co.com.bookhive.circulation.services.input.dto.request.FindBookCopyRequestDTO;

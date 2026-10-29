@@ -1,7 +1,6 @@
 package co.com.bookhive.access.services.output.ports.repositories;
 
 import java.util.Optional;
-
 import co.com.bookhive.access.services.output.ports.repositories.entities.RegistrationEntities.DomainInstitution;
 import co.com.bookhive.access.services.output.ports.repositories.entities.RegistrationEntities.NewPerson;
 import co.com.bookhive.access.services.output.ports.repositories.entities.RegistrationEntities.PublicPolicy;

@@ -2,7 +2,6 @@ package co.com.bookhive.catalog.infrastructure.input.controllers;
 
 import java.util.List;
 import java.util.UUID;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
 import co.com.bookhive.catalog.services.input.dto.request.CategoryRequestDTO;
 import co.com.bookhive.catalog.services.input.dto.request.CategoryStatusRequestDTO;
 import co.com.bookhive.catalog.services.input.dto.request.TitleRequestDTO;

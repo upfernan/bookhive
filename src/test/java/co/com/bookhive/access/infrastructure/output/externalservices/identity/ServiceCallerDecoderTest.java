@@ -2,11 +2,9 @@ package co.com.bookhive.access.infrastructure.output.externalservices.identity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.function.Consumer;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.jwt.BadJwtException;

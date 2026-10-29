@@ -1,7 +1,6 @@
 package co.com.bookhive.shared.services.output.ports.repositories.criteria;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

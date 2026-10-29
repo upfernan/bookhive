@@ -1,10 +1,8 @@
 package co.com.bookhive.circulation.infrastructure.output.messaging;
 
 import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.circulation.services.output.ports.InstitutionTaskPort;
 import co.com.bookhive.shared.infrastructure.output.messaging.pubsub.PubSubPublisher;
 

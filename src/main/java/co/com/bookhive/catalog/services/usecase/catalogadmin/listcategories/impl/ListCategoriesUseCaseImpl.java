@@ -1,7 +1,6 @@
 package co.com.bookhive.catalog.services.usecase.catalogadmin.listcategories.impl;
 
 import java.util.List;
-
 import co.com.bookhive.catalog.domain.catalogadmin.CatalogAdminDomains;
 import co.com.bookhive.catalog.services.output.ports.repositories.CategoryRepository;
 import co.com.bookhive.catalog.services.usecase.catalogadmin.listcategories.ListCategoriesUseCase;

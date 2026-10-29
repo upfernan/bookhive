@@ -1,7 +1,6 @@
 package co.com.bookhive.circulation.infrastructure.output.repositories.structured.adapters;
 
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.InstitutionParameterChangeJpaRepository;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.InstitutionParameterChangeJpaEntity;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.mapper.EntityMapper;

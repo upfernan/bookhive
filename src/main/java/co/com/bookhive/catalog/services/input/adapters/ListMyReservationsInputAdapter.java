@@ -1,7 +1,6 @@
 package co.com.bookhive.catalog.services.input.adapters;
 
 import java.util.List;
-
 import co.com.bookhive.catalog.domain.reservation.listmyreservations.MyReservationDomain;
 import co.com.bookhive.catalog.services.input.dto.response.MyReservationResponseDTO;
 import co.com.bookhive.catalog.services.input.ports.ListMyReservationsInputPort;

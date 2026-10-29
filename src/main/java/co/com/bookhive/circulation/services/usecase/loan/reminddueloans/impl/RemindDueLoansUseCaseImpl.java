@@ -1,7 +1,6 @@
 package co.com.bookhive.circulation.services.usecase.loan.reminddueloans.impl;
 
 import java.util.List;
-
 import co.com.bookhive.circulation.domain.institution.CurrentInstitution;
 import co.com.bookhive.circulation.domain.loan.reminddueloans.RemindDueLoansDomain;
 import co.com.bookhive.circulation.services.output.ports.NotificationRequestPort;

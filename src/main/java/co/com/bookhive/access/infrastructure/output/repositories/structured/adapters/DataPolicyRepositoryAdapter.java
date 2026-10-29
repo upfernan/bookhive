@@ -3,11 +3,8 @@ package co.com.bookhive.access.infrastructure.output.repositories.structured.ada
 import java.sql.ResultSet;
 import java.time.OffsetDateTime;
 import java.util.Optional;
-
 import javax.sql.DataSource;
-
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.access.infrastructure.output.repositories.structured.tenancy.TenantStatements;
 import co.com.bookhive.access.services.output.ports.repositories.DataPolicyRepository;
 import co.com.bookhive.access.services.output.ports.repositories.entities.DataPolicyEntity;

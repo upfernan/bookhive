@@ -1,9 +1,7 @@
 package co.com.bookhive.notification.infrastructure.output.repositories.structured.adapters;
 
 import java.util.List;
-
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.notification.infrastructure.output.repositories.structured.jpa.NotificationJpaRepository;

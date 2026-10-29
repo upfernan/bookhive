@@ -1,7 +1,6 @@
 package co.com.bookhive.payment.infrastructure.output.repositories.structured.adapters;
 
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.helper.TextHelper;

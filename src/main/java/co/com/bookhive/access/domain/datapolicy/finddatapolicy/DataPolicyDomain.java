@@ -1,7 +1,6 @@
 package co.com.bookhive.access.domain.datapolicy.finddatapolicy;
 
 import java.time.Instant;
-
 import co.com.bookhive.crosscutting.helper.DateHelper;
 import co.com.bookhive.crosscutting.helper.TextHelper;
 

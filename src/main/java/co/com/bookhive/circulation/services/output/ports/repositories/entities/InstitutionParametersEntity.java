@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
-
 import co.com.bookhive.crosscutting.helper.DateHelper;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
 

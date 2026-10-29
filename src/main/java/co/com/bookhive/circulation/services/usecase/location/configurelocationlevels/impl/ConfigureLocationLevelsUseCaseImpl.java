@@ -1,7 +1,6 @@
 package co.com.bookhive.circulation.services.usecase.location.configurelocationlevels.impl;
 
 import java.util.List;
-
 import co.com.bookhive.circulation.domain.location.LocationDomains;
 import co.com.bookhive.circulation.services.output.ports.SessionContextPort;
 import co.com.bookhive.circulation.services.output.ports.repositories.LocationRepository;

@@ -3,10 +3,8 @@ package co.com.bookhive.circulation.infrastructure.output.repositories.structure
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.FineJpaRepository;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.FineJpaEntity;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.FineSettlementJpaEntity;
@@ -14,7 +12,6 @@ import co.com.bookhive.circulation.infrastructure.output.repositories.structured
 import co.com.bookhive.circulation.services.output.ports.repositories.FineRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.FineCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.FineEntity;
-
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;

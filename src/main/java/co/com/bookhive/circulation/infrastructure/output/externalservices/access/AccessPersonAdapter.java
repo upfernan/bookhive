@@ -1,11 +1,9 @@
 package co.com.bookhive.circulation.infrastructure.output.externalservices.access;
 
 import java.util.UUID;
-
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-
 import co.com.bookhive.access.services.input.dto.request.ChangePersonRequestDTO;
 import co.com.bookhive.access.services.input.ports.ChangePersonInputPort;
 import co.com.bookhive.circulation.services.output.ports.PersonAccessPort;

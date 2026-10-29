@@ -3,12 +3,10 @@ package co.com.bookhive.access.infrastructure.input.interceptors;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
-
 import co.com.bookhive.access.services.input.dto.request.AuthorizeOperationRequestDTO;
 import co.com.bookhive.access.services.input.ports.AuthorizeOperationInputPort;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.security.RequiredPermission;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 

@@ -2,12 +2,10 @@ package co.com.bookhive.circulation.infrastructure.output.repositories.structure
 
 import java.util.List;
 import java.util.UUID;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
-
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.LoanJpaEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.FinePaymentEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.ReturnedLoanEntity;

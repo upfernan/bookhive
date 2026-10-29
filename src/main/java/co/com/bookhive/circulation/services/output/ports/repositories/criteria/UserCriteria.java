@@ -2,7 +2,6 @@ package co.com.bookhive.circulation.services.output.ports.repositories.criteria;
 
 import java.text.Normalizer;
 import java.util.Locale;
-
 import co.com.bookhive.crosscutting.helper.TextHelper;
 
 public final class UserCriteria {

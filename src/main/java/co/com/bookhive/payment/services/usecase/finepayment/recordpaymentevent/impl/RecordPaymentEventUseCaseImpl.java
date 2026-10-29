@@ -1,7 +1,6 @@
 package co.com.bookhive.payment.services.usecase.finepayment.recordpaymentevent.impl;
 
 import java.util.Optional;
-
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;

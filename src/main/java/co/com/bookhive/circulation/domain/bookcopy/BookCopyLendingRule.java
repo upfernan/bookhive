@@ -2,7 +2,6 @@ package co.com.bookhive.circulation.domain.bookcopy;
 
 import java.util.Optional;
 import java.util.UUID;
-
 import co.com.bookhive.circulation.services.output.ports.repositories.ReservationRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.ReservationCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;

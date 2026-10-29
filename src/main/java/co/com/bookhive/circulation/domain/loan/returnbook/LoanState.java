@@ -1,7 +1,6 @@
 package co.com.bookhive.circulation.domain.loan.returnbook;
 
 import java.time.LocalDate;
-
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanEntity;
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.DateHelper;

@@ -2,14 +2,11 @@ package co.com.bookhive.payment.infrastructure.input.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
-
 import co.com.bookhive.payment.services.input.dto.request.PaymentEventRequestDTO;
 import co.com.bookhive.payment.services.input.dto.response.PaymentEventResponseDTO;
 

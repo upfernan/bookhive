@@ -3,10 +3,8 @@ package co.com.bookhive.payment.infrastructure.output.repositories.structured.ad
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.payment.domain.finepayment.PaymentStatus;
 import co.com.bookhive.payment.infrastructure.output.repositories.structured.jpa.FinePaymentJpaRepository;
@@ -16,7 +14,6 @@ import co.com.bookhive.payment.infrastructure.output.repositories.structured.map
 import co.com.bookhive.payment.services.output.ports.repositories.FinePaymentRepository;
 import co.com.bookhive.payment.services.output.ports.repositories.criteria.FinePaymentCriteria;
 import co.com.bookhive.payment.services.output.ports.repositories.entities.FinePaymentEntity;
-
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;

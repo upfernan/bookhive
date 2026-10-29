@@ -3,14 +3,12 @@ package co.com.bookhive.gateway.testdata;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
-
 import reactor.core.publisher.Mono;
 
 public final class StubHttp {

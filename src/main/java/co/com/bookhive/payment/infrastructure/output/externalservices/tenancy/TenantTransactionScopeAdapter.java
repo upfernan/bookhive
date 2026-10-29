@@ -1,11 +1,9 @@
 package co.com.bookhive.payment.infrastructure.output.externalservices.tenancy;
 
 import java.util.function.Supplier;
-
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
-
 import co.com.bookhive.crosscutting.tenancy.TenantContext;
 import co.com.bookhive.payment.services.output.ports.TenantScopePort;
 

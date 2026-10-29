@@ -2,9 +2,7 @@ package co.com.bookhive.catalog.infrastructure.output.repositories.structured.ad
 
 import java.util.List;
 import java.util.UUID;
-
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.catalog.infrastructure.output.repositories.structured.jpa.CatalogChangeJpaRepository;
 import co.com.bookhive.catalog.services.output.ports.repositories.CatalogChangeRepository;
 import co.com.bookhive.catalog.services.output.ports.repositories.criteria.CatalogChangeCriteria;

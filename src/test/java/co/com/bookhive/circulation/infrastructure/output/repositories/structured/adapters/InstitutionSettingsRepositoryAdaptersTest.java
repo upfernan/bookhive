@@ -1,13 +1,10 @@
 package co.com.bookhive.circulation.infrastructure.output.repositories.structured.adapters;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.time.Instant;
 import java.util.UUID;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.InstitutionParameterChangeJpaRepository;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.InstitutionParametersJpaRepository;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.InstitutionParameterChangeJpaEntity;

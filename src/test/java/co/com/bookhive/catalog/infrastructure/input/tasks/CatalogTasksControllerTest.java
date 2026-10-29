@@ -1,14 +1,11 @@
 package co.com.bookhive.catalog.infrastructure.input.tasks;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.util.List;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import co.com.bookhive.catalog.services.input.dto.response.SyncAllCatalogsResponseDTO;
 
 class CatalogTasksControllerTest {

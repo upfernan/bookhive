@@ -1,9 +1,7 @@
 package co.com.bookhive.catalog.infrastructure.output.externalservices.access;
 
 import java.util.UUID;
-
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.access.services.input.ports.CurrentSessionInputPort;
 import co.com.bookhive.catalog.services.output.ports.CatalogSessionPort;
 

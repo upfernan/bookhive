@@ -1,12 +1,10 @@
 package co.com.bookhive.access.infrastructure.output.repositories.structured.adapters;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.lang.reflect.Proxy;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

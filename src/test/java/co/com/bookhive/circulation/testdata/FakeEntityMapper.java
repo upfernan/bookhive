@@ -1,7 +1,6 @@
 package co.com.bookhive.circulation.testdata;
 
 import java.util.function.Function;
-
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.mapper.EntityMapper;
 
 public final class FakeEntityMapper<E, J> implements EntityMapper<E, J> {

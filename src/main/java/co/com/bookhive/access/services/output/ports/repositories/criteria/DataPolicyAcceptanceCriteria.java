@@ -1,7 +1,6 @@
 package co.com.bookhive.access.services.output.ports.repositories.criteria;
 
 import java.util.UUID;
-
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
 
 public record DataPolicyAcceptanceCriteria(UUID person, int version) {

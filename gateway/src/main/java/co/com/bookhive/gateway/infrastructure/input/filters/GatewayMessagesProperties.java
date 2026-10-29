@@ -1,7 +1,6 @@
 package co.com.bookhive.gateway.infrastructure.input.filters;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import co.com.bookhive.gateway.crosscutting.helper.TextHelper;
 
 @ConfigurationProperties(prefix = "bookhive.gateway.messages")

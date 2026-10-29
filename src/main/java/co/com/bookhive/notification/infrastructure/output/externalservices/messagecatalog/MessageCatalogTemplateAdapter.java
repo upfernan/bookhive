@@ -1,7 +1,6 @@
 package co.com.bookhive.notification.infrastructure.output.externalservices.messagecatalog;
 
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.notification.services.output.ports.MessageTemplatePort;
 import co.com.bookhive.shared.services.input.dto.request.ResolveMessageRequestDTO;
 import co.com.bookhive.shared.services.input.ports.ResolveMessageInputPort;

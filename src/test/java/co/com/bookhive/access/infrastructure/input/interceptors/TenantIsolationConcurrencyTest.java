@@ -2,7 +2,6 @@ package co.com.bookhive.access.infrastructure.input.interceptors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,13 +12,11 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-
 import co.com.bookhive.access.infrastructure.output.externalservices.identity.SecurityContextIdentityAdapter;
 import co.com.bookhive.access.infrastructure.output.repositories.structured.tenancy.TenantSchemaResolver;
 import co.com.bookhive.access.services.input.adapters.ResolveSchemaInputAdapter;

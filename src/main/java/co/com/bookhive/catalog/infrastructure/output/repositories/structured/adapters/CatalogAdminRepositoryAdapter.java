@@ -6,9 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.catalog.infrastructure.output.repositories.structured.jpa.BookJpaRepository;
 import co.com.bookhive.catalog.infrastructure.output.repositories.structured.jpa.CatalogAdminJpaRepository;
 import co.com.bookhive.catalog.services.output.ports.repositories.CategoryRepository;

@@ -3,15 +3,12 @@ package co.com.bookhive.gateway.services.input.adapters;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.gateway.domain.attempt.AttemptRequest;
 import co.com.bookhive.gateway.domain.attempt.GuardVerdict;
 import co.com.bookhive.gateway.services.input.dto.AttemptDTO;

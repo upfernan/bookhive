@@ -2,7 +2,6 @@ package co.com.bookhive.circulation.domain.account.manageuser;
 
 import java.time.Instant;
 import java.util.UUID;
-
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;

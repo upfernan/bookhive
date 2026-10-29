@@ -7,11 +7,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
 import javax.sql.DataSource;
-
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.access.services.output.ports.repositories.PersonRepository;
 import co.com.bookhive.access.services.output.ports.repositories.criteria.PersonCriteria;
 import co.com.bookhive.access.services.output.ports.repositories.entities.PersonEntity;

@@ -2,7 +2,6 @@ package co.com.bookhive.initializer.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import co.com.bookhive.catalog.infrastructure.input.controllers.CatalogAdminController;
 import co.com.bookhive.catalog.services.input.adapters.CatalogAdminInputAdapters;
 import co.com.bookhive.catalog.services.output.ports.BookCopyInventoryPort;

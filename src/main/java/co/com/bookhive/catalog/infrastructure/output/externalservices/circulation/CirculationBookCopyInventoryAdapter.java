@@ -2,9 +2,7 @@ package co.com.bookhive.catalog.infrastructure.output.externalservices.circulati
 
 import java.util.List;
 import java.util.UUID;
-
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.catalog.services.output.ports.BookCopyInventoryPort;
 import co.com.bookhive.circulation.services.input.dto.request.RegisterBookCopiesRequestDTO;
 import co.com.bookhive.circulation.services.input.ports.RegisterBookCopiesInputPort;

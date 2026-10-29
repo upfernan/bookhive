@@ -2,7 +2,6 @@ package co.com.bookhive.circulation.services.usecase.location.relocatebookcopy.i
 
 import java.util.List;
 import java.util.stream.IntStream;
-
 import co.com.bookhive.circulation.domain.location.LocationDomains;
 import co.com.bookhive.circulation.services.output.ports.SessionContextPort;
 import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRepository;

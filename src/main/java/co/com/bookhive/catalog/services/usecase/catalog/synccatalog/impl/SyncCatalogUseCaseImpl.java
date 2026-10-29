@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
 import co.com.bookhive.catalog.domain.catalog.synccatalog.SyncCatalogDomain;
 import co.com.bookhive.catalog.services.output.ports.repositories.BookIndexRepository;
 import co.com.bookhive.catalog.services.output.ports.repositories.BookRepository;

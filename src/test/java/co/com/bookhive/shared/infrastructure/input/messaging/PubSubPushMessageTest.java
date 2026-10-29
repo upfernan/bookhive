@@ -1,11 +1,9 @@
 package co.com.bookhive.shared.infrastructure.input.messaging;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

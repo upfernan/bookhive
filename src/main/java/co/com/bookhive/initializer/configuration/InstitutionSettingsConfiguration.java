@@ -2,7 +2,6 @@ package co.com.bookhive.initializer.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import co.com.bookhive.circulation.services.input.adapters.InstitutionSettingsInputAdapters;
 import co.com.bookhive.circulation.services.input.ports.ConfigureInstitutionInputPort;
 import co.com.bookhive.circulation.services.input.ports.FindInstitutionSettingsInputPort;

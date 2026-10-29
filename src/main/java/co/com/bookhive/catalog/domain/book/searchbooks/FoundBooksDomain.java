@@ -1,7 +1,6 @@
 package co.com.bookhive.catalog.domain.book.searchbooks;
 
 import java.util.List;
-
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 
 public record FoundBooksDomain(

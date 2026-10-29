@@ -1,7 +1,6 @@
 package co.com.bookhive.payment.domain.finepayment.startfinepayment;
 
 import java.util.UUID;
-
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;

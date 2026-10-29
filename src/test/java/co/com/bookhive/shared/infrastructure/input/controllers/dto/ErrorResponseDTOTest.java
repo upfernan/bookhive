@@ -1,7 +1,6 @@
 package co.com.bookhive.shared.infrastructure.input.controllers.dto;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

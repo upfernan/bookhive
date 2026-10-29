@@ -1,12 +1,9 @@
 package co.com.bookhive.circulation.services.usecase.user.findusercontact.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.util.UUID;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.circulation.domain.user.findusercontact.FindUserContactDomain;
 import co.com.bookhive.circulation.services.input.adapters.FindUserContactInputAdapter;
 import co.com.bookhive.circulation.services.input.dto.request.FindUserContactRequestDTO;

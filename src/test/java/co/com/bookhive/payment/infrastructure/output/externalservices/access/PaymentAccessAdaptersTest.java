@@ -1,14 +1,11 @@
 package co.com.bookhive.payment.infrastructure.output.externalservices.access;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.util.List;
 import java.util.UUID;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.access.services.input.dto.response.CurrentSessionResponseDTO;
 import co.com.bookhive.access.services.input.dto.response.ListActiveSchemasResponseDTO;
 import co.com.bookhive.crosscutting.tenancy.TenantContext;

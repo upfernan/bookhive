@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.LoanJpaRepository;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.LoanJpaEntity;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.LoanReturnJpaEntity;
@@ -18,7 +16,6 @@ import co.com.bookhive.circulation.services.output.ports.repositories.criteria.L
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LoanEntity;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.shared.services.output.ports.repositories.criteria.PageCriteria;
-
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;

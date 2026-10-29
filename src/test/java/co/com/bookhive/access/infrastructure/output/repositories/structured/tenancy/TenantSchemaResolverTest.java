@@ -1,10 +1,8 @@
 package co.com.bookhive.access.infrastructure.output.repositories.structured.tenancy;
 
 import co.com.bookhive.crosscutting.tenancy.TenantContext;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

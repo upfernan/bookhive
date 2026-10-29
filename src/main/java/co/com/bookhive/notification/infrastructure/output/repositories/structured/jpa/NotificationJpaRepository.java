@@ -2,9 +2,7 @@ package co.com.bookhive.notification.infrastructure.output.repositories.structur
 
 import java.util.List;
 import java.util.UUID;
-
 import org.springframework.data.jpa.repository.JpaRepository;
-
 import co.com.bookhive.notification.infrastructure.output.repositories.structured.jpa.entities.NotificationJpaEntity;
 
 

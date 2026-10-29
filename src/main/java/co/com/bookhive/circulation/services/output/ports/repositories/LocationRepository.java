@@ -2,7 +2,6 @@ package co.com.bookhive.circulation.services.output.ports.repositories;
 
 import java.util.List;
 import java.util.UUID;
-
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LocationEntities.BranchEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LocationEntities.LevelEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.LocationEntities.ValueEntity;

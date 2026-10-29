@@ -1,7 +1,6 @@
 package co.com.bookhive.access.services.usecase.session.registerperson.impl;
 
 import java.util.Optional;
-
 import co.com.bookhive.access.domain.session.registerperson.RegistrationDomain;
 import co.com.bookhive.access.services.output.ports.IdentityProviderPort;
 import co.com.bookhive.access.services.output.ports.InstitutionProvisioningPort;

@@ -2,7 +2,6 @@ package co.com.bookhive.initializer.migrations;
 
 import java.util.Map;
 import java.util.regex.Pattern;
-
 import co.com.bookhive.crosscutting.helper.TextHelper;
 
 public final class MigrationPlaceholders {

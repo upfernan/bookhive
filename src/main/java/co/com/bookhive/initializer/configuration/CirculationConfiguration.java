@@ -3,7 +3,6 @@ package co.com.bookhive.initializer.configuration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import co.com.bookhive.circulation.services.input.adapters.CancelReservationInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.CountBookCopiesInputAdapter;
 import co.com.bookhive.circulation.services.input.adapters.ExpireReservationsInputAdapter;

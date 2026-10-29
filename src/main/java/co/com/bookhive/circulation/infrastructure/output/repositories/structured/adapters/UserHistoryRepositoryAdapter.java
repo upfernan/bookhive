@@ -2,10 +2,8 @@ package co.com.bookhive.circulation.infrastructure.output.repositories.structure
 
 import java.util.List;
 import java.util.UUID;
-
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.UserHistoryJpaRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.UserHistoryRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.FinePaymentEntity;

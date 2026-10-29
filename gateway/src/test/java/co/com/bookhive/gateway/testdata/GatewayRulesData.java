@@ -2,7 +2,6 @@ package co.com.bookhive.gateway.testdata;
 
 import java.util.List;
 import java.util.Map;
-
 import co.com.bookhive.gateway.infrastructure.input.rules.EntryRulesProperties;
 
 public final class GatewayRulesData {

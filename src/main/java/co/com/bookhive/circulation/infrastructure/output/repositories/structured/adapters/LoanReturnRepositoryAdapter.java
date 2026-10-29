@@ -4,12 +4,10 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
-
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.LoanReturnJpaRepository;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.LoanJpaEntity;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.LoanReturnJpaEntity;
@@ -21,7 +19,6 @@ import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;
-
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 

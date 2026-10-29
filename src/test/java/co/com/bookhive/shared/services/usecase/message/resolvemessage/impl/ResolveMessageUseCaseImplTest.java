@@ -1,13 +1,10 @@
 package co.com.bookhive.shared.services.usecase.message.resolvemessage.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.shared.domain.message.resolvemessage.ResolveMessageDomain;
 
 class ResolveMessageUseCaseImplTest {

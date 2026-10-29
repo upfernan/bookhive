@@ -2,7 +2,6 @@ package co.com.bookhive.access.services.usecase.datapolicy.finddatapolicy.impl;
 
 import java.time.Instant;
 import java.util.UUID;
-
 import co.com.bookhive.access.domain.datapolicy.finddatapolicy.DataPolicyDomain;
 import co.com.bookhive.access.services.output.ports.repositories.DataPolicyAcceptanceRepository;
 import co.com.bookhive.access.services.output.ports.repositories.DataPolicyRepository;

@@ -5,12 +5,9 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicReference;
-
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-
 import com.nimbusds.jwt.JWTParser;
-
 import co.com.bookhive.gateway.crosscutting.helper.TextHelper;
 import reactor.core.publisher.Mono;
 
