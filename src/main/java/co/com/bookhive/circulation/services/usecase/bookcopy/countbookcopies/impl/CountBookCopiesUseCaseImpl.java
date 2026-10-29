@@ -2,7 +2,6 @@ package co.com.bookhive.circulation.services.usecase.bookcopy.countbookcopies.im
 
 import java.util.List;
 import java.util.UUID;
-
 import co.com.bookhive.circulation.domain.bookcopy.countbookcopies.BookCopiesCountDomain;
 import co.com.bookhive.circulation.domain.bookcopy.countbookcopies.CountBookCopiesDomain;
 import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRepository;

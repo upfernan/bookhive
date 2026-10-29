@@ -1,7 +1,6 @@
 package co.com.bookhive.circulation.services.input.adapters;
 
 import java.util.List;
-
 import co.com.bookhive.circulation.domain.bookcopy.countbookcopies.CountBookCopiesDomain;
 import co.com.bookhive.circulation.services.input.dto.request.CountBookCopiesRequestDTO;
 import co.com.bookhive.circulation.services.input.dto.response.BookCopiesDTO;

@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.catalog.services.input.dto.response.SyncAllCatalogsResponseDTO;
 import co.com.bookhive.catalog.services.input.ports.SyncAllCatalogsInputPort;
 import co.com.bookhive.crosscutting.helper.TextHelper;

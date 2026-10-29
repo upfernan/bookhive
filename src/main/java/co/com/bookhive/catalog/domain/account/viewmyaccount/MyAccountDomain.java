@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
-
 import co.com.bookhive.catalog.domain.reservation.listmyreservations.MyReservationDomain;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.helper.TextHelper;

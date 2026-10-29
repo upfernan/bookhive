@@ -1,12 +1,9 @@
 package co.com.bookhive.catalog.services.usecase.book.findbooktitle.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.util.UUID;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.catalog.domain.book.findbooktitle.FindBookTitleDomain;
 import co.com.bookhive.catalog.services.input.adapters.FindBookTitleInputAdapter;
 import co.com.bookhive.catalog.services.input.dto.request.FindBookTitleRequestDTO;

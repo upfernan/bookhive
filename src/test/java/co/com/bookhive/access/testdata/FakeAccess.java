@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 import co.com.bookhive.access.services.output.ports.IdentityProviderPort;
 import co.com.bookhive.access.services.output.ports.repositories.DataPolicyAcceptanceRepository;
 import co.com.bookhive.access.services.output.ports.repositories.DataPolicyRepository;

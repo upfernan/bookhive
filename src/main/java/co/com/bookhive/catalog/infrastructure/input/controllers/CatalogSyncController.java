@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import co.com.bookhive.catalog.services.input.dto.response.SyncCatalogResponseDTO;
 import co.com.bookhive.catalog.services.input.ports.SyncCatalogInputPort;
 import co.com.bookhive.crosscutting.security.PermissionCode;

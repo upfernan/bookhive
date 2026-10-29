@@ -2,12 +2,9 @@ package co.com.bookhive.access.services.usecase.session.resolveschema.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.util.UUID;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.access.domain.session.resolveschema.ResolveSchemaDomain;
 import co.com.bookhive.access.domain.session.resolvesession.ResolveSessionDomain;
 import co.com.bookhive.access.services.output.ports.repositories.entities.InstitutionEntity;

@@ -3,7 +3,6 @@ package co.com.bookhive.gateway.infrastructure.output.audit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.gateway.crosscutting.helper.TextHelper;
 import co.com.bookhive.gateway.services.output.ports.AuditPort;
 

@@ -5,7 +5,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.util.UriComponentsBuilder;
-
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.helper.TextHelper;

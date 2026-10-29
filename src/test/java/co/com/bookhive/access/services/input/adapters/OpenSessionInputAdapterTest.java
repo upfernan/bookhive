@@ -1,13 +1,10 @@
 package co.com.bookhive.access.services.input.adapters;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.access.services.input.dto.request.OpenSessionRequestDTO;
 
 class OpenSessionInputAdapterTest {

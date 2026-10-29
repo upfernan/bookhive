@@ -2,7 +2,6 @@ package co.com.bookhive.circulation.services.usecase.location.retirebookcopies.i
 
 import java.util.List;
 import java.util.UUID;
-
 import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.LocationRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.ReservationRepository;

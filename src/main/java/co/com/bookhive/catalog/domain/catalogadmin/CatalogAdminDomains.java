@@ -6,7 +6,6 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
-
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.helper.TextHelper;

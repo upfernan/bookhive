@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
-
 import co.com.bookhive.circulation.domain.loan.returnbook.FinePolicy;
 import co.com.bookhive.circulation.domain.loan.returnbook.LoanState;
 import co.com.bookhive.circulation.domain.loan.returnbook.ReturnBookDomain;

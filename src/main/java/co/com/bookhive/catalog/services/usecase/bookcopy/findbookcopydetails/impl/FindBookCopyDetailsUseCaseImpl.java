@@ -1,7 +1,6 @@
 package co.com.bookhive.catalog.services.usecase.bookcopy.findbookcopydetails.impl;
 
 import java.util.List;
-
 import co.com.bookhive.catalog.domain.bookcopy.findbookcopydetails.BookCopyDetailsDomain;
 import co.com.bookhive.catalog.domain.bookcopy.findbookcopydetails.FindBookCopyDetailsDomain;
 import co.com.bookhive.catalog.services.output.ports.BookCopyStatusPort;

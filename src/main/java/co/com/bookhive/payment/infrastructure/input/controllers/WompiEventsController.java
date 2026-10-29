@@ -2,7 +2,6 @@ package co.com.bookhive.payment.infrastructure.input.controllers;
 
 import java.util.List;
 import java.util.stream.StreamSupport;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
-
 import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.payment.services.input.dto.request.PaymentEventRequestDTO;
 import co.com.bookhive.payment.services.input.dto.response.PaymentEventResponseDTO;

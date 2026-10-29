@@ -7,11 +7,8 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
 import javax.sql.DataSource;
-
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.access.infrastructure.output.repositories.structured.tenancy.TenantStatements;
 import co.com.bookhive.access.services.output.ports.repositories.DataPolicyAcceptanceRepository;
 import co.com.bookhive.access.services.output.ports.repositories.criteria.DataPolicyAcceptanceCriteria;

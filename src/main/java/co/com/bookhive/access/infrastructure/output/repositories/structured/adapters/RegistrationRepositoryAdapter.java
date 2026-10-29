@@ -7,11 +7,8 @@ import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
-
 import javax.sql.DataSource;
-
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.access.infrastructure.output.repositories.structured.tenancy.TenantSession;
 import co.com.bookhive.access.services.output.ports.repositories.RegistrationRepository;
 import co.com.bookhive.access.services.output.ports.repositories.entities.RegistrationEntities.DomainInstitution;

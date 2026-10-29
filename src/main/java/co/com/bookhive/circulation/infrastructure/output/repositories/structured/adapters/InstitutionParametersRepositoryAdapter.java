@@ -3,10 +3,8 @@ package co.com.bookhive.circulation.infrastructure.output.repositories.structure
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.InstitutionParametersJpaRepository;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.InstitutionParametersJpaEntity;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.mapper.EntityMapper;

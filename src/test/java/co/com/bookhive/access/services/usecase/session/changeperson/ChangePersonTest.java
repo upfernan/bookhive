@@ -3,18 +3,15 @@ package co.com.bookhive.access.services.usecase.session.changeperson;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import co.com.bookhive.access.domain.session.changeperson.PersonChangeDomain;
 import co.com.bookhive.access.infrastructure.input.controllers.PublicDataPolicyController;
 import co.com.bookhive.access.infrastructure.input.controllers.RegistrationController;

@@ -1,13 +1,11 @@
 package co.com.bookhive.shared.infrastructure.output.externalservices.audit;
 
 import java.util.UUID;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-
 import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
 import co.com.bookhive.shared.services.output.ports.AuditPort;

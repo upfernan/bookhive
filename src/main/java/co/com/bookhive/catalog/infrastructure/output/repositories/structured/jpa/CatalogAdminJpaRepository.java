@@ -2,12 +2,10 @@ package co.com.bookhive.catalog.infrastructure.output.repositories.structured.jp
 
 import java.util.List;
 import java.util.UUID;
-
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
-
 import co.com.bookhive.catalog.infrastructure.output.repositories.structured.jpa.entities.BookJpaEntity;
 
 public interface CatalogAdminJpaRepository extends Repository<BookJpaEntity, UUID> {

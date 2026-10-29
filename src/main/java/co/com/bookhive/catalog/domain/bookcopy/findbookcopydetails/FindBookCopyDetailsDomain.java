@@ -1,7 +1,6 @@
 package co.com.bookhive.catalog.domain.bookcopy.findbookcopydetails;
 
 import java.util.UUID;
-
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;

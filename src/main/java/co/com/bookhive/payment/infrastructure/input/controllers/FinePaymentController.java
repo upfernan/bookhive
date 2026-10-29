@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import co.com.bookhive.crosscutting.security.PermissionCode;
 import co.com.bookhive.crosscutting.security.RequiredPermission;
 import co.com.bookhive.payment.services.input.dto.request.ConfirmFinePaymentRequestDTO;
@@ -56,11 +55,11 @@ public class FinePaymentController {
 			@PathVariable final String reference,
 			@RequestBody final ConfirmFinePaymentRequestDTO request) {
 
-		logger.info("Se consulta en la pasarela el resultado del pago {}.", reference);
+		logger.info("Se consulta en la pasarela el resultado de un pago.");
 		final FinePaymentStatusResponseDTO response = confirmFinePayment.execute(
 				new ConfirmFinePaymentRequestDTO(reference, request.transaction()));
 		final String status = response.status();
-		logger.info("El pago {} quedó en estado {}.", reference, status);
+		logger.info("El pago {} quedó en estado {}.", response.reference(), status);
 		return ResponseEntity.ok(response);
 	}
 

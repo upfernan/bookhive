@@ -1,13 +1,10 @@
 package co.com.bookhive.catalog.infrastructure.output.externalservices.circulation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.util.List;
 import java.util.UUID;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.circulation.services.input.dto.response.LocationResponseDTOs;
 
 class CirculationBranchDirectoryAdapterTest {

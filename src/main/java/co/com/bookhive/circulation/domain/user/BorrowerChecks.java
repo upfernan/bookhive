@@ -3,7 +3,6 @@ package co.com.bookhive.circulation.domain.user;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 import co.com.bookhive.circulation.services.output.ports.repositories.FineRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.FineCriteria;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.FineEntity;

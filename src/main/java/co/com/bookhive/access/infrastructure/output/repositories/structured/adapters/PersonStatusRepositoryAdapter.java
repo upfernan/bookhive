@@ -4,11 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.UUID;
-
 import javax.sql.DataSource;
-
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.access.infrastructure.output.repositories.structured.tenancy.SchemaName;
 import co.com.bookhive.access.services.output.ports.repositories.PersonStatusRepository;
 import co.com.bookhive.crosscutting.exception.BookHiveException;

@@ -3,7 +3,6 @@ package co.com.bookhive.shared.infrastructure.input.messaging;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
-
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.helper.TextHelper;
 

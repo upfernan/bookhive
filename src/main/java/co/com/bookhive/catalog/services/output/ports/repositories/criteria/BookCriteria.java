@@ -2,7 +2,6 @@ package co.com.bookhive.catalog.services.output.ports.repositories.criteria;
 
 import java.util.List;
 import java.util.UUID;
-
 import co.com.bookhive.catalog.services.output.ports.repositories.entities.BookEntity;
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.helper.TextHelper;

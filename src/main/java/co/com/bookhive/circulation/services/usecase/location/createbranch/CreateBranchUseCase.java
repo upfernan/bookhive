@@ -1,7 +1,5 @@
 package co.com.bookhive.circulation.services.usecase.location.createbranch;
 
-import java.util.List;
-
 import co.com.bookhive.circulation.domain.location.LocationDomains;
 
 public interface CreateBranchUseCase {

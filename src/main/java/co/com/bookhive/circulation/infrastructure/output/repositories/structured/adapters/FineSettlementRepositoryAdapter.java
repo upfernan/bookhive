@@ -1,11 +1,9 @@
 package co.com.bookhive.circulation.infrastructure.output.repositories.structured.adapters;
 
 import java.util.List;
-
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.FineSettlementJpaRepository;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.FineSettlementJpaEntity;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.mapper.EntityMapper;

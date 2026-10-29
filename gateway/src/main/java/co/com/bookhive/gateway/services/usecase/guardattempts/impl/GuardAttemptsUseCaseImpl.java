@@ -3,7 +3,6 @@ package co.com.bookhive.gateway.services.usecase.guardattempts.impl;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.LongPredicate;
-
 import co.com.bookhive.gateway.domain.attempt.AttemptKeys;
 import co.com.bookhive.gateway.domain.attempt.AttemptPolicy;
 import co.com.bookhive.gateway.domain.attempt.AttemptRequest;

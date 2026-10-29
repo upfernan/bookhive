@@ -1,7 +1,6 @@
 package co.com.bookhive.notification.services.output.ports.repositories.entities;
 
 import java.util.UUID;
-
 import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
 

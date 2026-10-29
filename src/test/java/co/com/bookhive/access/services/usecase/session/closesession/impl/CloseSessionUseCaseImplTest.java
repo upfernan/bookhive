@@ -2,12 +2,9 @@ package co.com.bookhive.access.services.usecase.session.closesession.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.List;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.access.domain.session.closesession.CloseSessionDomain;
 import co.com.bookhive.access.testdata.FakeAccess;
 

@@ -1,7 +1,6 @@
 package co.com.bookhive.access.domain.session.describesession;
 
 import java.util.List;
-
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.helper.TextHelper;
 

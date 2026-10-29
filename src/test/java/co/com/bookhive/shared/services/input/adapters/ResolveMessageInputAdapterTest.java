@@ -1,10 +1,8 @@
 package co.com.bookhive.shared.services.input.adapters;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.shared.services.input.dto.request.ResolveMessageRequestDTO;
 
 class ResolveMessageInputAdapterTest {

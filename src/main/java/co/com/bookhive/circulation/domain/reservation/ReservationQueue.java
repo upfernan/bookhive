@@ -3,7 +3,6 @@ package co.com.bookhive.circulation.domain.reservation;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
-
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.ReservationEntity;
 
 public final class ReservationQueue {

@@ -2,11 +2,9 @@ package co.com.bookhive.access.infrastructure.input.interceptors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.access.services.input.dto.response.ResolveSchemaResponseDTO;
 import co.com.bookhive.crosscutting.tenancy.TenantContext;
 

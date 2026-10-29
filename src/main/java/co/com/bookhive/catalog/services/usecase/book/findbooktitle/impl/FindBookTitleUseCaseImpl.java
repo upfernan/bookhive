@@ -1,7 +1,6 @@
 package co.com.bookhive.catalog.services.usecase.book.findbooktitle.impl;
 
 import java.util.List;
-
 import co.com.bookhive.catalog.domain.book.findbooktitle.FindBookTitleDomain;
 import co.com.bookhive.catalog.services.output.ports.repositories.BookRepository;
 import co.com.bookhive.catalog.services.output.ports.repositories.criteria.BookCriteria;

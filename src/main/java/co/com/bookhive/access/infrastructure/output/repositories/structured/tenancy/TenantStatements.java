@@ -3,9 +3,7 @@ package co.com.bookhive.access.infrastructure.output.repositories.structured.ten
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
 import javax.sql.DataSource;
-
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.messages.MessageKey;
 import co.com.bookhive.crosscutting.tenancy.TenantContext;

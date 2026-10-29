@@ -2,7 +2,6 @@ package co.com.bookhive.crosscutting.resilience;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -11,7 +10,6 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

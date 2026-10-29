@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import co.com.bookhive.catalog.services.input.dto.request.SearchBooksRequestDTO;
 import co.com.bookhive.catalog.services.input.dto.response.SearchBooksResponseDTO;
 import co.com.bookhive.catalog.services.input.ports.SearchBooksInputPort;

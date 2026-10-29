@@ -8,7 +8,6 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
-
 import co.com.bookhive.gateway.crosscutting.helper.TextHelper;
 import co.com.bookhive.gateway.infrastructure.output.identity.MetadataIdentityTokens;
 import reactor.core.publisher.Mono;

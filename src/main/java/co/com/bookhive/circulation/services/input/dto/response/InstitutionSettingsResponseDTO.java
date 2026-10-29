@@ -1,7 +1,6 @@
 package co.com.bookhive.circulation.services.input.dto.response;
 
 import java.math.BigDecimal;
-
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.helper.TextHelper;
 

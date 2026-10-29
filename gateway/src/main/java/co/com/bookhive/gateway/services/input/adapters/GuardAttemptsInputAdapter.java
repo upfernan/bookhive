@@ -1,7 +1,6 @@
 package co.com.bookhive.gateway.services.input.adapters;
 
 import java.util.concurrent.CompletionStage;
-
 import co.com.bookhive.gateway.services.input.adapters.mapper.AttemptMapper;
 import co.com.bookhive.gateway.services.input.dto.AttemptDTO;
 import co.com.bookhive.gateway.services.input.dto.VerdictDTO;

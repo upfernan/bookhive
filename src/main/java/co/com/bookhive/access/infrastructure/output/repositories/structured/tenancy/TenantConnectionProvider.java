@@ -2,9 +2,7 @@ package co.com.bookhive.access.infrastructure.output.repositories.structured.ten
 
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import javax.sql.DataSource;
-
 import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.springframework.stereotype.Component;
 

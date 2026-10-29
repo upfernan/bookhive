@@ -3,7 +3,6 @@ package co.com.bookhive.gateway.infrastructure.input.filters;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.time.Clock;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -11,7 +10,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -20,7 +18,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.web.server.MockServerWebExchange;
-
 import co.com.bookhive.gateway.infrastructure.input.rules.EntryRules;
 import co.com.bookhive.gateway.infrastructure.input.security.ClientOrigin;
 import co.com.bookhive.gateway.infrastructure.input.security.SessionCookieVerifier;

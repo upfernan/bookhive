@@ -1,9 +1,7 @@
 package co.com.bookhive.catalog.infrastructure.output.repositories.structured.jpa.entities;
 
 import java.util.UUID;
-
 import org.hibernate.annotations.Immutable;
-
 import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
 import jakarta.persistence.Column;

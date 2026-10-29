@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-
 import co.com.bookhive.gateway.services.output.ports.AttemptStore;
 
 public final class FakeAttemptStore implements AttemptStore {

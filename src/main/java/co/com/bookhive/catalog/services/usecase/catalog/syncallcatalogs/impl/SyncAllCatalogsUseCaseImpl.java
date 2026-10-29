@@ -2,7 +2,6 @@ package co.com.bookhive.catalog.services.usecase.catalog.syncallcatalogs.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import co.com.bookhive.catalog.domain.catalog.syncallcatalogs.SyncAllCatalogsDomain;
 import co.com.bookhive.catalog.services.output.ports.InstitutionDirectoryPort;
 import co.com.bookhive.catalog.services.output.ports.TenantScopePort;

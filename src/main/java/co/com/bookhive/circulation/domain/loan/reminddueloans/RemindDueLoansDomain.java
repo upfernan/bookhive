@@ -1,7 +1,6 @@
 package co.com.bookhive.circulation.domain.loan.reminddueloans;
 
 import java.time.LocalDate;
-
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.DateHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;

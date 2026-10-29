@@ -1,7 +1,6 @@
 package co.com.bookhive.access.infrastructure.output.repositories.structured.tenancy;
 
 import java.util.regex.Pattern;
-
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;

@@ -9,11 +9,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.access.infrastructure.output.repositories.structured.tenancy.SchemaName;
 import co.com.bookhive.access.services.output.ports.InstitutionProvisioningPort;
 import co.com.bookhive.access.services.output.ports.repositories.entities.RegistrationEntities.DomainInstitution;

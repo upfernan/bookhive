@@ -7,7 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import co.com.bookhive.catalog.services.input.dto.response.MyAccountResponseDTO;
 import co.com.bookhive.catalog.services.input.ports.ViewMyAccountInputPort;
 import co.com.bookhive.crosscutting.security.PermissionCode;

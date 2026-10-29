@@ -3,15 +3,12 @@ package co.com.bookhive.catalog.infrastructure.input.controllers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import co.com.bookhive.catalog.services.input.dto.request.SearchBooksRequestDTO;
 import co.com.bookhive.catalog.services.input.dto.response.SearchBooksResponseDTO;
 import co.com.bookhive.catalog.services.input.dto.response.SyncCatalogResponseDTO;

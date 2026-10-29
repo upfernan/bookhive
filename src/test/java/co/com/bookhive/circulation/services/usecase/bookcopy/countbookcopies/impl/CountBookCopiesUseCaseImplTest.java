@@ -1,13 +1,10 @@
 package co.com.bookhive.circulation.services.usecase.bookcopy.countbookcopies.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.util.List;
 import java.util.UUID;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.circulation.domain.bookcopy.countbookcopies.BookCopiesCountDomain;
 import co.com.bookhive.circulation.domain.bookcopy.countbookcopies.CountBookCopiesDomain;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.BookCopyEntity;

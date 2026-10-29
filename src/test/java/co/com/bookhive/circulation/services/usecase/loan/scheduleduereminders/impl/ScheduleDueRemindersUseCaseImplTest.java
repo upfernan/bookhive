@@ -2,13 +2,10 @@ package co.com.bookhive.circulation.services.usecase.loan.scheduleduereminders.i
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.circulation.domain.loan.scheduleduereminders.ScheduleDueRemindersDomain;
 import co.com.bookhive.circulation.services.input.adapters.ScheduleDueRemindersInputAdapter;
 import co.com.bookhive.circulation.services.output.ports.InstitutionDirectoryPort;

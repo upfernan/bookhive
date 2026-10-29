@@ -1,9 +1,7 @@
 package co.com.bookhive.gateway.infrastructure.input.security;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.net.InetSocketAddress;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;

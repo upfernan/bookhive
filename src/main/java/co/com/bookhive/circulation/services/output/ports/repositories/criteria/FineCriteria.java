@@ -1,7 +1,6 @@
 package co.com.bookhive.circulation.services.output.ports.repositories.criteria;
 
 import java.util.UUID;
-
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
 
 public final class FineCriteria {

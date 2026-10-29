@@ -2,16 +2,13 @@ package co.com.bookhive.circulation.infrastructure.output.repositories.structure
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.UserJpaRepository;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.entities.UserJpaEntity;
 import co.com.bookhive.circulation.services.output.ports.repositories.criteria.UserCriteria;

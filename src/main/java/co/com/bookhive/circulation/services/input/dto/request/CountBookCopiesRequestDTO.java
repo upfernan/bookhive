@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 
 public record CountBookCopiesRequestDTO(List<UUID> books) {

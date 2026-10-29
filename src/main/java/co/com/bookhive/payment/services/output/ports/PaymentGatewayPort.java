@@ -3,7 +3,6 @@ package co.com.bookhive.payment.services.output.ports;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-
 import co.com.bookhive.payment.services.output.ports.entities.CheckoutEntity;
 import co.com.bookhive.payment.services.output.ports.entities.CheckoutRequestEntity;
 import co.com.bookhive.payment.services.output.ports.entities.GatewayTransactionEntity;

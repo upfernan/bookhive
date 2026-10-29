@@ -2,13 +2,11 @@ package co.com.bookhive.gateway.infrastructure.input.security;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.support.ipresolver.RemoteAddressResolver;
 import org.springframework.cloud.gateway.support.ipresolver.XForwardedRemoteAddressResolver;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
-
 import co.com.bookhive.gateway.crosscutting.helper.TextHelper;
 
 @Component

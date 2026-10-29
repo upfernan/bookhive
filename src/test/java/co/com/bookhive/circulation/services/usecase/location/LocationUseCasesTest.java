@@ -3,18 +3,15 @@ package co.com.bookhive.circulation.services.usecase.location;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
-
 import co.com.bookhive.circulation.services.input.dto.request.RegisterBookCopiesRequestDTO;
 import co.com.bookhive.circulation.services.input.ports.RegisterBookCopiesInputPort;
 import co.com.bookhive.circulation.services.input.ports.RetireBookCopiesInputPort;
@@ -27,7 +24,6 @@ import co.com.bookhive.circulation.services.input.adapters.LocationInputAdapters
 import co.com.bookhive.circulation.infrastructure.input.controllers.LocationController;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.adapters.LocationRepositoryAdapter;
 import co.com.bookhive.circulation.infrastructure.output.repositories.structured.jpa.LocationJpaRepository;
-import co.com.bookhive.circulation.services.input.adapters.LocationInputAdapters;
 import co.com.bookhive.circulation.services.input.dto.request.BranchRequestDTO;
 import co.com.bookhive.circulation.services.input.dto.request.LocationLevelsRequestDTO;
 import co.com.bookhive.circulation.services.input.dto.request.RelocateBookCopyRequestDTO;
@@ -46,8 +42,6 @@ import co.com.bookhive.circulation.services.usecase.location.listbranches.impl.L
 import co.com.bookhive.circulation.services.usecase.location.relocatebookcopy.impl.RelocateBookCopyUseCaseImpl;
 import co.com.bookhive.circulation.services.usecase.location.withdrawbookcopy.impl.WithdrawBookCopyUseCaseImpl;
 import co.com.bookhive.circulation.testdata.FakeRepositories;
-import co.com.bookhive.crosscutting.exception.BookHiveException;
-import co.com.bookhive.crosscutting.messages.MessageKey;
 import co.com.bookhive.shared.services.output.ports.AuditPort;
 
 class LocationUseCasesTest {

@@ -2,15 +2,12 @@ package co.com.bookhive.notification.infrastructure.output;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.catalog.services.input.dto.response.BookTitleResponseDTO;
 import co.com.bookhive.circulation.services.input.dto.response.UserContactResponseDTO;
 import co.com.bookhive.notification.infrastructure.output.externalservices.catalog.CatalogBookTitleAdapter;

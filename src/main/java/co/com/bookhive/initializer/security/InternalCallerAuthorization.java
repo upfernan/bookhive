@@ -1,7 +1,6 @@
 package co.com.bookhive.initializer.security;
 
 import java.util.function.Supplier;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authorization.AuthorizationDecision;
@@ -9,7 +8,6 @@ import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.authorization.AuthorizationResult;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
-
 import co.com.bookhive.crosscutting.helper.TextHelper;
 
 public final class InternalCallerAuthorization implements AuthorizationManager<RequestAuthorizationContext> {

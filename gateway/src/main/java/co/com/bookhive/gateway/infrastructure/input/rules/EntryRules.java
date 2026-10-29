@@ -3,13 +3,11 @@ package co.com.bookhive.gateway.infrastructure.input.rules;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import org.springframework.http.server.PathContainer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.pattern.PathPattern;
 import org.springframework.web.util.pattern.PathPatternParser;
-
 import co.com.bookhive.gateway.crosscutting.helper.TextHelper;
 
 @Component

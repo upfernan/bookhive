@@ -1,7 +1,6 @@
 package co.com.bookhive.catalog.services.input.adapters.mapper;
 
 import java.util.List;
-
 import co.com.bookhive.catalog.domain.book.searchbooks.FacetValueDomain;
 import co.com.bookhive.catalog.domain.book.searchbooks.FoundBookDomain;
 import co.com.bookhive.catalog.domain.book.searchbooks.FoundBooksDomain;

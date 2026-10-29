@@ -3,13 +3,10 @@ package co.com.bookhive.catalog.services.output.ports;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.List;
 import java.util.UUID;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.catalog.services.output.ports.entities.BookCopiesEntity;
 import co.com.bookhive.catalog.services.output.ports.repositories.criteria.BookCriteria;
 import co.com.bookhive.catalog.services.output.ports.repositories.criteria.BookSearchCriteria;

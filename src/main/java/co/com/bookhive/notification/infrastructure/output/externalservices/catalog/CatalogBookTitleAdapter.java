@@ -1,9 +1,7 @@
 package co.com.bookhive.notification.infrastructure.output.externalservices.catalog;
 
 import java.util.UUID;
-
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.catalog.services.input.dto.request.FindBookTitleRequestDTO;
 import co.com.bookhive.catalog.services.input.ports.FindBookTitleInputPort;
 import co.com.bookhive.notification.services.output.ports.BookTitlePort;

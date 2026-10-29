@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.regex.Pattern;
-
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.crosscutting.messages.MessageKey;

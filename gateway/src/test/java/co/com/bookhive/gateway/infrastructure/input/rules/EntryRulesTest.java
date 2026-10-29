@@ -3,11 +3,9 @@ package co.com.bookhive.gateway.infrastructure.input.rules;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
-
 import co.com.bookhive.gateway.testdata.GatewayRulesData;
 
 class EntryRulesTest {

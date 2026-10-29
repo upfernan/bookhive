@@ -1,7 +1,6 @@
 package co.com.bookhive.circulation.services.usecase.loan.lendbook.impl;
 
 import java.time.LocalDate;
-
 import co.com.bookhive.circulation.domain.bookcopy.BookCopyLendingRule;
 import co.com.bookhive.circulation.domain.institution.CurrentInstitution;
 import co.com.bookhive.circulation.domain.loan.lendbook.LendBookDomain;

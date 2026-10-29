@@ -10,10 +10,8 @@ import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.catalog.services.output.ports.repositories.BookIndexRepository;
 import co.com.bookhive.catalog.services.output.ports.repositories.criteria.BookSearchCriteria;
 import co.com.bookhive.catalog.services.output.ports.repositories.entities.BookEntity;

@@ -2,7 +2,6 @@ package co.com.bookhive.catalog.services.output.ports.repositories;
 
 import java.util.Optional;
 import java.util.UUID;
-
 import co.com.bookhive.catalog.services.output.ports.repositories.entities.CatalogAdminEntities.TitleEntity;
 
 public interface TitleRepository {

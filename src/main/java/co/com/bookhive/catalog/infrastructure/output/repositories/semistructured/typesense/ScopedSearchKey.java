@@ -4,10 +4,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Base64;
 import java.util.HexFormat;
-
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-
 import co.com.bookhive.crosscutting.exception.BookHiveException;
 import co.com.bookhive.crosscutting.messages.MessageKey;
 

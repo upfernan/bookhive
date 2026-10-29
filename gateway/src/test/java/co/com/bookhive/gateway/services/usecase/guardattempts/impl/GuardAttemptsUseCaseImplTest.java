@@ -2,13 +2,10 @@ package co.com.bookhive.gateway.services.usecase.guardattempts.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.List;
 import java.util.concurrent.CompletionStage;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.gateway.domain.attempt.AttemptKeys;
 import co.com.bookhive.gateway.domain.attempt.AttemptPolicy;
 import co.com.bookhive.gateway.domain.attempt.AttemptRequest;

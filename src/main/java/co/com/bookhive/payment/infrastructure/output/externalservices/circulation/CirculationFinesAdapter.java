@@ -2,9 +2,7 @@ package co.com.bookhive.payment.infrastructure.output.externalservices.circulati
 
 import java.math.BigDecimal;
 import java.util.UUID;
-
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.circulation.services.input.dto.request.FindPayableFineRequestDTO;
 import co.com.bookhive.circulation.services.input.dto.request.SettleFineRequestDTO;
 import co.com.bookhive.circulation.services.input.dto.response.PayableFineResponseDTO;

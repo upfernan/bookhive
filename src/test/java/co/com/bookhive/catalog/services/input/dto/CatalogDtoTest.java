@@ -1,13 +1,10 @@
 package co.com.bookhive.catalog.services.input.dto;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.util.List;
 import java.util.UUID;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.catalog.services.input.dto.request.SearchBooksRequestDTO;
 import co.com.bookhive.catalog.services.input.dto.response.FacetValueDTO;
 import co.com.bookhive.catalog.services.input.dto.response.FoundBookDTO;

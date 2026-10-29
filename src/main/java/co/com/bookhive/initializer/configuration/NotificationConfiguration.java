@@ -2,7 +2,6 @@ package co.com.bookhive.initializer.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import co.com.bookhive.notification.services.input.adapters.SendNotificationInputAdapter;
 import co.com.bookhive.notification.services.input.ports.SendNotificationInputPort;
 import co.com.bookhive.notification.services.output.ports.BookTitlePort;

@@ -1,7 +1,6 @@
 package co.com.bookhive.payment.services.output.ports.entities;
 
 import java.time.Instant;
-
 import co.com.bookhive.crosscutting.helper.DateHelper;
 import co.com.bookhive.crosscutting.helper.TextHelper;
 

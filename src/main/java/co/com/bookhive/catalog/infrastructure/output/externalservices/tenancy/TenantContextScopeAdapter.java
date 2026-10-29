@@ -1,7 +1,6 @@
 package co.com.bookhive.catalog.infrastructure.output.externalservices.tenancy;
 
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.catalog.services.output.ports.TenantScopePort;
 import co.com.bookhive.crosscutting.tenancy.TenantContext;
 

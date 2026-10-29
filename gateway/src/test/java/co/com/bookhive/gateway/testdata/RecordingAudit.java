@@ -2,7 +2,6 @@ package co.com.bookhive.gateway.testdata;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import co.com.bookhive.gateway.services.output.ports.AuditPort;
 
 public final class RecordingAudit implements AuditPort {

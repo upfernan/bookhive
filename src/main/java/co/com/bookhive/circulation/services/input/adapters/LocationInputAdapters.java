@@ -1,7 +1,6 @@
 package co.com.bookhive.circulation.services.input.adapters;
 
 import java.util.List;
-
 import co.com.bookhive.circulation.domain.location.LocationDomains;
 import co.com.bookhive.circulation.services.input.dto.request.BranchRequestDTO;
 import co.com.bookhive.circulation.services.input.dto.request.RegisterBookCopiesRequestDTO;

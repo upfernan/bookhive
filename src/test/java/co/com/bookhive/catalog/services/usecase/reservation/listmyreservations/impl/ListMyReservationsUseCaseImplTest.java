@@ -3,15 +3,12 @@ package co.com.bookhive.catalog.services.usecase.reservation.listmyreservations.
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.catalog.domain.reservation.listmyreservations.MyReservationDomain;
 import co.com.bookhive.catalog.services.output.ports.entities.UserReservationEntity;
 import co.com.bookhive.catalog.services.output.ports.repositories.entities.BookEntity;

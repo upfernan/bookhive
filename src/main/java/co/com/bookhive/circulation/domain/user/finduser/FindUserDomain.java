@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 import co.com.bookhive.circulation.domain.account.finduseraccount.UserAccountDomain;
 import co.com.bookhive.circulation.domain.institution.CurrentInstitution;
 import co.com.bookhive.circulation.domain.loan.returnbook.DailyRateFinePolicy;

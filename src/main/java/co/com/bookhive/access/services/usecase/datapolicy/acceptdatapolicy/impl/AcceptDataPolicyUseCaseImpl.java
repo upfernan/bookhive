@@ -1,7 +1,6 @@
 package co.com.bookhive.access.services.usecase.datapolicy.acceptdatapolicy.impl;
 
 import java.util.List;
-
 import co.com.bookhive.access.domain.datapolicy.acceptdatapolicy.AcceptDataPolicyDomain;
 import co.com.bookhive.access.domain.datapolicy.finddatapolicy.DataPolicyDomain;
 import co.com.bookhive.access.domain.session.resolvesession.ResolveSessionDomain;

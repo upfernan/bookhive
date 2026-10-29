@@ -3,13 +3,11 @@ package co.com.bookhive.gateway.infrastructure.output.attempts;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletionStage;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.gateway.services.output.ports.AttemptStore;
 import reactor.core.publisher.Mono;
 

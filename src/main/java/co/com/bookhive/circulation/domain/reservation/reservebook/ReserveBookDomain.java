@@ -2,7 +2,6 @@ package co.com.bookhive.circulation.domain.reservation.reservebook;
 
 import java.util.List;
 import java.util.UUID;
-
 import co.com.bookhive.circulation.domain.user.BorrowerChecks;
 import co.com.bookhive.circulation.services.output.ports.repositories.BookCopyRepository;
 import co.com.bookhive.circulation.services.output.ports.repositories.FineRepository;

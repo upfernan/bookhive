@@ -1,10 +1,8 @@
 package co.com.bookhive.initializer.configuration;
 
 import java.time.Clock;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import co.com.bookhive.payment.services.input.adapters.ConfirmFinePaymentInputAdapter;
 import co.com.bookhive.payment.services.input.adapters.ReconcilePaymentsInputAdapter;
 import co.com.bookhive.payment.services.input.adapters.RecordPaymentEventInputAdapter;

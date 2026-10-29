@@ -3,12 +3,9 @@ package co.com.bookhive.catalog.services.usecase.book.searchbooks.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.List;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.catalog.domain.book.searchbooks.FoundBookDomain;
 import co.com.bookhive.catalog.domain.book.searchbooks.FoundBooksDomain;
 import co.com.bookhive.catalog.domain.book.searchbooks.SearchBooksDomain;

@@ -1,16 +1,13 @@
 package co.com.bookhive.gateway.infrastructure.input.security;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.time.Clock;
 import java.time.ZoneOffset;
 import java.util.Date;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpCookie;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
-
 import co.com.bookhive.gateway.infrastructure.output.identity.SessionKeys;
 import co.com.bookhive.gateway.testdata.SessionTokens;
 import reactor.core.publisher.Mono;

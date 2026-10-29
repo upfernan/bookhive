@@ -3,14 +3,11 @@ package co.com.bookhive.access.services.usecase.session.describesession;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.List;
 import java.util.UUID;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.access.domain.session.resolvesession.ResolveSessionDomain;
 import co.com.bookhive.access.infrastructure.input.controllers.SessionProfileController;
 import co.com.bookhive.access.infrastructure.output.repositories.structured.adapters.SessionProfileRepositoryAdapter;

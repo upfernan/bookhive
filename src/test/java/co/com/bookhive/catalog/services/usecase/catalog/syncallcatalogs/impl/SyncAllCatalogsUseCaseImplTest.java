@@ -2,13 +2,10 @@ package co.com.bookhive.catalog.services.usecase.catalog.syncallcatalogs.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.catalog.domain.catalog.syncallcatalogs.SyncAllCatalogsDomain;
 import co.com.bookhive.catalog.domain.catalog.synccatalog.SyncCatalogDomain;
 import co.com.bookhive.catalog.services.output.ports.InstitutionDirectoryPort;

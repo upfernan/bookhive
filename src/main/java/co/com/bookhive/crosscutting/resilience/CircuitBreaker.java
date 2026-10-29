@@ -5,7 +5,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
 import co.com.bookhive.crosscutting.helper.ObjectHelper;
 import co.com.bookhive.crosscutting.helper.TextHelper;
 

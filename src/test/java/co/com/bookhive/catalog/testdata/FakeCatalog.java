@@ -3,7 +3,6 @@ package co.com.bookhive.catalog.testdata;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
 import co.com.bookhive.catalog.services.output.ports.BookCopiesPort;
 import co.com.bookhive.catalog.services.output.ports.entities.BookCopiesEntity;
 import co.com.bookhive.catalog.services.output.ports.repositories.BookIndexRepository;

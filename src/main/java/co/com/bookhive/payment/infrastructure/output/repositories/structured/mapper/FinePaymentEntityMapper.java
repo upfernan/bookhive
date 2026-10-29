@@ -3,7 +3,6 @@ package co.com.bookhive.payment.infrastructure.output.repositories.structured.ma
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValueMappingStrategy;
-
 import co.com.bookhive.payment.infrastructure.output.repositories.structured.jpa.entities.FinePaymentJpaEntity;
 import co.com.bookhive.payment.services.output.ports.repositories.entities.FinePaymentEntity;
 

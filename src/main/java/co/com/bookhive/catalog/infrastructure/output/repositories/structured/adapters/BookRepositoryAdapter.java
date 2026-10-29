@@ -3,9 +3,7 @@ package co.com.bookhive.catalog.infrastructure.output.repositories.structured.ad
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.catalog.infrastructure.output.repositories.structured.jpa.BookDetailsRow;
 import co.com.bookhive.catalog.infrastructure.output.repositories.structured.jpa.BookJpaRepository;
 import co.com.bookhive.catalog.services.output.ports.repositories.BookRepository;

@@ -1,7 +1,6 @@
 package co.com.bookhive.catalog.infrastructure.output.externalservices.circulation;
 
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.catalog.domain.account.viewmyaccount.MyAccountDomain;
 import co.com.bookhive.catalog.domain.account.viewmyaccount.MyAccountDomain.Book;
 import co.com.bookhive.catalog.services.output.ports.UserAccountPort;

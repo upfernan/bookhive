@@ -1,9 +1,7 @@
 package co.com.bookhive.catalog.infrastructure.output.externalservices.circulation;
 
 import java.util.List;
-
 import org.springframework.stereotype.Component;
-
 import co.com.bookhive.catalog.services.output.ports.UserReservationsPort;
 import co.com.bookhive.catalog.services.output.ports.entities.UserReservationEntity;
 import co.com.bookhive.circulation.services.input.ports.FindUserReservationsInputPort;

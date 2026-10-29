@@ -3,14 +3,11 @@ package co.com.bookhive.circulation.domain.user.searchreaders;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.util.List;
 import java.util.UUID;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.circulation.domain.account.manageuser.UserLifecycleDomains;
 import co.com.bookhive.circulation.services.output.ports.repositories.entities.UserEntity;
 import co.com.bookhive.circulation.testdata.FakeRepositories;

@@ -2,10 +2,8 @@ package co.com.bookhive.access.infrastructure.input.interceptors;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-
 import co.com.bookhive.access.services.input.ports.ResolveSchemaInputPort;
 import co.com.bookhive.crosscutting.tenancy.TenantContext;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 

@@ -1,10 +1,8 @@
 package co.com.bookhive.access.services.input.adapters;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import co.com.bookhive.access.domain.session.resolveschema.ResolveSchemaDomain;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
 

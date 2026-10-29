@@ -1,7 +1,6 @@
 package co.com.bookhive.access.domain.session.resolveschema;
 
 import java.util.UUID;
-
 import co.com.bookhive.crosscutting.helper.TextHelper;
 import co.com.bookhive.crosscutting.helper.UUIDHelper;
 
