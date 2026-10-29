@@ -27,7 +27,7 @@ public final class DateHelper {
 	}
 
 	public static LocalDate todayInUtc(final Clock clock) {
-		final Clock source = ObjectHelper.isNull(clock) ? UTC_CLOCK : clock;
+		final Clock source = ObjectHelper.getDefaultValue(clock, UTC_CLOCK);
 		return LocalDate.ofInstant(source.instant(), ZoneOffset.UTC);
 	}
 
