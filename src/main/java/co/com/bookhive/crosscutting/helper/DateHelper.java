@@ -23,12 +23,14 @@ public final class DateHelper {
 	}
 
 	public static LocalDate todayInUtc() {
-		return todayInUtc(UTC_CLOCK);
+		return LocalDate.now(UTC_CLOCK);
 	}
 
 	public static LocalDate todayInUtc(final Clock clock) {
-		final Clock source = ObjectHelper.getDefaultValue(clock, UTC_CLOCK);
-		return LocalDate.ofInstant(source.instant(), ZoneOffset.UTC);
+		if (ObjectHelper.isNull(clock)) {
+			return todayInUtc();
+		}
+		return LocalDate.ofInstant(clock.instant(), ZoneOffset.UTC);
 	}
 
 	public static LocalDate todayIn(final ZoneId zone) {
