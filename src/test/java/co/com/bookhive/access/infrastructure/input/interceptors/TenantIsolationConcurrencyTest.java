@@ -84,7 +84,7 @@ class TenantIsolationConcurrencyTest {
 			if (!TenantContext.SCHEMA_WITHOUT_TENANT.equals(schemaResolver.resolveCurrentTenantIdentifier())) {
 				mistakes.add(institution.schema() + " no limpió su esquema al terminar");
 			}
-		} catch (final InterruptedException exception) {
+		} catch (final InterruptedException _) {
 			Thread.currentThread().interrupt();
 			mistakes.add(institution.schema() + " fue interrumpida");
 		} finally {
