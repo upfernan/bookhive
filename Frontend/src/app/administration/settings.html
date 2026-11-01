@@ -1,0 +1,199 @@
+<div class="admin">
+  <div>
+    <h1 class="page__title">{{ messages.title }}</h1>
+    <p class="page__lead">{{ messages.lead }}</p>
+  </div>
+
+  <!-- Préstamos y multas -->
+  <section class="panel" aria-labelledby="settings-rules" [attr.aria-busy]="rules.loading()">
+    <h2 id="settings-rules" class="panel__title">{{ messages.rulesStep }}</h2>
+    <p class="admin__note">{{ messages.rulesLead }}</p>
+
+    @if (rules.loading()) {
+      <p class="admin__note" role="status">{{ messages.loading }}</p>
+    } @else if (rules.loadProblem()) {
+      <p class="panel__problem" role="alert">{{ rules.loadProblem() }}</p>
+      <div class="admin__actions">
+        <button mat-stroked-button type="button" (click)="loadRules()">{{ messages.retry }}</button>
+      </div>
+    } @else {
+      <form class="admin__form" [formGroup]="rulesForm" (ngSubmit)="saveRules()" novalidate>
+        <div class="admin__grid">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ messages.loanDaysLabel }}</mat-label>
+            <input matInput formControlName="loanDays" inputmode="numeric" maxlength="2" autocomplete="off" />
+            @if (errorOf(rulesForm.controls.loanDays, messages.loanDaysInvalid)) {
+              <mat-error>{{ messages.loanDaysInvalid }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ messages.maxLoansLabel }}</mat-label>
+            <input matInput formControlName="maxConcurrentLoans" inputmode="numeric" maxlength="2" autocomplete="off" />
+            @if (errorOf(rulesForm.controls.maxConcurrentLoans, messages.maxLoansInvalid)) {
+              <mat-error>{{ messages.maxLoansInvalid }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ messages.fineRateLabel }}</mat-label>
+            <input matInput formControlName="dailyFineRate" inputmode="decimal" maxlength="10" autocomplete="off" />
+            @if (errorOf(rulesForm.controls.dailyFineRate, messages.fineRateInvalid)) {
+              <mat-error>{{ messages.fineRateInvalid }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ messages.timeZoneLabel }}</mat-label>
+            <mat-select formControlName="timeZone">
+              @for (zone of timeZones(); track zone) {
+                <mat-option [value]="zone">{{ zone }}</mat-option>
+              }
+            </mat-select>
+            <mat-hint>{{ messages.timeZoneHint }}</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <div class="admin__submit">
+          <button mat-flat-button type="submit" [disabled]="rules.saving()">
+            {{ rules.saving() ? messages.saving : messages.save }}
+          </button>
+        </div>
+      </form>
+    }
+
+    @if (rules.saved()) {
+      <p class="panel__success" role="status">{{ rules.saved() }}</p>
+    }
+    @if (rules.saveProblem()) {
+      <p class="panel__problem" role="alert">{{ rules.saveProblem() }}</p>
+    }
+  </section>
+
+  <!-- Sedes -->
+  <section class="panel" aria-labelledby="settings-branches" [attr.aria-busy]="branchesBlock.loading()">
+    <h2 id="settings-branches" class="panel__title">{{ messages.branchesStep }}</h2>
+    <p class="admin__note">{{ messages.branchesLead }}</p>
+
+    @if (branchesBlock.loading()) {
+      <p class="admin__note" role="status">{{ messages.loading }}</p>
+    } @else if (branchesBlock.loadProblem()) {
+      <p class="panel__problem" role="alert">{{ branchesBlock.loadProblem() }}</p>
+      <div class="admin__actions">
+        <button mat-stroked-button type="button" (click)="loadBranches()">{{ messages.retry }}</button>
+      </div>
+    } @else if (branches().length === 0) {
+      <p class="panel__empty">{{ messages.branchesEmpty }}</p>
+    } @else {
+      <ul class="chips">
+        @for (branch of branches(); track branch.id) {
+          <li class="chip chip--neutral">{{ branch.name }}</li>
+        }
+      </ul>
+    }
+
+    <form class="inline-form" [formGroup]="branchForm" (ngSubmit)="createBranch()" novalidate>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ messages.branchNameLabel }}</mat-label>
+        <input matInput formControlName="name" maxlength="100" autocomplete="off" />
+        @if (branchNameError()) {
+          <mat-error>{{ branchNameError() }}</mat-error>
+        }
+      </mat-form-field>
+      <button mat-flat-button type="submit" [disabled]="branchesBlock.saving()">
+        {{ branchesBlock.saving() ? messages.creatingBranch : messages.createBranch }}
+      </button>
+    </form>
+
+    @if (branchesBlock.saved()) {
+      <p class="panel__success" role="status">{{ branchesBlock.saved() }}</p>
+    }
+    @if (branchesBlock.saveProblem()) {
+      <p class="panel__problem" role="alert">{{ branchesBlock.saveProblem() }}</p>
+    }
+  </section>
+
+  <!-- Niveles de ubicación -->
+  <section class="panel" aria-labelledby="settings-levels" [attr.aria-busy]="levelsBlock.loading()">
+    <h2 id="settings-levels" class="panel__title">{{ messages.levelsStep }}</h2>
+    <p class="admin__note">{{ messages.levelsLead }}</p>
+
+    @if (levelsBlock.loading()) {
+      <p class="admin__note" role="status">{{ messages.loading }}</p>
+    } @else if (levelsBlock.loadProblem()) {
+      <p class="panel__problem" role="alert">{{ levelsBlock.loadProblem() }}</p>
+      <div class="admin__actions">
+        <button mat-stroked-button type="button" (click)="loadLevels()">{{ messages.retry }}</button>
+      </div>
+    } @else {
+      <ol class="levels">
+        @for (control of levelsForm.controls; track control; let index = $index) {
+          <li class="levels__item">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>{{ levelLabel(index) }}</mat-label>
+              <input matInput [formControl]="control" maxlength="40" autocomplete="off" />
+            </mat-form-field>
+            @if (levelsForm.length > 1) {
+              <button mat-button type="button" (click)="removeLevel(index)">{{ messages.removeLevel }}</button>
+            }
+          </li>
+        }
+      </ol>
+
+      @if (levelsInvalid()) {
+        <p class="panel__problem" role="alert">{{ messages.levelInvalid }}</p>
+      }
+
+      <div class="admin__actions">
+        @if (canAddLevel()) {
+          <button mat-stroked-button type="button" (click)="addLevel()">+ {{ messages.addLevel }}</button>
+        }
+        <button mat-flat-button type="button" [disabled]="levelsBlock.saving()" (click)="saveLevels()">
+          {{ levelsBlock.saving() ? messages.saving : messages.save }}
+        </button>
+      </div>
+    }
+
+    @if (levelsBlock.saved()) {
+      <p class="panel__success" role="status">{{ levelsBlock.saved() }}</p>
+    }
+    @if (levelsBlock.saveProblem()) {
+      <p class="panel__problem" role="alert">{{ levelsBlock.saveProblem() }}</p>
+    }
+  </section>
+
+  <!-- Conservación de datos -->
+  <section class="panel" aria-labelledby="settings-retention" [attr.aria-busy]="retention.loading()">
+    <h2 id="settings-retention" class="panel__title">{{ messages.retentionStep }}</h2>
+    <p class="admin__note">{{ messages.retentionLead }}</p>
+
+    @if (retention.loading()) {
+      <p class="admin__note" role="status">{{ messages.loading }}</p>
+    } @else if (retention.loadProblem()) {
+      <p class="panel__problem" role="alert">{{ retention.loadProblem() }}</p>
+      <div class="admin__actions">
+        <button mat-stroked-button type="button" (click)="loadRetention()">{{ messages.retry }}</button>
+      </div>
+    } @else {
+      <form class="inline-form" [formGroup]="retentionForm" (ngSubmit)="saveRetention()" novalidate>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ messages.retentionLabel }}</mat-label>
+          <input matInput formControlName="months" inputmode="numeric" maxlength="3" autocomplete="off" />
+          @if (errorOf(retentionForm.controls.months, messages.retentionInvalid)) {
+            <mat-error>{{ messages.retentionInvalid }}</mat-error>
+          }
+        </mat-form-field>
+        <button mat-flat-button type="submit" [disabled]="retention.saving()">
+          {{ retention.saving() ? messages.saving : messages.save }}
+        </button>
+      </form>
+    }
+
+    @if (retention.saved()) {
+      <p class="panel__success" role="status">{{ retention.saved() }}</p>
+    }
+    @if (retention.saveProblem()) {
+      <p class="panel__problem" role="alert">{{ retention.saveProblem() }}</p>
+    }
+  </section>
+</div>

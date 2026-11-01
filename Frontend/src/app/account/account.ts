@@ -16,6 +16,7 @@ import {
   PendingFine,
   ReturnedLoan,
 } from './account-desk';
+import { DeleteMyData } from '../administration/delete-my-data';
 
 const DATE_FORMAT = new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: 'long', year: 'numeric' });
 const MONEY_FORMAT = new Intl.NumberFormat('es-CO', {
@@ -44,7 +45,7 @@ interface AccountGroup {
 
 @Component({
   selector: 'app-account',
-  imports: [RouterLink, MatButtonModule],
+  imports: [RouterLink, MatButtonModule, DeleteMyData],
   templateUrl: './account.html',
   styleUrls: ['../shell/section-page.css', '../shared/feedback.css', './account.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,

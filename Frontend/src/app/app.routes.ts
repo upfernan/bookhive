@@ -67,6 +67,42 @@ export const routes: Routes = [
         loadComponent: () => import('./catalog/catalog').then((m) => m.Catalog),
       },
       {
+        path: 'catalogo/titulos/nuevo',
+        title: 'Registrar un libro · BookHive',
+        canMatch: [requirePermission(PermissionCode.manageCatalog)],
+        loadComponent: () => import('./catalog-admin/title-editor').then((m) => m.TitleEditor),
+      },
+      {
+        path: 'catalogo/titulos/:id',
+        title: 'Editar libro · BookHive',
+        canMatch: [requirePermission(PermissionCode.manageCatalog)],
+        loadComponent: () => import('./catalog-admin/title-editor').then((m) => m.TitleEditor),
+      },
+      {
+        path: 'categorias',
+        title: 'Categorías · BookHive',
+        canMatch: [requirePermission(PermissionCode.manageCategories)],
+        loadComponent: () => import('./catalog-admin/categories').then((m) => m.Categories),
+      },
+      {
+        path: 'ejemplares',
+        title: 'Ubicar ejemplares · BookHive',
+        canMatch: [requirePermission(PermissionCode.locateBookCopy)],
+        loadComponent: () => import('./administration/book-copies').then((m) => m.BookCopies),
+      },
+      {
+        path: 'lectores',
+        title: 'Administrar lectores · BookHive',
+        canMatch: [requirePermission(PermissionCode.manageUsers)],
+        loadComponent: () => import('./administration/readers').then((m) => m.Readers),
+      },
+      {
+        path: 'configuracion',
+        title: 'Configuración · BookHive',
+        canMatch: [requirePermission(PermissionCode.configureInstitution)],
+        loadComponent: () => import('./administration/settings').then((m) => m.Settings),
+      },
+      {
         path: 'reservas',
         title: 'Mis reservas · BookHive',
         canMatch: [requirePermission(PermissionCode.reserveBook)],

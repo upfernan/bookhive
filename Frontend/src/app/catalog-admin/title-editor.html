@@ -1,0 +1,240 @@
+<div class="admin">
+  <div>
+    <a class="admin__back" routerLink="/catalogo">← {{ messages.backToCatalog }}</a>
+    <h1 class="page__title">{{ editing ? messages.editTitle : messages.newTitle }}</h1>
+    <p class="page__lead">{{ editing ? messages.editLead : messages.newLead }}</p>
+  </div>
+
+  @if (loading()) {
+    <p class="admin__note" role="status">{{ messages.loading }}</p>
+  } @else if (loadProblem(); as failure) {
+    <div class="banner banner--error" role="alert">
+      <svg class="banner__icon" aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9" />
+        <line x1="12" y1="7.5" x2="12" y2="13" />
+        <line x1="12" y1="16.5" x2="12" y2="16.6" />
+      </svg>
+      <div>
+        <p class="banner__title">{{ messages.loadFailedTitle }}</p>
+        <p class="banner__text">{{ failure.message }}</p>
+        @if (loadTrace()) {
+          <p class="banner__trace">{{ loadTrace() }}</p>
+        }
+        <button class="banner__action" mat-stroked-button type="button" (click)="load()">{{ messages.retry }}</button>
+      </div>
+    </div>
+  } @else {
+    @if (saved(); as title) {
+      <div class="banner banner--success" role="status">
+        <svg class="banner__icon" aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M8 12.5l2.7 2.7L16 9.8" />
+        </svg>
+        <div>
+          <p class="banner__title">{{ editing ? messages.updatedTitle : messages.savedTitle }}</p>
+          <p class="banner__text">{{ savedText() }}</p>
+          @if (!editing) {
+            <div class="banner__actions">
+              <button mat-flat-button type="button" (click)="registerAnother()">{{ messages.registerAnother }}</button>
+              <a mat-stroked-button routerLink="/catalogo">{{ messages.backToCatalog }}</a>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    @if (withdrawn()) {
+      <div class="banner banner--error" role="status">
+        <svg class="banner__icon" aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9" />
+          <line x1="8" y1="12" x2="16" y2="12" />
+        </svg>
+        <div>
+          <p class="banner__title">{{ messages.withdrawnDone }}</p>
+          <p class="banner__text">{{ messages.withdrawnText }}</p>
+        </div>
+      </div>
+    }
+
+    @if (saveProblem(); as failure) {
+      <div class="banner banner--error" role="alert">
+        <svg class="banner__icon" aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9" />
+          <line x1="12" y1="7.5" x2="12" y2="13" />
+          <line x1="12" y1="16.5" x2="12" y2="16.6" />
+        </svg>
+        <div>
+          <p class="banner__title">{{ messages.saveFailedTitle }}</p>
+          <p class="banner__text">{{ failure.message }}</p>
+          @if (saveTrace()) {
+            <p class="banner__trace">{{ saveTrace() }}</p>
+          }
+        </div>
+      </div>
+    }
+
+    <form class="admin__form" [formGroup]="form" (ngSubmit)="save()" novalidate>
+      <section class="panel" aria-labelledby="title-data">
+        <div class="panel__header">
+          <h2 id="title-data" class="panel__title">{{ messages.dataStep }}</h2>
+          @if (current(); as title) {
+            <span [class]="withdrawn() ? 'chip chip--error' : 'chip chip--success'">
+              {{ withdrawn() ? messages.withdrawn : messages.active }}
+            </span>
+          }
+        </div>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ messages.titleLabel }}</mat-label>
+          <input matInput formControlName="title" maxlength="300" autocomplete="off" />
+          @if (errorOf('title')) {
+            <mat-error>{{ errorOf('title') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>{{ messages.authorsLabel }}</mat-label>
+          <input matInput formControlName="authors" autocomplete="off" />
+          <mat-hint>{{ messages.authorsHint }}</mat-hint>
+          @if (errorOf('authors')) {
+            <mat-error>{{ errorOf('authors') }}</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="admin__grid">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ messages.publisherLabel }}</mat-label>
+            <input matInput formControlName="publisher" maxlength="150" autocomplete="off" />
+            @if (errorOf('publisher')) {
+              <mat-error>{{ errorOf('publisher') }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ messages.categoryLabel }}</mat-label>
+            <mat-select formControlName="category">
+              @for (option of categoryOptions(); track option.id) {
+                <mat-option [value]="option.id">{{ option.label }}</mat-option>
+              }
+            </mat-select>
+            @if (errorOf('category')) {
+              <mat-error>{{ errorOf('category') }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ messages.isbnLabel }}</mat-label>
+            <input matInput formControlName="isbn" maxlength="17" autocomplete="off" inputmode="numeric" />
+            <mat-hint>{{ messages.isbnHint }}</mat-hint>
+            @if (errorOf('isbn')) {
+              <mat-error>{{ errorOf('isbn') }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ messages.yearLabel }}</mat-label>
+            <input matInput formControlName="year" maxlength="4" autocomplete="off" inputmode="numeric" />
+            @if (errorOf('year')) {
+              <mat-error>{{ errorOf('year') }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        @if (categoryOptions().length === 0) {
+          <p class="panel__problem" role="alert">
+            {{ messages.noCategories }}
+            <a class="admin__link" routerLink="/categorias">{{ messages.categoryLabel }}</a>
+          </p>
+        }
+
+        <fieldset class="admin__formats">
+          <legend class="admin__legend">{{ messages.formatLabel }}</legend>
+          <div class="admin__toggle" role="radiogroup">
+            <label class="admin__option" [class.admin__option--selected]="format() === formats.physical">
+              <input type="radio" formControlName="format" [value]="formats.physical" />
+              {{ messages.physical }}
+            </label>
+            <label class="admin__option" [class.admin__option--selected]="format() === formats.digital">
+              <input type="radio" formControlName="format" [value]="formats.digital" />
+              {{ messages.digital }}
+            </label>
+          </div>
+          @if (editing) {
+            <p class="admin__hint">{{ messages.formatLocked }}</p>
+          }
+        </fieldset>
+      </section>
+
+      @if (!withdrawn()) {
+        <section class="panel" aria-labelledby="title-copies">
+          <h2 id="title-copies" class="panel__title">{{ messages.copiesStep }}</h2>
+
+          @if (format() === formats.digital) {
+            <p class="admin__note">{{ messages.digitalNoCopies }}</p>
+          } @else if (branches() === null) {
+            <p class="panel__empty">{{ messages.branchesUnavailable }}</p>
+          } @else {
+            <p class="admin__note">{{ editing ? messages.copiesEditLead : messages.copiesLead }}</p>
+
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>{{ messages.branchLabel }}</mat-label>
+              <mat-select formControlName="branch">
+                @for (branch of branches() ?? []; track branch.id) {
+                  <mat-option [value]="branch.id">{{ branch.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            @if (branchMissing()) {
+              <p class="panel__problem" role="alert">{{ messages.branchRequired }}</p>
+            }
+
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>{{ messages.barcodesLabel }}</mat-label>
+              <textarea matInput formControlName="barcodes" rows="4" autocomplete="off"></textarea>
+              @if (errorOf('barcodes')) {
+                <mat-error>{{ errorOf('barcodes') }}</mat-error>
+              }
+            </mat-form-field>
+
+            @if (barcodeCount() > 0) {
+              <span class="chip chip--neutral admin__count">{{ copiesText() }}</span>
+            }
+          }
+        </section>
+
+        <div class="admin__submit">
+          <button mat-flat-button type="submit" [disabled]="saving() || (!!saved() && !editing)">
+            {{ saving() ? messages.saving : editing ? messages.update : messages.save }}
+          </button>
+        </div>
+      }
+    </form>
+
+    @if (editing && current() && !withdrawn()) {
+      <section class="panel panel--danger" aria-labelledby="title-withdraw">
+        <h2 id="title-withdraw" class="panel__title">{{ messages.withdrawStep }}</h2>
+        <p class="admin__note">{{ messages.withdrawLead }}</p>
+
+        @if (confirmingWithdraw()) {
+          <p class="admin__question">{{ withdrawQuestion() }}</p>
+          <div class="admin__actions">
+            <button class="admin__danger" mat-flat-button type="button" [disabled]="withdrawing()" (click)="withdraw()">
+              {{ withdrawing() ? messages.withdrawing : messages.withdrawYes }}
+            </button>
+            <button mat-stroked-button type="button" [disabled]="withdrawing()" (click)="cancelWithdraw()">
+              {{ messages.withdrawNo }}
+            </button>
+          </div>
+        } @else {
+          <div class="admin__actions">
+            <button mat-stroked-button type="button" (click)="askWithdraw()">{{ messages.withdraw }}</button>
+          </div>
+        }
+
+        @if (withdrawProblem()) {
+          <p class="panel__problem" role="alert">{{ withdrawProblem() }}</p>
+        }
+      </section>
+    }
+  }
+</div>
