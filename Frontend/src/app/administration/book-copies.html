@@ -1,0 +1,144 @@
+<div class="admin">
+  <div>
+    <h1 class="page__title">{{ messages.title }}</h1>
+    <p class="page__lead">{{ messages.lead }}</p>
+  </div>
+
+  <section class="panel">
+    <form class="inline-form" role="search" [formGroup]="searchForm" (ngSubmit)="search()" novalidate>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ messages.barcodeLabel }}</mat-label>
+        <input #barcodeInput matInput formControlName="barcode" maxlength="50" autocomplete="off" />
+        @if (searchForm.controls.barcode.touched && searchForm.controls.barcode.invalid) {
+          <mat-error>{{ messages.barcodeRequired }}</mat-error>
+        }
+      </mat-form-field>
+      <button mat-flat-button type="submit" [disabled]="searching()">
+        {{ searching() ? messages.searching : messages.search }}
+      </button>
+    </form>
+  </section>
+
+  @if (searchProblem(); as failure) {
+    <div class="banner banner--error" role="alert">
+      <svg class="banner__icon" aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9" />
+        <line x1="12" y1="7.5" x2="12" y2="13" />
+        <line x1="12" y1="16.5" x2="12" y2="16.6" />
+      </svg>
+      <div>
+        <p class="banner__title">{{ messages.notFoundTitle }}</p>
+        <p class="banner__text">{{ failure.message }}</p>
+        @if (traceText()) {
+          <p class="banner__trace">{{ traceText() }}</p>
+        }
+      </div>
+    </div>
+  }
+
+  @if (location(); as copy) {
+    <section class="panel" aria-labelledby="copy-where">
+      <div class="panel__header">
+        <h2 id="copy-where" class="panel__title">{{ messages.whereStep }} · {{ copy.barcode }}</h2>
+        <span [class]="statusClass()">{{ statusText() }}</span>
+      </div>
+
+      <dl class="facts">
+        <div class="fact">
+          <dt>{{ messages.branch }}</dt>
+          <dd>{{ copy.branch?.name || messages.noBranch }}</dd>
+        </div>
+        @for (spot of copy.spots; track spot.depth) {
+          <div class="fact">
+            <dt>{{ spot.level }}</dt>
+            <dd>{{ spot.value }}</dd>
+          </div>
+        }
+      </dl>
+
+      @if (copy.spots.length === 0) {
+        <p class="admin__note">{{ messages.noSpot }}</p>
+      }
+      @if (copy.description) {
+        <p class="admin__note">{{ copy.description }}</p>
+      }
+      @if (withdrawnNow()) {
+        <p class="panel__success" role="status">{{ messages.withdrawn }}</p>
+      }
+    </section>
+
+    @if (canRelocate() && !isWithdrawn()) {
+      <section class="panel" aria-labelledby="copy-relocate">
+        <h2 id="copy-relocate" class="panel__title">{{ messages.relocateStep }}</h2>
+
+        @if (placesProblem()) {
+          <p class="panel__empty">{{ messages.levelsUnavailable }}</p>
+        } @else {
+          <p class="admin__note">{{ messages.relocateLead }}</p>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ messages.branchLabel }}</mat-label>
+            <mat-select [formControl]="branchControl">
+              @for (branch of branches(); track branch.id) {
+                <mat-option [value]="branch.id">{{ branch.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          @if (levels().length === 0) {
+            <p class="panel__empty">{{ messages.noLevels }}</p>
+          } @else {
+            <div class="admin__grid admin__grid--three">
+              @for (control of valuesForm.controls; track $index; let index = $index) {
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                  <mat-label>{{ valueLabel(index) }}</mat-label>
+                  <input matInput [formControl]="control" maxlength="40" autocomplete="off" />
+                </mat-form-field>
+              }
+            </div>
+          }
+
+          @if (relocateProblem()) {
+            <p class="panel__problem" role="alert">{{ relocateProblem() }}</p>
+          }
+          @if (relocated()) {
+            <p class="panel__success" role="status">{{ messages.relocated }}</p>
+          }
+
+          <div class="admin__actions">
+            <button mat-flat-button type="button" [disabled]="relocating()" (click)="relocate()">
+              {{ relocating() ? messages.relocating : messages.relocate }}
+            </button>
+          </div>
+        }
+      </section>
+    }
+
+    @if (canWithdraw() && !isWithdrawn()) {
+      <section class="panel panel--danger" aria-labelledby="copy-withdraw">
+        <h2 id="copy-withdraw" class="panel__title">{{ messages.withdrawStep }}</h2>
+        <p class="admin__note">{{ messages.withdrawLead }}</p>
+
+        @if (confirmingWithdraw()) {
+          <p class="admin__question">{{ withdrawQuestion() }}</p>
+          <div class="admin__actions">
+            <button class="admin__danger" mat-flat-button type="button" [disabled]="withdrawing()" (click)="withdraw()">
+              {{ withdrawing() ? messages.withdrawing : messages.withdrawYes }}
+            </button>
+            <button mat-stroked-button type="button" [disabled]="withdrawing()" (click)="cancelWithdraw()">
+              {{ messages.withdrawNo }}
+            </button>
+          </div>
+        } @else {
+          <div class="admin__actions">
+            <button mat-stroked-button type="button" (click)="askWithdraw()">{{ messages.withdraw }}</button>
+          </div>
+        }
+
+        @if (withdrawProblem()) {
+          <p class="panel__problem" role="alert">{{ withdrawProblem() }}</p>
+        }
+      </section>
+    }
+  }
+</div>

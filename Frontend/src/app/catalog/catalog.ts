@@ -14,6 +14,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { RouterLink } from '@angular/router';
+import { AdministrationDesk } from '../administration/administration-desk';
 import { messages } from '../messages';
 import { ReservationDesk, ReservationStatus, ReservedBook } from '../reservations/reservation-desk';
 import { CurrentSession } from '../session/current-session';
@@ -63,6 +64,7 @@ export class Catalog {
   private readonly catalog = inject(CatalogSearch);
   private readonly reservationDesk = inject(ReservationDesk);
   private readonly currentSession = inject(CurrentSession);
+  private readonly administration = inject(AdministrationDesk);
   private readonly formBuilder = inject(NonNullableFormBuilder);
   private readonly reservations = signal<ReadonlyMap<string, CardReservation>>(new Map());
   private readonly textInput = viewChild<ElementRef<HTMLInputElement>>('textInput');
@@ -101,6 +103,13 @@ export class Catalog {
   );
 
   protected readonly canReserve = computed(() => this.currentSession.allows(PermissionCode.reserveBook));
+
+  protected readonly canManage = computed(() => this.currentSession.allows(PermissionCode.manageCatalog));
+
+  protected readonly canSync = computed(() => this.currentSession.allows(PermissionCode.syncCatalog));
+  protected readonly syncing = signal(false);
+  protected readonly syncMessage = signal('');
+  protected readonly syncFailed = signal(false);
 
   protected readonly cards = computed(() => {
     const reservations = this.reservations();
@@ -161,6 +170,32 @@ export class Catalog {
       if (request === this.latestRequest) {
         this.searching.set(false);
       }
+    }
+  }
+
+  protected async sync(): Promise<void> {
+    if (this.syncing()) {
+      return;
+    }
+
+    this.syncing.set(true);
+    this.syncMessage.set('');
+    this.syncFailed.set(false);
+
+    try {
+      const result = await this.administration.syncCatalog();
+      this.syncMessage.set(
+        fillTemplate(result.fullReload ? this.messages.syncFullReload : this.messages.syncDone, {
+          indexed: NUMBER_FORMAT.format(result.indexed),
+          removed: NUMBER_FORMAT.format(result.removed),
+        }),
+      );
+      void this.search(this.result()?.page ?? 1);
+    } catch (error) {
+      this.syncFailed.set(true);
+      this.syncMessage.set(describeRequestProblem(error, this.messages.syncFailed).message);
+    } finally {
+      this.syncing.set(false);
     }
   }
 

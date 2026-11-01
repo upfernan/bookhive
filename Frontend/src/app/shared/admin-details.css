@@ -1,0 +1,54 @@
+/* Detalles de las pantallas de configuración y de ejemplares: niveles de ubicación y datos en tarjetas. */
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+.fact {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--bh-parchment);
+}
+
+.fact dt {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--bh-wood);
+}
+
+.fact dd {
+  margin-top: 4px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--bh-walnut-dark);
+  overflow-wrap: anywhere;
+}
+
+.levels {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.levels__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.levels__item mat-form-field {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.levels__item button {
+  min-height: 56px;
+}
+

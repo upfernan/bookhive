@@ -1,8 +1,26 @@
 <div class="catalog">
-  <div>
-    <h1 class="page__title">{{ messages.title }}</h1>
-    <p class="page__lead">{{ messages.lead }}</p>
+  <div class="catalog__header">
+    <div>
+      <h1 class="page__title">{{ messages.title }}</h1>
+      <p class="page__lead">{{ messages.lead }}</p>
+    </div>
+    @if (canManage() || canSync()) {
+      <div class="catalog__tools">
+        @if (canSync()) {
+          <button class="catalog__add" mat-stroked-button type="button" [disabled]="syncing()" (click)="sync()">
+            {{ syncing() ? messages.syncing : messages.sync }}
+          </button>
+        }
+        @if (canManage()) {
+          <a class="catalog__add" mat-flat-button routerLink="/catalogo/titulos/nuevo">+ {{ messages.registerTitle }}</a>
+        }
+      </div>
+    }
   </div>
+
+  @if (syncMessage()) {
+    <p [class]="syncFailed() ? 'catalog__sync catalog__sync--error' : 'catalog__sync'" role="status">{{ syncMessage() }}</p>
+  }
 
   <form class="search" role="search" [formGroup]="form" (ngSubmit)="search()" novalidate>
     <div class="search__main">
@@ -124,7 +142,12 @@
                   </div>
                 }
               </div>
-              <span [class]="book.availabilityClass">{{ book.availability }}</span>
+              <div class="book__side">
+                <span [class]="book.availabilityClass">{{ book.availability }}</span>
+                @if (canManage()) {
+                  <a class="book__edit" mat-button [routerLink]="['/catalogo/titulos', book.id]">{{ messages.edit }}</a>
+                }
+              </div>
             </li>
           }
         </ul>

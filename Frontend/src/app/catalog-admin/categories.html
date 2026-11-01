@@ -1,0 +1,98 @@
+<div class="admin">
+  <div>
+    <h1 class="page__title">{{ messages.title }}</h1>
+    <p class="page__lead">{{ messages.lead }}</p>
+  </div>
+
+  <section class="panel" aria-labelledby="categories-new">
+    <h2 id="categories-new" class="panel__title">{{ messages.newStep }}</h2>
+
+    <form class="inline-form" [formGroup]="createForm" (ngSubmit)="create()" novalidate>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ messages.nameLabel }}</mat-label>
+        <input matInput formControlName="name" [maxlength]="maxLength" autocomplete="off" />
+        @if (nameError(createForm)) {
+          <mat-error>{{ nameError(createForm) }}</mat-error>
+        }
+      </mat-form-field>
+      <button mat-flat-button type="submit" [disabled]="creating()">
+        {{ creating() ? messages.creating : messages.create }}
+      </button>
+    </form>
+
+    @if (createdText()) {
+      <p class="panel__success" role="status">{{ createdText() }}</p>
+    }
+    @if (createProblem()) {
+      <p class="panel__problem" role="alert">{{ createProblem() }}</p>
+    }
+  </section>
+
+  <section class="panel" aria-labelledby="categories-list" [attr.aria-busy]="loading()">
+    <h2 id="categories-list" class="panel__title">{{ messages.listStep }}</h2>
+
+    @if (loading()) {
+      <p class="admin__note" role="status">{{ messages.loading }}</p>
+    } @else if (loadProblem()) {
+      <p class="panel__problem" role="alert">{{ loadProblem() }}</p>
+      <div class="admin__actions">
+        <button mat-stroked-button type="button" (click)="load()">{{ messages.retry }}</button>
+      </div>
+    } @else if (categories().length === 0) {
+      <p class="panel__empty">{{ messages.empty }}</p>
+    } @else {
+      <ul class="rows">
+        @for (category of categories(); track category.id) {
+          <li class="row">
+            @if (renaming() === category.id) {
+              <form class="row__edit" [formGroup]="renameForm" (ngSubmit)="rename(category)" novalidate>
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                  <mat-label>{{ messages.nameLabel }}</mat-label>
+                  <input matInput formControlName="name" [maxlength]="maxLength" autocomplete="off" />
+                  @if (nameError(renameForm)) {
+                    <mat-error>{{ nameError(renameForm) }}</mat-error>
+                  }
+                </mat-form-field>
+              </form>
+              <div class="row__actions">
+                <button mat-flat-button type="button" [disabled]="rowOf(category.id).working" (click)="rename(category)">
+                  {{ rowOf(category.id).working ? messages.working : messages.save }}
+                </button>
+                <button mat-button type="button" [disabled]="rowOf(category.id).working" (click)="cancelRename()">
+                  {{ messages.cancel }}
+                </button>
+              </div>
+            } @else {
+              <div>
+                <p class="row__name">{{ category.name }}</p>
+                <p class="row__meta">
+                  <span [class]="isActive(category) ? 'chip chip--success' : 'chip chip--neutral'">
+                    {{ isActive(category) ? messages.active : messages.inactive }}
+                  </span>
+                  <span>{{ titlesOf(category) }}</span>
+                </p>
+              </div>
+              <div class="row__actions">
+                <button mat-stroked-button type="button" [disabled]="rowOf(category.id).working" (click)="startRename(category)">
+                  {{ messages.rename }}
+                </button>
+                <button
+                  mat-stroked-button
+                  type="button"
+                  [disabled]="rowOf(category.id).working || (isActive(category) && category.activeTitles > 0)"
+                  [attr.title]="isActive(category) && category.activeTitles > 0 ? messages.inUse : null"
+                  (click)="toggle(category)"
+                >
+                  {{ rowOf(category.id).working ? messages.working : isActive(category) ? messages.deactivate : messages.activate }}
+                </button>
+              </div>
+            }
+            @if (rowOf(category.id).problem) {
+              <p class="row__problem" role="alert">{{ rowOf(category.id).problem }}</p>
+            }
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</div>

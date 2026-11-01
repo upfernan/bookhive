@@ -1,0 +1,71 @@
+<div class="admin">
+  <div>
+    <h1 class="page__title">{{ messages.title }}</h1>
+    <p class="page__lead">{{ messages.lead }}</p>
+  </div>
+
+  <section class="panel" aria-labelledby="readers-pick">
+    <h2 id="readers-pick" class="panel__title">{{ messages.pickStep }}</h2>
+    <app-reader-picker [label]="messages.pickLabel" (picked)="pick($event)" />
+
+    @if (reader(); as person) {
+      <div class="person">
+        <p class="row__name">{{ person.name }}</p>
+        <p class="admin__hint">{{ person.email }}</p>
+      </div>
+    }
+  </section>
+
+  @if (reader(); as person) {
+    <section class="panel" aria-labelledby="readers-actions">
+      <div class="panel__header">
+        <h2 id="readers-actions" class="panel__title">{{ messages.actionsStep }}</h2>
+        @if (account()) {
+          <span class="chip chip--neutral">{{ messages.statusLabel }}: {{ statusText() }}</span>
+        }
+      </div>
+
+      @if (account()) {
+        <p class="panel__success" role="status">{{ doneText() }}</p>
+      }
+
+      @if (!purged()) {
+        <ul class="rows">
+          @for (option of options; track option.action) {
+            <li class="row">
+              <div>
+                <p class="row__name">{{ option.label }}</p>
+                <p class="row__meta">{{ option.text }}</p>
+              </div>
+              <div class="row__actions">
+                @if (confirming()?.action === option.action) {
+                  <button
+                    mat-flat-button
+                    type="button"
+                    [class.admin__danger]="option.danger"
+                    [disabled]="working()"
+                    (click)="confirm()"
+                  >
+                    {{ working() ? messages.working : messages.confirmYes }}
+                  </button>
+                  <button mat-button type="button" [disabled]="working()" (click)="cancel()">{{ messages.confirmNo }}</button>
+                } @else {
+                  <button mat-stroked-button type="button" [disabled]="working()" (click)="ask(option)">
+                    {{ option.label }}
+                  </button>
+                }
+              </div>
+              @if (confirming()?.action === option.action) {
+                <p class="row__problem">{{ question() }}</p>
+              }
+            </li>
+          }
+        </ul>
+      }
+
+      @if (problem()) {
+        <p class="panel__problem" role="alert">{{ problem() }}</p>
+      }
+    </section>
+  }
+</div>

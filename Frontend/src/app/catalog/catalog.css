@@ -9,6 +9,44 @@ h2 {
   margin: 0;
 }
 
+.catalog__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.catalog__tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.catalog__sync {
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--bh-success-tint);
+  color: var(--bh-success);
+}
+
+.catalog__sync--error {
+  background: var(--bh-brick-tint);
+  color: var(--bh-brick-text);
+}
+
+.catalog__add {
+  min-height: 48px;
+  padding-inline: 24px;
+}
+
+.book__side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
 .search {
   display: flex;
   flex-direction: column;
@@ -193,9 +231,9 @@ h2 {
     height: 54px;
   }
 
-  .book__availability {
+  .book__side {
     grid-column: 2;
-    justify-self: start;
+    align-items: flex-start;
   }
 
   .pager {

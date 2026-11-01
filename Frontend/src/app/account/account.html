@@ -109,4 +109,8 @@
   } @else if (loading()) {
     <p class="loading" role="status">{{ messages.loading }}</p>
   }
+
+  @if (account()) {
+    <app-delete-my-data />
+  }
 </div>

@@ -1,0 +1,35 @@
+<section class="panel panel--danger" aria-labelledby="my-data-title">
+  <h2 id="my-data-title" class="panel__title">{{ messages.title }}</h2>
+  <p class="admin__note">{{ messages.lead }}</p>
+
+  @if (confirming()) {
+    <p class="admin__question">{{ messages.confirm }}</p>
+    <div class="admin__actions">
+      <button
+        class="admin__danger"
+        mat-flat-button
+        type="button"
+        [disabled]="working()"
+        (click)="purge()"
+      >
+        {{ working() ? messages.working : messages.confirmYes }}
+      </button>
+      <button
+        mat-stroked-button
+        type="button"
+        [disabled]="working()"
+        (click)="confirming.set(false)"
+      >
+        {{ messages.confirmNo }}
+      </button>
+    </div>
+  } @else {
+    <div class="admin__actions">
+      <button mat-stroked-button type="button" (click)="ask()">{{ messages.start }}</button>
+    </div>
+  }
+
+  @if (problem()) {
+    <p class="panel__problem" role="alert">{{ problem() }}</p>
+  }
+</section>

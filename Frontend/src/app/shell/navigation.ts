@@ -1,7 +1,7 @@
 import { messages } from '../messages';
 import { PermissionCode } from '../session/permission-code';
 
-export type TaskIcon = 'lend' | 'return' | 'search' | 'reserve' | 'account';
+export type TaskIcon = 'lend' | 'return' | 'search' | 'reserve' | 'account' | 'add-book' | 'categories' | 'book-copies' | 'readers' | 'settings';
 
 export interface Section {
   readonly path: string;
@@ -23,6 +23,10 @@ export const sections: readonly Section[] = [
   { path: '/catalogo', label: messages.shell.catalog, permission: PermissionCode.searchCatalog },
   { path: '/reservas', label: messages.shell.reservations, permission: PermissionCode.reserveBook },
   { path: '/mi-cuenta', label: messages.shell.myAccount, permission: PermissionCode.viewAccount },
+  { path: '/categorias', label: messages.shell.categories, permission: PermissionCode.manageCategories },
+  { path: '/ejemplares', label: messages.shell.bookCopies, permission: PermissionCode.locateBookCopy },
+  { path: '/lectores', label: messages.shell.readers, permission: PermissionCode.manageUsers },
+  { path: '/configuracion', label: messages.shell.settings, permission: PermissionCode.configureInstitution },
 ];
 
 export const tasks: readonly Task[] = [
@@ -60,5 +64,40 @@ export const tasks: readonly Task[] = [
     description: messages.tasks.account.description,
     icon: 'account',
     permission: PermissionCode.viewAccount,
+  },
+  {
+    path: '/catalogo/titulos/nuevo',
+    title: messages.tasks.registerTitle.title,
+    description: messages.tasks.registerTitle.description,
+    icon: 'add-book',
+    permission: PermissionCode.manageCatalog,
+  },
+  {
+    path: '/categorias',
+    title: messages.tasks.categories.title,
+    description: messages.tasks.categories.description,
+    icon: 'categories',
+    permission: PermissionCode.manageCategories,
+  },
+  {
+    path: '/ejemplares',
+    title: messages.tasks.bookCopies.title,
+    description: messages.tasks.bookCopies.description,
+    icon: 'book-copies',
+    permission: PermissionCode.locateBookCopy,
+  },
+  {
+    path: '/lectores',
+    title: messages.tasks.readers.title,
+    description: messages.tasks.readers.description,
+    icon: 'readers',
+    permission: PermissionCode.manageUsers,
+  },
+  {
+    path: '/configuracion',
+    title: messages.tasks.settings.title,
+    description: messages.tasks.settings.description,
+    icon: 'settings',
+    permission: PermissionCode.configureInstitution,
   },
 ];
